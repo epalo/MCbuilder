@@ -11,7 +11,7 @@ def getUserInput():
     parser.add_argument('-i', '--input',
                         dest="infile",
                         action="store",
-                        default="./",
+                        default=None,
                         nargs="*",
                         help="Input fasta and PDB files, or directory containing these")
 
@@ -46,6 +46,8 @@ def getUserInput():
     input_list = options.infile
     fasta_files = []
     pdb_files = []
+    if len(input_list) == 0: 
+        input_list = os.getcwd()
     for input in input_list:
         if os.path.isdir(input):
             fasta_files.append([os.path.join(input, f) for f in os.listdir(input) if f.endswith(".fa") or f.endswith(".fasta")])
@@ -54,10 +56,11 @@ def getUserInput():
             fasta_files.append(input)
         elif os.path.isfile(input) and (input.endswith(".pdb")):
             pdb_files.append(input)
+        
 
-    if len(fasta_files) == 0 or len(pdb_files) == 0:
+    if len(fasta_files) == 0 and len(pdb_files) == 0:
         raise Exception("No fasta or pdb files were found")
-    if options.verbose:
-        sys.stderr.write("%d FASTA files found.\n" % len(list_files))
+    if len(fasta_files) == 0 or len(pdb_files) == 0:
+        raise Exception("fasta or pdb file is missing")
     
     return (fasta_files, pdb_files)
