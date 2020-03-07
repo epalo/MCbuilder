@@ -50,7 +50,7 @@ def getUserInput():
         if os.path.isdir(input):
             fasta_files.append([os.path.join(input, f) for f in os.listdir(input) if f.endswith(".fa") or f.endswith(".fasta")])
             pdb_files.append([os.path.join(input, f) for f in os.listdir(input) if f.endswith(".pdb")])
-        elif os.path.isfile(input) and (input.endswith(".fa") or f.endswith(".fasta")):
+        elif os.path.isfile(input) and (input.endswith(".fa") or input.endswith(".fasta")):
             fasta_files.append(input)
         elif os.path.isfile(input) and (input.endswith(".pdb")):
             pdb_files.append(input)
