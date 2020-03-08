@@ -7,6 +7,8 @@ import argparse, os, sys, UserInteraction
 
 #main function that is called when running the script
 if __name__ == "__main__":
+    """ Macrocomplex builder based on structure superimposition."""
+    
     fasta_files, pdb_files = UserInteraction.getUserInput()
 
     seq_record_list = []
