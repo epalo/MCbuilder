@@ -5,6 +5,11 @@ import sys
 
 
 def getUserInput():
+    """ Import user data.
+
+    Requires input of fasta file(.fasta or .fa) containg protein to be modelled along with PDB files (.pdb) containing relevant interactions. 
+    Only the mentioned file types will be accepted.
+    """
     # flags used when running in terminal
     parser = argparse.ArgumentParser(description=" ")
 

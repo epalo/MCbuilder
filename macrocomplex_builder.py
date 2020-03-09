@@ -7,7 +7,10 @@ import argparse, os, sys, UserInteraction
 
 #main function that is called when running the script
 if __name__ == "__main__":
+    """ Macrocomplex builder based on structure superimposition."""
+    
     # obtaining fasta and pdb files 
+    
     fasta_files, pdb_files = UserInteraction.getUserInput()
 
 # TODO: insert case of empty fasta file 
