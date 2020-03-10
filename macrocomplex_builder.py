@@ -2,6 +2,7 @@
 from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
 from Bio import SeqIO, PDB, pairwise2
+from Bio.PDB.Polypeptide import PPBuilder
 import argparse, os, sys, UserInteraction
 
 
@@ -24,23 +25,29 @@ if __name__ == "__main__":
     interact_structure = []
     for pdb_struct in pdb_files:
         interact_structure.append(parser.get_structure(pdb_struct,pdb_struct))
-
+    print("interact structure", interact_structure)
+    ppb = PPBuilder()
     pdb_seq = []
-    for i in range(len(pdb_files)):
-        for record in SeqIO.parse(pdb_files[i], "pdb-seqres"):
+    for i in range(len(interact_structure)):
+        for peptide in ppb.build_peptides(interact_structure[i]):
             # saves the record together with the index of the pdb file
-            pdb_seq.append([record,i])
+            pdb_seq.append([peptide.get_sequence(), i])
+    print("pdbseq:", pdb_seq)
+    
+    # for i in range(len(pdb_files)):
+    #     for record in SeqIO.parse(pdb_files[i], "pdb-seqres"):
+    #         # saves the record together with the index of the pdb file
+    #         pdb_seq = pdb_seq.append([record,i])
 
 # find the sequences that occur multiple times in pdb files and save all proteins for each structural aln in a separate list
 similar_seq = []
-
 for i in range(len(pdb_seq)):
     for m in range(i):
-        print(pdb_seq[i][1])
+        print(pdb_seq[i][0])
         # just check sequence alignments if sequences are not in the same pair
         if not(pdb_seq[i][1] == pdb_seq[m][1]):
             # find the best alignment for two sequences (first element of list of alignments)
-            alignment = pairwise2.align.globalxx(pdb_seq[i][0].seq, pdb_seq[m][0].seq)[0]
+            alignment = pairwise2.align.globalxx(pdb_seq[i][0], pdb_seq[m][0])[0]
             aln_seq_1 = alignment[0]
             aln_seq_2 = alignment[1]
             al_length = len(alignment[0])
