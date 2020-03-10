@@ -87,5 +87,19 @@ def calcStrucAln():
         # install STAMP in our program?? as a dependency
         # then run STAMP
 
-
         return
+
+
+# SET UP Superimposer
+# TODO: How to save/output
+
+# superimp = PDB.Superimposer()
+# for l in range(len(similar_seq)):
+#     for m in range(len(similar_seq[l])):
+#         for n in range(m+1,len(similar_seq[l])):
+#             if not similar_seq[l][m] == similar_seq[l][n]:
+#                 superimp.set_atoms(pbd_seq[m], pdb_seq[n])
+#                 print(superimp.rms)
+# superimp.set_atoms(fixed, moving)
+# superimp.rms
+# superimp.apply(moving.get_atoms())
