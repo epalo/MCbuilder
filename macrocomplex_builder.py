@@ -36,33 +36,24 @@ similar_seq = []
 
 for i in range(len(pdb_seq)):
     for m in range(i):
-        # find the best alignment for two sequences (first element of list of alignments)
-        # maybe just check for every pair separately??
-        print(pdb_seq[i][0])
-        alignment = pairwise2.align.globalxx(pdb_seq[i][0].seq, pdb_seq[m][0].seq)[0]
-        aln_seq_1 = alignment[0]
-        aln_seq_2 = alignment[1]
-        al_length = len(alignment[0])
-        ident = sum(base1 == base2 for base1, base2 in zip(aln_seq_1, aln_seq_2))
-        #if ident/al_length >= 0.95 and not similar_seq:  # If 95% of identity, return known sequence
-            #for elem in similar_seq:
-            #    if pdb_seq[i][0].seq in elem:
-            #        elem.append(pdb_seq[m].seq)
-            #    elif pdb_seq[m][0].seq in elem:
-            #        elem.append(pdb_seq[i].seq)
-            #    else: 
-            #        similar_seq.append([pdb_seq[i].seq, pdb_seq[m].seq)])
-        # else: similar_seq.append([pdb_seq[i].seq, pdb_seq[m].seq)])
-        if ident/al_length >= 0.95:
-            for elem in similar_seq:
-                if pdb_seq[i][1] in elem:
-                    elem.append(pdb_seq[m][1])
-                elif pdb_seq[m][1] in elem:
-                    elem.append(pdb_seq[i][1])
-                else: 
-                    similar_seq.append([pdb_seq[i][1], pdb_seq[m][1]])
-        else: similar_seq.append([pdb_seq[i][1], pdb_seq[m][1]])
-
+        print(pdb_seq[i][1])
+        # just check sequence alignments if sequences are not in the same pair
+        if not(pdb_seq[i][1] == pdb_seq[m][1]):
+            # find the best alignment for two sequences (first element of list of alignments)
+            alignment = pairwise2.align.globalxx(pdb_seq[i][0].seq, pdb_seq[m][0].seq)[0]
+            aln_seq_1 = alignment[0]
+            aln_seq_2 = alignment[1]
+            al_length = len(alignment[0])
+            ident = sum(base1 == base2 for base1, base2 in zip(aln_seq_1, aln_seq_2))
+    
+            if ident/al_length >= 0.95:
+                for elem in similar_seq:
+                    if pdb_seq[i][1] in elem:
+                        elem.append(pdb_seq[m][1])
+                    elif pdb_seq[m][1] in elem:
+                        elem.append(pdb_seq[i][1])
+                    else: 
+                        similar_seq.append([pdb_seq[i][1], pdb_seq[m][1]])
 print(similar_seq)
 
 
