@@ -98,7 +98,22 @@ for i in range(len(sequences)):
     for el in sequences[i]:
         print("elem", i, el.get_file_index())
 
-#def get_superimpose_options(chain_to_superimpose):
+def get_superimpose_options(chain_to_superimpose):
+    for similar_seq in sequences:
+        if chain_to_superimpose in similar_seq:
+            return similar_seq
+
+
+def create_macrocomplex(current_complex, superimpose_chain):
+    # add end options:
+    ##################
+    
+    superimpose_options = get_superimpose_options(superimpose_chain)
+    for chain_option in superimpose_options:
+        # implement breadth-search or depth-search 
+        created_complex = superimpose_chain(current_complex, chain_option)
+        create_macrocomplex(created_complex, chain_option.get_interaction())
+
 
 # do a structural alignment for all pdb files that contain an identity higher than 95%
 def calcStrucAln():
