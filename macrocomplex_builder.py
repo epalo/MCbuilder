@@ -45,7 +45,8 @@ if __name__ == "__main__":
             peptide = ppb.build_peptides(interact_structure[i])[j]
             # saves the record as a chain object with pdb-file index and sequence
             pdb_seq.append(Chain(peptide.get_sequence(), i))
-    print("pdbseq:", pdb_seq)
+    for i in range(len(pdb_seq)):
+        print(pdb_seq[i])
     
     # for i in range(len(pdb_files)):
     #     for record in SeqIO.parse(pdb_files[i], "pdb-seqres"):
@@ -56,30 +57,38 @@ if __name__ == "__main__":
 sequences = []
 for i in range(len(pdb_seq)):
     for m in range(i):
+        print("i:", i)
+        print("m:", m)
         # just check sequence alignments if sequences are not in the same pair
         if (pdb_seq[i].get_file_index() != pdb_seq[m].get_file_index()):
-            print("Seq1:", pdb_seq[i].get_sequence())
-            print("Seq2:", pdb_seq[i].get_sequence())
+            print("Seq1:", pdb_seq[i].get_file_index())
+            print("Seq2:", pdb_seq[m].get_file_index())
             # find the best alignment for two sequences (first element of list of alignments)
             alignment = pairwise2.align.globalxx(pdb_seq[i].get_sequence(), pdb_seq[m].get_sequence())[0]
             aln_seq_1 = alignment[0]
             aln_seq_2 = alignment[1]
             al_length = len(alignment[0])
             ident = sum(base1 == base2 for base1, base2 in zip(aln_seq_1, aln_seq_2))
-    
             if ident/al_length >= 0.95:
-                inserted = False
+                print("is identical")
+                inserted = True
                 for similar_seq in sequences:
                     if pdb_seq[i] in similar_seq:
-                        similar_seq.append(pdb_seq[m])
-                        inserted = True
+                        if pdb_seq[m] not in similar_seq:
+                            similar_seq.append(pdb_seq[m])
+                            inserted = False
+                            break
+                    if pdb_seq[m] in similar_seq:
+                        if pdb_seq[i] not in similar_seq:
+                            similar_seq.append(pdb_seq[i])
+                            inserted = False
+                            break
+                    if pdb_seq[m] in similar_seq and pdb_seq[i] in similar_seq:
+                        inserted = False
                         break
-                    elif pdb_seq[m] in similar_seq:
-                        similar_seq.append(pdb_seq[i])
-                        inserted = True
-                        break
-                if inserted == False: 
+                if inserted:
                     sequences.append([pdb_seq[i], pdb_seq[m]])
+                print(sequences)
 for i in range(len(sequences)):
     for el in sequences[i]:
         print("elem", i, el.get_file_index())
