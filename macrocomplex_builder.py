@@ -8,15 +8,19 @@ import argparse, os, sys, UserInteraction
 class Chain(object):
     """ DESCRIPTION """
 
-    def __init__(self, sequence, file_index):
+    def __init__(self, sequence, file_index, interactions):
         self.__sequence = sequence
         self.__file_index = file_index
+        self.__interactions = interactions
 
     def get_sequence(self):
         return self.__sequence
 
     def get_file_index(self):
         return self.__file_index
+
+    def get_interaction(self):
+        return self.__interactions
 
 #main function that is called when running the script
 if __name__ == "__main__":
@@ -41,10 +45,11 @@ if __name__ == "__main__":
     ppb = PPBuilder()
     pdb_seq = []
     for i in range(len(interact_structure)):
-        for j in range(len(ppb.build_peptides(interact_structure[i]))):
-            peptide = ppb.build_peptides(interact_structure[i])[j]
+            peptide1 = ppb.build_peptides(interact_structure[i])[0]
             # saves the record as a chain object with pdb-file index and sequence
-            pdb_seq.append(Chain(peptide.get_sequence(), i))
+            peptide2 = ppb.build_peptides(interact_structure[i])[1]
+            pdb_seq.append(Chain(peptide1.get_sequence(), i, peptide2))
+            pdb_seq.append(Chain(peptide2.get_sequence(), i, peptide1))
     for i in range(len(pdb_seq)):
         print(pdb_seq[i])
     
