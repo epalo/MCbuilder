@@ -5,6 +5,18 @@ from Bio import SeqIO, PDB, pairwise2
 from Bio.PDB.Polypeptide import PPBuilder
 import argparse, os, sys, UserInteraction
 
+class Chain(object):
+    """ DESCRIPTION """
+
+    def __init__(self, sequence, file_index):
+        self.__sequence = sequence
+        self.__file_index = file_index
+
+    def get_sequence(self):
+        return self.__sequence
+
+    def get_file_index(self):
+        return self.__file_index
 
 #main function that is called when running the script
 if __name__ == "__main__":
@@ -29,9 +41,10 @@ if __name__ == "__main__":
     ppb = PPBuilder()
     pdb_seq = []
     for i in range(len(interact_structure)):
-        for peptide in ppb.build_peptides(interact_structure[i]):
-            # saves the record together with the index of the pdb file
-            pdb_seq.append([peptide.get_sequence(), i])
+        for j in range(len(ppb.build_peptides(interact_structure[i]))):
+            peptide = ppb.build_peptides(interact_structure[i])[j]
+            # saves the record as a chain object with pdb-file index and sequence
+            pdb_seq.append(Chain(peptide.get_sequence(), i))
     print("pdbseq:", pdb_seq)
     
     # for i in range(len(pdb_files)):
@@ -40,29 +53,38 @@ if __name__ == "__main__":
     #         pdb_seq = pdb_seq.append([record,i])
 
 # find the sequences that occur multiple times in pdb files and save all proteins for each structural aln in a separate list
-similar_seq = []
+sequences = []
 for i in range(len(pdb_seq)):
     for m in range(i):
-        print(pdb_seq[i][0])
         # just check sequence alignments if sequences are not in the same pair
-        if not(pdb_seq[i][1] == pdb_seq[m][1]):
+        if (pdb_seq[i].get_file_index() != pdb_seq[m].get_file_index()):
+            print("Seq1:", pdb_seq[i].get_sequence())
+            print("Seq2:", pdb_seq[i].get_sequence())
             # find the best alignment for two sequences (first element of list of alignments)
-            alignment = pairwise2.align.globalxx(pdb_seq[i][0], pdb_seq[m][0])[0]
+            alignment = pairwise2.align.globalxx(pdb_seq[i].get_sequence(), pdb_seq[m].get_sequence())[0]
             aln_seq_1 = alignment[0]
             aln_seq_2 = alignment[1]
             al_length = len(alignment[0])
             ident = sum(base1 == base2 for base1, base2 in zip(aln_seq_1, aln_seq_2))
     
             if ident/al_length >= 0.95:
-                for elem in similar_seq:
-                    if pdb_seq[i][1] in elem:
-                        elem.append(pdb_seq[m][1])
-                    elif pdb_seq[m][1] in elem:
-                        elem.append(pdb_seq[i][1])
-                    else: 
-                        similar_seq.append([pdb_seq[i][1], pdb_seq[m][1]])
-print(similar_seq)
+                inserted = False
+                for similar_seq in sequences:
+                    if pdb_seq[i] in similar_seq:
+                        similar_seq.append(pdb_seq[m])
+                        inserted = True
+                        break
+                    elif pdb_seq[m] in similar_seq:
+                        similar_seq.append(pdb_seq[i])
+                        inserted = True
+                        break
+                if inserted == False: 
+                    sequences.append([pdb_seq[i], pdb_seq[m]])
+for i in range(len(sequences)):
+    for el in sequences[i]:
+        print("elem", i, el.get_file_index())
 
+#def get_superimpose_options(chain_to_superimpose):
 
 # do a structural alignment for all pdb files that contain an identity higher than 95%
 def calcStrucAln():
