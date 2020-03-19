@@ -161,3 +161,12 @@ def calcStrucAln():
 # superimp.set_atoms(fixed, moving)
 # superimp.rms
 # superimp.apply(moving.get_atoms())
+
+# Feasible complexes - No clashes when superimposed
+# Backbone of the model is not interacting with the rest of the complex (threshold example 2 Amstrons)
+# We have to obtain the atoms thanks to the PDB
+# 1. Obtain the backnone atoms of the complex and the model
+# 2. use Bio.PDB.NeighborSearch(complex_atoms) --> Generates a neigbour search tree to speed up distance calculations
+# for atom in chain_atoms:
+# clashes += bool(ns.search(atom.coord, 2))  # If this atom shows clashes, add 1 to the clashes counter
+# 3. threshold of % clashes (to discard the chain) --> Pau 3%
