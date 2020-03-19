@@ -33,7 +33,7 @@ Moreover, an accurate superimposition does not imply that a third chain is in th
 
 [INCLUDE DIAGRAM FROM BIORENDER]
 
-Finally, PDB files often only have a part of the prtotein strcture and so we can rebuild the complete quaternary structure by using the relevant amino acid sequences, from FASTA files, the build out our model of the structure.
+Finally, PDB files often only have a part of the protein structure and so we can rebuild the complete quaternary structure by using the relevant amino acid sequences, from FASTA files, the build out our model of the structure.
 ## Algorithm
 como todavia no tenemos bien diseñado el alg, no se bien que poner.
 ### Input
