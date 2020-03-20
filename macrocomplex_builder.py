@@ -4,6 +4,7 @@ from Bio.Alphabet import IUPAC
 from Bio import SeqIO, PDB, pairwise2
 from Bio.PDB.Polypeptide import PPBuilder
 import argparse, os, sys, UserInteraction
+import random
 
 class Chain(object):
     """ DESCRIPTION """
@@ -29,6 +30,8 @@ if __name__ == "__main__":
     # obtaining fasta and pdb files 
     
     fasta_files, pdb_files = UserInteraction.getUserInput()
+
+# PARSING OF DATA
 
 # TODO: insert case of empty fasta file 
     seq_record_list = []
@@ -57,6 +60,8 @@ if __name__ == "__main__":
     #     for record in SeqIO.parse(pdb_files[i], "pdb-seqres"):
     #         # saves the record together with the index of the pdb file
     #         pdb_seq = pdb_seq.append([record,i])
+
+# SEQUENCE ALIGNMENTS
 
 # find the sequences that occur multiple times in pdb files and save all proteins for each structural aln in a separate list
 sequences = []
@@ -98,66 +103,41 @@ for i in range(len(sequences)):
     for el in sequences[i]:
         print("elem", i, el.get_file_index())
 
+# BUILDING UP THE COMPLEX
+
+# start with pdb-file with the most interactions
+chain_to_superimpose = random.choice(max(len(similar_seq)))
+starting_complex = pdb_files[chain_to_superimpose.get_file_index]
+#print()
+create_macrocomplex(starting_complex, chain_to_superimpose)
+
+
 def get_superimpose_options(chain_to_superimpose):
     for similar_seq in sequences:
         if chain_to_superimpose in similar_seq:
+            # return the list of similar sequences without the chain itself??
             return similar_seq
 
 
-def create_macrocomplex(current_complex, superimpose_chain):
-    # add end options:
-    ##################
-    
+# TODO: check both chains of starting complex and combine them to complete complex
+# TODO: combine multiple superimpose options
+def create_macrocomplex(current_complex, superimpose_chain, threshold):
+    # reach threshold
+    if (threshold == 0):
+        return current_complex # append to list of working complexes?
     superimpose_options = get_superimpose_options(superimpose_chain)
+    
+    if not superimpose_options:
+        return current_complex # append to list of working complexes
     for chain_option in superimpose_options:
-        # implement breadth-search or depth-search 
-        created_complex = superimpose_chain(current_complex, chain_option)
-        create_macrocomplex(created_complex, chain_option.get_interaction())
+        created_complex = superimpose(current_complex, chain_option)
+        threshold = 0
+        if created_complex.rms > threshold:
+            # implement: checking if complex works (surface stuff)
+            create_macrocomplex(created_complex, chain_option.get_interaction(),threshold-1)
 
 
-# do a structural alignment for all pdb files that contain an identity higher than 95%
-def calcStrucAln():
-    for i in range(len(similar_seq)):
-        f = open('{}.domains'.format(i),"w+")
-        for elem in similar_seq[i]:
-            #access to pdb_file with certain index
-            f.write(pdb_files[elem])
-        f.close
-        # do structural superposition with all pdb files that the index refers to
-        # for using STAMP we need like globin.domains file
-
-        #./2hhb.pdb 2hhba {CHAIN A}
-        #./2hhb.pdb 2hhbb {CHAIN B}
-        #./1lh1.pdb 1lh1 {ALL}
-        #./2lhb.pdb 2lhb {ALL}
-        #./4mbn.pdb 4mbn {ALL}
-        #./1ecd.pdb 1ecd {ALL}
-
-
-
-        # create file that contain all of the pdb files with the indexes
-
-        # f= open("guru99.txt","w+")
-        # for i in range(10):
-        #   f.write("This is line %d\r\n" % (i+1))
-        # f.close() 
-
-        # install STAMP in our program?? as a dependency
-        # then run STAMP
-
-        return
-
-
-# SET UP Superimposer
-# TODO: How to save/output
-
-# superimp = PDB.Superimposer()
-# for l in range(len(similar_seq)):
-#     for m in range(len(similar_seq[l])):
-#         for n in range(m+1,len(similar_seq[l])):
-#             if not similar_seq[l][m] == similar_seq[l][n]:
-#                 superimp.set_atoms(pbd_seq[m], pdb_seq[n])
-#                 print(superimp.rms)
-# superimp.set_atoms(fixed, moving)
-# superimp.rms
-# superimp.apply(moving.get_atoms())
+def superimpose(chain_a, chain_b):
+    superimp = PDB.Superimposer()
+    superimp.set_atoms(chain_a, chain_b) 
+    return superimp.apply(chain_b.get_atoms())
