@@ -117,17 +117,22 @@ def get_superimpose_options(chain_to_superimpose):
         if chain_to_superimpose in similar_seq:
             # return the list of similar sequences without the chain itself??
             return similar_seq
+
 # TODO: check both chains of starting complex and combine them to complete complex
-# TODO: combine multiple superimpose options
+
+final_complexes = []
 def create_macrocomplex(current_complex, superimpose_chain, threshold):
     # reach threshold
     if (threshold == 0):
-        return current_complex # append to list of working complexes?
+        # append to list of final complexes
+        return final_complexes.append(current_complex) 
     superimpose_options = get_superimpose_options(superimpose_chain)
-    
+    # no other superimposition options
     if not superimpose_options:
-        return current_complex # append to list of working complexes
+        # append to list of final complexes
+        return final_complexes.append(current_complex) 
     for chain_option in superimpose_options:
+        # TODO: combine multiple superimpose options
         created_complex = superimpose(current_complex, chain_option)
         threshold = 0
         if created_complex.rms > threshold:
