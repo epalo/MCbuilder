@@ -11,10 +11,14 @@ import random
 class Chain(object):
     """ DESCRIPTION """
 
-    def __init__(self, sequence, file_index, interactions):
+    def __init__(self,structure, sequence, file_index, interactions):
+        self.__structure = structure
         self.__sequence = sequence
         self.__file_index = file_index
         self.__interactions = interactions
+
+    def get_structure(self):
+        return self.__structure
 
     def get_sequence(self):
         return self.__sequence
@@ -56,8 +60,9 @@ if __name__ == "__main__":
             peptide1 = ppb.build_peptides(interact_structure[i])[0]
             # saves the record as a chain object with pdb-file index and sequence
             peptide2 = ppb.build_peptides(interact_structure[i])[1]
-            pdb_seq.append(Chain(peptide1.get_sequence(), i, peptide2))
-            pdb_seq.append(Chain(peptide2.get_sequence(), i, peptide1))
+            structure1, structure2 = interact_structure[i][0].get_chains()
+            pdb_seq.append(Chain(structure1, peptide1.get_sequence(), i, peptide2))
+            pdb_seq.append(Chain(structure2, peptide2.get_sequence(), i, peptide1))
     for i in range(len(pdb_seq)):
         print(pdb_seq[i])
     
@@ -164,8 +169,15 @@ def is_clashing(current_complex, chain_to_superimpose):
 
 def superimpose(chain_a, chain_b):
     superimp = PDB.Superimposer()
-    superimp.set_atoms(chain_a.get_atoms(), chain_b.get_atoms()) 
-    return superimp.apply(chain_b.get_atoms())
+    atoms_a = []
+    atoms_b = []
+    for elem in chain_a.get_structure().get_atoms():
+        atoms_a.append(elem)
+    for elem in chain_b.get_structure().get_atoms():
+        atoms_b.append(elem)
+    superimp.set_atoms(atoms_a, atoms_b) 
+    print(superimp.rms)
+    return superimp.apply(atoms_b)
 
 # BUILDING UP THE COMPLEX
 
