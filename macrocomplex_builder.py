@@ -5,6 +5,8 @@ from Bio import SeqIO, PDB, pairwise2
 from Bio.PDB.Polypeptide import PPBuilder
 import argparse, os, sys, UserInteraction
 import random
+#import chimera
+#from DetectClash import detectClash
 
 class Chain(object):
     """ DESCRIPTION """
@@ -22,6 +24,9 @@ class Chain(object):
 
     def get_interaction(self):
         return self.__interactions
+    
+    def __len__(self):
+        return len(self.__sequence)
 
 #main function that is called when running the script
 if __name__ == "__main__":
@@ -103,19 +108,11 @@ for i in range(len(sequences)):
     for el in sequences[i]:
         print("elem", i, el.get_file_index())
 
-# BUILDING UP THE COMPLEX
-
-# start with pdb-file with the most interactions
-chain_to_superimpose = random.choice(max(len(similar_seq)))
-starting_complex = pdb_files[chain_to_superimpose.get_file_index]
-#print()
-create_macrocomplex(starting_complex, chain_to_superimpose)
-
+# HELPER FUNCTIONS 
 
 def get_superimpose_options(chain_to_superimpose):
     for similar_seq in sequences:
         if chain_to_superimpose in similar_seq:
-            # return the list of similar sequences without the chain itself??
             return similar_seq
 
 # TODO: check both chains of starting complex and combine them to complete complex
@@ -133,23 +130,47 @@ def create_macrocomplex(current_complex, superimpose_chain, threshold):
         return final_complexes.append(current_complex) 
     for chain_option in superimpose_options:
         # TODO: combine multiple superimpose options
-        created_complex = superimpose(current_complex, chain_option)
-        threshold = 0
-        if created_complex.rms > threshold:
-            # implement: checking if complex works (surface stuff)
-            create_macrocomplex(created_complex, chain_option.get_interaction(),threshold-1)
+        created_complex = superimpose(superimpose_chain, chain_option)
+        rmsd_threshold = 0
+        if created_complex.rms < rmsd_threshold:
+            if not is_clashing(current_complex, chain_option):
+            #if not is_clashing2(created_complex):
+                create_macrocomplex(created_complex, chain_option.get_interaction(),threshold-1)
+
+def is_clashing(current_complex, chain_to_superimpose):
+    backbone = {"CA", "C1\'"}
+    model_atoms = [atom for atom in current_complex.get_atoms() if atom.id in backbone]
+    chain_atoms = [atom for atom in chain_to_superimpose if atom.id in backbone]
+    nsearch = PDB.NeighborSearch(model_atoms) # Generates a neigbour search tree
+    clashes = 0
+    for atom in chain_atoms:
+        clashes += bool(nsearch.search(atom.coord, 1.7))  # If this atom shows clashes, add 1 to the clashes counter
+    if clashes/len(chain_atoms) >= 0.03:  # If more than 3% of atoms show clashes return yes
+        return True
+    else:  # Otherwise return no
+        return False
+
+# def is_clashing2(created_complex):
+#     clashes = detectClash(created_complex.get_atoms())
+#     sum = 0
+#     for clashDict in clashes.values():
+#         sum += len(clashDict)
+#     numClashes = sum/2
+#     if numClashes/len() >= 0.03:  # If more than 3% of atoms show clashes return yes
+#         return True
+#     else:  # Otherwise return no
+#         return False
 
 
 def superimpose(chain_a, chain_b):
     superimp = PDB.Superimposer()
-    superimp.set_atoms(chain_a, chain_b) 
+    superimp.set_atoms(chain_a.get_atoms(), chain_b.get_atoms()) 
     return superimp.apply(chain_b.get_atoms())
 
-# Feasible complexes - No clashes when superimposed
-# Backbone of the model is not interacting with the rest of the complex (threshold example 2 Amstrons)
-# We have to obtain the atoms thanks to the PDB
-# 1. Obtain the backnone atoms of the complex and the model
-# 2. use Bio.PDB.NeighborSearch(complex_atoms) --> Generates a neigbour search tree to speed up distance calculations
-# for atom in chain_atoms:
-# clashes += bool(ns.search(atom.coord, 2))  # If this atom shows clashes, add 1 to the clashes counter
-# 3. threshold of % clashes (to discard the chain) --> Pau 3%
+# BUILDING UP THE COMPLEX
+
+# start with pdb-file with the most interactions
+chain_to_superimpose = random.choice(max(sequences, key=len))
+starting_complex = pdb_files[chain_to_superimpose.get_file_index()]
+#print()
+create_macrocomplex(starting_complex, chain_to_superimpose, 100)
