@@ -4,7 +4,9 @@ from Bio.Alphabet import IUPAC
 from Bio import SeqIO, PDB, pairwise2
 from Bio.PDB.Polypeptide import PPBuilder
 import argparse, os, sys, UserInteraction
+import processInputFiles
 import random
+import loggingSetup
 #import chimera
 #from DetectClash import detectClash
 
@@ -28,27 +30,27 @@ class Chain(object):
 
     def get_interaction(self):
         return self.__interactions
-    
+
     def __len__(self):
         return len(self.__sequence)
 
 #main function that is called when running the script
 if __name__ == "__main__":
     """ Macrocomplex builder based on structure superimposition."""
-    
-    # obtaining fasta and pdb files 
-    
-    fasta_files, pdb_files = UserInteraction.getUserInput()
+
+    # obtaining fasta and pdb files
+
+    fasta_files, pdb_files, log = processInputFiles.processInput()
+
 
 # PARSING OF DATA
-
-# TODO: insert case of empty fasta file 
+# TODO: insert case of empty fasta file
     seq_record_list = []
     for seq in fasta_files:
         for seq_record in SeqIO.parse(seq, "fasta"):
             seq_record_list.append(seq_record)
 
-# TODO: insert case of empty pdb-file 
+# TODO: insert case of empty pdb-file
     parser = PDB.PDBParser()
     interact_structure = []
     for pdb_struct in pdb_files:
@@ -63,9 +65,11 @@ if __name__ == "__main__":
             structure1, structure2 = interact_structure[i][0].get_chains()
             pdb_seq.append(Chain(structure1, peptide1.get_sequence(), i, peptide2))
             pdb_seq.append(Chain(structure2, peptide2.get_sequence(), i, peptide1))
+
+    log.info("PDB interactions processed")
     for i in range(len(pdb_seq)):
         print(pdb_seq[i])
-    
+
     # for i in range(len(pdb_files)):
     #     for record in SeqIO.parse(pdb_files[i], "pdb-seqres"):
     #         # saves the record together with the index of the pdb file
@@ -109,11 +113,12 @@ for i in range(len(pdb_seq)):
                 if inserted:
                     sequences.append([pdb_seq[i], pdb_seq[m]])
                 print(sequences)
+log.info(f"{len(sequences)} homologous chains found")
 for i in range(len(sequences)):
     for el in sequences[i]:
         print("elem", i, el.get_file_index())
 
-# HELPER FUNCTIONS 
+# HELPER FUNCTIONS
 
 def get_superimpose_options(chain_to_superimpose):
     for similar_seq in sequences:
@@ -127,12 +132,12 @@ def create_macrocomplex(current_complex, superimpose_chain, threshold):
     # reach threshold
     if (threshold == 0):
         # append to list of final complexes
-        return final_complexes.append(current_complex) 
+        return final_complexes.append(current_complex)
     superimpose_options = get_superimpose_options(superimpose_chain)
     # no other superimposition options
     if not superimpose_options:
         # append to list of final complexes
-        return final_complexes.append(current_complex) 
+        return final_complexes.append(current_complex)
     for chain_option in superimpose_options:
         # TODO: combine multiple superimpose options
         created_complex = superimpose(superimpose_chain, chain_option)
@@ -175,7 +180,7 @@ def superimpose(chain_a, chain_b):
         atoms_a.append(elem)
     for elem in chain_b.get_structure().get_atoms():
         atoms_b.append(elem)
-    superimp.set_atoms(atoms_a, atoms_b) 
+    superimp.set_atoms(atoms_a, atoms_b)
     print(superimp.rms)
     return superimp.apply(atoms_b)
 
