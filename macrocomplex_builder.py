@@ -34,6 +34,28 @@ class Chain(object):
     def __len__(self):
         return len(self.__sequence)
 
+class Complex(object):
+    """ DESCRIPTION """
+
+    def __init__(self, structure, chains, pdb_files=False):
+        self.__structure = structure
+        self.__chains = chains
+        self.__pdb_files = pdb_files
+
+    def get_structure(self):
+        return self.__structure
+
+    def get_chains(self):
+        return self.__chains
+    
+    def get_pdb_files(self):
+        return self.__pdb_files
+    
+    def calc_z_score(self):
+        # how to calculate z_score? 
+        return 
+
+
 #main function that is called when running the script
 if __name__ == "__main__":
     """ Macrocomplex builder based on structure superimposition."""
@@ -233,26 +255,34 @@ def is_clashing(current_complex, chain_to_superimpose):
 #         return False
 
 
-def superimpose(chain_a, chain_b):
+def superimpose(current_complex, chain_b):
+    # TODO: add rmsd 
+    # TODO: only with backbone
+    # TODO: check all different positions ??? 
     superimp = PDB.Superimposer()
     atoms_a = []
     atoms_b = []
-    for elem in chain_a.get_structure().get_atoms():
-        atoms_a.append(elem)
-    for elem in chain_b.get_structure().get_atoms():
-        atoms_b.append(elem)
-    superimp.set_atoms(atoms_a, atoms_b)
-    print(superimp.rms)
-    # returns a tuple of the superimposed structure and the associated rmsd-value
-    return (superimp.apply(atoms_b), superimp.rms)
+    best_superimposition = False
+    # get superimposition positions in the current complex
+    superimposition_positions = []
+    for chain in superimposition_positions:
+        for elem in chain.get_structure().get_atoms():
+            atoms_a.append(elem)
+        for elem in chain_b.get_structure().get_atoms():
+            atoms_b.append(elem)
+        # setting fixed and moving atoms 
+        superimp.set_atoms(atoms_a, atoms_b)
+        # think about copy 
+    created_complex = Complex(superimp.apply(atoms_b), current_complex.get_chains().append(chain_b))
+    return created_complex
 
 # BUILDING UP THE COMPLEX
 
 # start with pdb-file with the most interactions
-chain_to_superimpose = random.choice(max(sequences, key=len))
-starting_complex = pdb_files[chain_to_superimpose.get_file_index()]
-#print()
+
+
+start_pdb = interact_structure[index][0]
+starting_complex = Complex(start_pdb.get_atoms(), )
 create_macrocomplex(starting_complex, 100)
 
-# getstructure of pdbfiles and superimpose pdb files?
-# getstructure of pdbfiles and superimpose pdb files?
+# check for DNA 
