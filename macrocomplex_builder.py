@@ -79,38 +79,38 @@ if __name__ == "__main__":
         interact_structure.append(parser.get_structure(pdb_struct,pdb_struct))
     print("interact structure", interact_structure)
     ppb = PPBuilder()
-    pdb_seq = []
+    chains = []
     for i in range(len(interact_structure)):
             peptide1 = ppb.build_peptides(interact_structure[i])[0]
             # saves the record as a chain object with pdb-file index and sequence
             peptide2 = ppb.build_peptides(interact_structure[i])[1]
             structure1, structure2 = interact_structure[i][0].get_chains()
-            pdb_seq.append(Chain(structure1, peptide1.get_sequence(), i, peptide2))
-            pdb_seq.append(Chain(structure2, peptide2.get_sequence(), i, peptide1))
+            chains.append(Chain(structure1, peptide1.get_sequence(), i, peptide2))
+            chains.append(Chain(structure2, peptide2.get_sequence(), i, peptide1))
 
     log.info("PDB interactions processed")
-    for i in range(len(pdb_seq)):
-        print(pdb_seq[i])
+    for i in range(len(chains)):
+        print(chains[i])
 
     # for i in range(len(pdb_files)):
     #     for record in SeqIO.parse(pdb_files[i], "pdb-seqres"):
     #         # saves the record together with the index of the pdb file
-    #         pdb_seq = pdb_seq.append([record,i])
+    #         chains = chains.append([record,i])
 
 # SEQUENCE ALIGNMENTS
 
 # find the sequences that occur multiple times in pdb files and save all proteins for each structural aln in a separate list
 sequences = []
-for i in range(len(pdb_seq)):
+for i in range(len(chains)):
     for m in range(i):
         print("i:", i)
         print("m:", m)
         # just check sequence alignments if sequences are not in the same pair
-        if (pdb_seq[i].get_file_index() != pdb_seq[m].get_file_index()):
-            print("Seq1:", pdb_seq[i].get_file_index())
-            print("Seq2:", pdb_seq[m].get_file_index())
+        if (chains[i].get_file_index() != chains[m].get_file_index()):
+            print("Seq1:", chains[i].get_file_index())
+            print("Seq2:", chains[m].get_file_index())
             # find the best alignment for two sequences (first element of list of alignments)
-            alignment = pairwise2.align.globalxx(pdb_seq[i].get_sequence(), pdb_seq[m].get_sequence())[0]
+            alignment = pairwise2.align.globalxx(chains[i].get_sequence(), chains[m].get_sequence())[0]
             aln_seq_1 = alignment[0]
             aln_seq_2 = alignment[1]
             al_length = len(alignment[0])
@@ -119,21 +119,21 @@ for i in range(len(pdb_seq)):
                 print("is identical")
                 inserted = True
                 for similar_seq in sequences:
-                    if pdb_seq[i] in similar_seq:
-                        if pdb_seq[m] not in similar_seq:
-                            similar_seq.append(pdb_seq[m])
+                    if chains[i] in similar_seq:
+                        if chains[m] not in similar_seq:
+                            similar_seq.append(chains[m])
                             inserted = False
                             break
-                    if pdb_seq[m] in similar_seq:
-                        if pdb_seq[i] not in similar_seq:
-                            similar_seq.append(pdb_seq[i])
+                    if chains[m] in similar_seq:
+                        if chains[i] not in similar_seq:
+                            similar_seq.append(chains[i])
                             inserted = False
                             break
-                    if pdb_seq[m] in similar_seq and pdb_seq[i] in similar_seq:
+                    if chains[m] in similar_seq and chains[i] in similar_seq:
                         inserted = False
                         break
                 if inserted:
-                    sequences.append([pdb_seq[i], pdb_seq[m]])
+                    sequences.append([chains[i], chains[m]])
                 print(sequences)
 log.info(f"{len(sequences)} homologous chains found")
 for i in range(len(sequences)):
@@ -182,7 +182,7 @@ def get_superimpose_options(current_complex, pdb_list):
 #     # gives us the new complex and the according rmsd
 #     superimposition = superimpose(superimpose_chain, next_chain)
     
-#     superimpose_options = get_superimpose_options(superimposition[0],pdb_seq)
+#     superimpose_options = get_superimpose_options(superimposition[0],chains)
 #     # new complex has no other superimposition options -> reached a leaf of the tree
 #     if not superimpose_options:
 #         # append to list of final complexes
