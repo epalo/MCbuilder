@@ -56,6 +56,9 @@ class Complex(object):
     def get_pdb_files(self):
         return self.__pdb_files
     
+    def add_chain(self, chain):
+        return Complex(structure.get_model().add(chain.get_chain()),chains.append(chain))
+    
     def calc_z_score(self):
         # how to calculate z_score? 
         return 
@@ -167,6 +170,7 @@ if __name__ == "__main__":
         for chain in current_complex.get_chains():  
             similar_chains = get_homo_chains(chain)
             superimpose_options = superimpose_options + similar_chains
+        print("Superimpose options:", superimpose_options)
         return superimpose_options
     # TODO: check both chains of starting complex and combine them to complete complex
 
@@ -285,10 +289,11 @@ if __name__ == "__main__":
         return superimpose_positions
 
     def superimpose(current_complex, chain_b):
+        # TODO: check for clashing 
         # TODO: only with backbone
         # TODO: check all different positions ???
         superimposition_positions = get_superimpose_positions(current_complex, chain_b)
-        print(superimposition_positions)
+        print("Superimpose positions",superimposition_positions)
         superimp = PDB.Superimposer()
         best_superimposition = None
         best_rmsd = 10
@@ -297,17 +302,21 @@ if __name__ == "__main__":
             atoms_b = []
             for elem in chain.get_chain().get_atoms():
                 atoms_a.append(elem)
+            print("atoms a:",atoms_a)
             for elem in chain_b.get_chain().get_atoms():
                 atoms_b.append(elem)
+            print("atoms b:",atoms_b)
             # setting fixed and moving atoms 
             superimp.set_atoms(atoms_a, atoms_b)
             # apply the superimposition, TODO: think about copy??
-            superimposition = superimp.apply(atoms_b) 
+            copy_chain_b = chain_b.get_chain()
+            superimp.apply(copy_chain_b)
             rmsd = superimp.rms
             if rmsd < best_rmsd:
-                best_superimposition = superimposition
+                best_superimposition = copy_chain_b
                 best_rmsd = rmsd
-        created_complex = Complex(best_superimposition, current_complex.get_chains().append(chain_b))
+        print("Best superimposition:",copy_chain_b)
+        created_complex = current_complex.add_chain(best_superimposition)
         return created_complex
 
     # BUILDING UP THE COMPLEX
