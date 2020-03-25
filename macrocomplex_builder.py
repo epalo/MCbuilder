@@ -120,28 +120,89 @@ def get_superimpose_options(chain_to_superimpose):
         if chain_to_superimpose in similar_seq:
             return similar_seq
 
+# search for clashes here
+def get_superimpose_options(current_complex, pdb_list):
+    for similar_seq in sequences:
+        if chain_to_superimpose in similar_seq:
+            return similar_seq
+
 # TODO: check both chains of starting complex and combine them to complete complex
 
-final_complexes = []
-def create_macrocomplex(current_complex, superimpose_chain, threshold):
-    # reach threshold
-    if (threshold == 0):
-        # append to list of final complexes
-        return final_complexes.append(current_complex) 
-    superimpose_options = get_superimpose_options(superimpose_chain)
-    # no other superimposition options
-    if not superimpose_options:
-        # append to list of final complexes
-        return final_complexes.append(current_complex) 
-    for chain_option in superimpose_options:
-        # TODO: combine multiple superimpose options
-        created_complex = superimpose(superimpose_chain, chain_option)
-        rmsd_threshold = 0
-        if created_complex.rms < rmsd_threshold:
-            if not is_clashing(current_complex, chain_option):
-            #if not is_clashing2(created_complex):
-                create_macrocomplex(created_complex, chain_option.get_interaction(),threshold-1)
+# final_complexes = []
+# def create_macrocomplex(current_complex, superimpose_chain, threshold):
+#     superimpose_options = get_superimpose_options(superimpose_chain)
+#     # no other superimposition options -> reached a leaf of the tree
+#     if not superimpose_options:
+#         # append to list of final complexes
+#         return superimpose(superimpose_chain,) 
+#      # reach threshold
+#     if (threshold == 0):
+#         # append to list of final complexes
+#         return 
+#     for chain_option in superimpose_options:
+#         # TODO: combine multiple superimpose options
+#         superimposition = superimpose(superimpose_chain, chain_option)
+#         created_complex = 
+#         current_rmsd = superimpose(superimpose_chain, chain_option)
+#         rmsd_threshold = 0
+#         if created_complex.rms < rmsd_threshold:
+#             if not is_clashing(current_complex, chain_option):
+#             #if not is_clashing2(created_complex):
+#                 create_macrocomplex(created_complex, chain_option.get_interaction(),threshold-1)
 
+
+# def create_macrocomplex(current_complex, next_chain, threshold):
+#     # gives us the new complex and the according rmsd
+#     superimposition = superimpose(superimpose_chain, next_chain)
+    
+#     superimpose_options = get_superimpose_options(superimposition[0],pdb_seq)
+#     # new complex has no other superimposition options -> reached a leaf of the tree
+#     if not superimpose_options:
+#         # append to list of final complexes
+#         return superimposition 
+#      # reach threshold
+#     if (threshold == 0):
+#         # append to list of final complexes
+#         return superimposition
+#     ## add here case for stoichometry
+#     if FALSE:
+#         return superimposition
+    
+#     for option in superimpose_options:
+#         created_complex = create_macrocomplex(created_complex, option ,threshold-1)
+#         current_structure = created_complex[]
+#         current_rmsd = created_complex[1]
+                
+
+
+def create_macrocomplex(current_complex, threshold):
+    superimpose_options = get_superimpose_options(current_complex[0],pdb_seq)
+    best_complex = current_complex
+    print("here")
+    # starting complex has no superimposition options
+    if not superimpose_options:
+        # then just return the starting complex
+        return best_complex
+    else:
+        for option in superimpose_options:
+            option_complex = superimpose(current_complex[0], option)
+            # no other superimposition options for the complex available (leaf)
+            # or reached threshold
+            # or TODO: ADD STOICHOMETRY option
+            if not get_superimpose_options(option_complex, pdb_seq) or \
+                (threshold == 0) or \
+                    False:
+                # if rmsd for option complex is lower than for the current best complex replace it
+                if option_complex[1] < best_complex[1]:
+                    best_complex = option_complex
+            # reach threshold
+            else:
+                # if we didn't reach the leaf yet, recursive call
+                create_macrocomplex(option_complex ,threshold-1)
+    return best_complex
+        
+   
+   
 def is_clashing(current_complex, chain_to_superimpose):
     backbone = {"CA", "C1\'"}
     model_atoms = [atom for atom in current_complex.get_atoms() if atom.id in backbone]
@@ -177,7 +238,8 @@ def superimpose(chain_a, chain_b):
         atoms_b.append(elem)
     superimp.set_atoms(atoms_a, atoms_b) 
     print(superimp.rms)
-    return superimp.apply(atoms_b)
+    # returns a tuple of the superimposed structure and the associated rmsd-value
+    return (superimp.apply(atoms_b), superimp.rms)
 
 # BUILDING UP THE COMPLEX
 
@@ -185,4 +247,6 @@ def superimpose(chain_a, chain_b):
 chain_to_superimpose = random.choice(max(sequences, key=len))
 starting_complex = pdb_files[chain_to_superimpose.get_file_index()]
 #print()
-create_macrocomplex(starting_complex, chain_to_superimpose, 100)
+create_macrocomplex(starting_complex, 100)
+
+# getstructure of pdbfiles and superimpose pdb files?
