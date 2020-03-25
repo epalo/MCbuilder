@@ -16,23 +16,21 @@ import loggingSetup
 class Interacting_Chain():
     """ DESCRIPTION """
 
-    def __init__(self, chain, file_index, interacting_chain):
+    def __init__(self, chain, file_index, sequence, interacting_chain):
         self.__chain = chain 
         self.__file_index = file_index
+        self.__structure = structure
+        self.__sequence = sequence
         self.__interacting_chain = interacting_chain
-
-    def get_sequence(self):
-        ppb=PPBuilder()
-        peptide = ppb.build_peptides(chain)
-        sequence = peptide.get_sequence()
-        print(sequence)
-        return sequence
     
     def get_chain(self):
         return self.__chain 
 
     def get_file_index(self):
         return self.__file_index
+    
+    def get_sequence(self):
+        return self.__sequence
 
     def get_interacting_chain(self):
         return self.__interacting_chain
@@ -92,9 +90,15 @@ if __name__ == "__main__":
     def get_interacting_chains(interactions):
         chains = []
         for index in range(len(interactions)):
+            # build the peptide to obtain the sequences of the chains
+            ppb=PPBuilder()
+            peptide = ppb.build_peptides(interactions[index])
+            sequence_a = peptide[0].get_sequence()
+            sequence_b = peptide[1].get_sequence()
+            # build up the list of chains for each interaction 
             chain_a, chain_b = interactions[index].get_chains()
-            chains.append(Interacting_Chain(chain_a, index, chain_b))
-            chains.append(Interacting_Chain(chain_b, index, chain_a))
+            chains.append(Interacting_Chain(chain_a, index, sequence_a, chain_b))
+            chains.append(Interacting_Chain(chain_b, index, sequence_b,chain_a))
         return chains
 
     log.info("PDB interactions processed")
@@ -274,11 +278,12 @@ def superimpose(current_complex, chain_b):
 
 # BUILDING UP THE COMPLEX
 
-starting_interaction = interaction[0]
+starting_interaction = interactions[0]
 interaction_sum = 0
 # find pdb-file with the most interactions
 for interaction in interactions:
-    sum = interaction.get_chain_a + interaction.get_chain_b
+    chain_a, chain_b = interaction.get_chains()
+    sum = chain_a + chain_b
     if sum > interaction_sum :
         starting_interaction = interaction
 starting_complex = Complex(starting_interaction, [starting_interaction.get_chain_a, starting_interaction.get_chain_b])
