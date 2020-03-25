@@ -108,7 +108,6 @@ if __name__ == "__main__":
         interacting_a = Interacting_Chain(chain_a, i, sequence_a, chain_b)
         interacting_b = Interacting_Chain(chain_b, i, sequence_b,chain_a)
         interactions.append(Interaction(structure, interacting_a, interacting_b))
-    print(interactions)
 
 
     # get all the chains of a list of interactions
@@ -116,27 +115,25 @@ if __name__ == "__main__":
     for interaction in interactions:
         chains.append(interaction.get_chain_a())
         chains.append(interaction.get_chain_b())
-    print(chains)
     log.info("PDB interactions processed")
 
 # SEQUENCE ALIGNMENTS
 
 # find the sequences that occur multiple times in pdb files and save all proteins for each structural aln in a separate list
-    sequences = []
+    homo_chains = []
     for i in range(len(chains)):
         for m in range(i):
-            # just check sequence alignments if sequences are not in the same pair
+            # just check sequence alignments if homo_chains are not in the same pair
             if (chains[i].get_file_index() != chains[m].get_file_index()):
-                # find the best alignment for two sequences (first element of list of alignments)
+                # find the best alignment for two homo_chains (first element of list of alignments)
                 alignment = pairwise2.align.globalxx(chains[i].get_sequence(), chains[m].get_sequence())[0]
                 aln_seq_1 = alignment[0]
                 aln_seq_2 = alignment[1]
                 al_length = len(alignment[0])
                 ident = sum(base1 == base2 for base1, base2 in zip(aln_seq_1, aln_seq_2))
                 if ident/al_length >= 0.95:
-                    print("is identical")
                     inserted = True
-                    for similar_seq in sequences:
+                    for similar_seq in homo_chains:
                         if chains[i] in similar_seq:
                             if chains[m] not in similar_seq:
                                 similar_seq.append(chains[m])
@@ -151,20 +148,15 @@ if __name__ == "__main__":
                             inserted = False
                             break
                     if inserted:
-                        sequences.append([chains[i], chains[m]])
-                    print(sequences)
-    log.info(f"{len(sequences)} homologous chains found")
-    for i in range(len(sequences)):
-        for el in sequences[i]:
-            print("elem", i, el.get_file_index())
+                        homo_chains.append([chains[i], chains[m]])
+    log.info(f"{len(homo_chains)} homologous chains found")
+
 
     # HELPER FUNCTIONS
-    # returns a list of all chains that are similar to the input chain
-    def get_similar_chains(chain):
-        for lst in sequences:
-            print("list", lst)
+    # returns a list of chains out of a list of chains that are similar to the input chain
+    def get_homo_chains(chain):
+        for lst in homo_chains:
             if chain in lst:
-                print("is in list", lst)
                 return lst
         else:
             return []
@@ -173,8 +165,8 @@ if __name__ == "__main__":
     def get_superimpose_options(current_complex):
         superimpose_options = []
         for chain in current_complex.get_chains():  
-            similar_chains = get_similar_chains(chain)
-            superimpose_options.append(similar_chains)
+            similar_chains = get_homo_chains(chain)
+            superimpose_options = superimpose_options + similar_chains
         return superimpose_options
     # TODO: check both chains of starting complex and combine them to complete complex
 
@@ -231,10 +223,13 @@ if __name__ == "__main__":
         # starting complex has no superimposition options
         if not superimpose_options:
             # then just return the starting complex
+            print("no options!")
             return best_complex
         else:
             for option in superimpose_options:
                 option_complex = superimpose(current_complex, option)
+                print("Option Complex", option_complex)
+                print("Current Structure:", option_complex.get_structure())
                 # no other superimposition options for the complex available (leaf)
                 # or reached threshold
                 # or TODO: ADD STOICHOMETRY option
@@ -247,6 +242,7 @@ if __name__ == "__main__":
                 # reach threshold
                 else:
                     # if we didn't reach the leaf yet, recursive call
+                    print("recursion!")
                     create_macrocomplex(option_complex ,threshold-1)
         return best_complex
             
@@ -276,23 +272,32 @@ if __name__ == "__main__":
     #     else:  # Otherwise return no
     #         return False
 
+    # return all the chains of a current complex where a chain_b can possibly be superimposed
+    def get_superimpose_positions(current_complex, chain_b):
+        superimpose_positions = []
+        print("Chain id:", chain_b.get_chain().get_id())
+        homos_chain_b = get_homo_chains(chain_b)
+        print("Homos chain b:",homos_chain_b)
+        print("Current complex:",current_complex.get_chains())
+        for chain in current_complex.get_chains():
+            if chain in homos_chain_b:
+                superimpose_positions.append(chain)
+        return superimpose_positions
 
     def superimpose(current_complex, chain_b):
         # TODO: only with backbone
-        # TODO: check all different positions ??? 
-
-        # TODO: get superimposition positions in the current complex
-        superimposition_positions = []
-
+        # TODO: check all different positions ???
+        superimposition_positions = get_superimpose_positions(current_complex, chain_b)
+        print(superimposition_positions)
         superimp = PDB.Superimposer()
         best_superimposition = None
         best_rmsd = 10
         for chain in superimposition_positions:
             atoms_a = []
             atoms_b = []
-            for elem in chain.get_atoms():
+            for elem in chain.get_chain().get_atoms():
                 atoms_a.append(elem)
-            for elem in chain_b.get_atoms():
+            for elem in chain_b.get_chain().get_atoms():
                 atoms_b.append(elem)
             # setting fixed and moving atoms 
             superimp.set_atoms(atoms_a, atoms_b)
@@ -311,7 +316,7 @@ if __name__ == "__main__":
     interaction_sum = 0
     # find pdb-file with the most interactions
     for interaction in interactions:
-        sum = len(get_similar_chains(interaction.get_chain_a())) + len(get_similar_chains(interaction.get_chain_b()))
+        sum = len(get_homo_chains(interaction.get_chain_a())) + len(get_homo_chains(interaction.get_chain_b()))
         if sum > interaction_sum :
             starting_interaction = interaction
             interaction_sum = sum
