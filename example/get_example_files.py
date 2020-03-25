@@ -36,7 +36,11 @@ for i in range(len(chains)):
         else:  # Otherwise return no
             continue# print("Doesn't")
 
+flat_list = [item for sublist in all_interact for item in sublist]
 
+for chain in chains:
+    if chain.get_id() not in flat_list:
+        print(f"{chain.get_id()} not in list")
 io = PDBIO()
 io.set_structure(structure)
 cwd = os.getcwd()
