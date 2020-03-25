@@ -3,6 +3,8 @@ from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
 from Bio import SeqIO, PDB, pairwise2
 from Bio.PDB.Polypeptide import PPBuilder
+from Bio.PDB.Chain import Chain
+from Bio.PDB.Structure import Structure
 import argparse, os, sys, UserInteraction
 import processInputFiles
 import random
@@ -10,26 +12,28 @@ import loggingSetup
 #import chimera
 #from DetectClash import detectClash
 
-class Chain(object):
+# maybe transform into an extend of the actual pdb chain class and add function to retrieve sequence 
+class Interacting_Chain():
     """ DESCRIPTION """
 
-    def __init__(self,structure, sequence, file_index, interactions):
+    def __init__(self, chain, file_index, sequence, interacting_chain):
+        self.__chain = chain 
+        self.__file_index = file_index
         self.__structure = structure
         self.__sequence = sequence
-        self.__file_index = file_index
-        self.__interactions = interactions
-
-    def get_structure(self):
-        return self.__structure
-
-    def get_sequence(self):
-        return self.__sequence
+        self.__interacting_chain = interacting_chain
+    
+    def get_chain(self):
+        return self.__chain 
 
     def get_file_index(self):
         return self.__file_index
+    
+    def get_sequence(self):
+        return self.__sequence
 
-    def get_interaction(self):
-        return self.__interactions
+    def get_interacting_chain(self):
+        return self.__interacting_chain
 
     def __len__(self):
         return len(self.__sequence)
@@ -37,6 +41,7 @@ class Chain(object):
 class Complex(object):
     """ DESCRIPTION """
 
+# chain attribute needed?
     def __init__(self, structure, chains, pdb_files=False):
         self.__structure = structure
         self.__chains = chains
@@ -74,28 +79,32 @@ if __name__ == "__main__":
 
 # TODO: insert case of empty pdb-file
     parser = PDB.PDBParser()
-    interact_structure = []
-    for pdb_struct in pdb_files:
-        interact_structure.append(parser.get_structure(pdb_struct,pdb_struct))
-    print("interact structure", interact_structure)
-    ppb = PPBuilder()
-    chains = []
-    for i in range(len(interact_structure)):
-            peptide1 = ppb.build_peptides(interact_structure[i])[0]
-            # saves the record as a chain object with pdb-file index and sequence
-            peptide2 = ppb.build_peptides(interact_structure[i])[1]
-            structure1, structure2 = interact_structure[i][0].get_chains()
-            chains.append(Chain(structure1, peptide1.get_sequence(), i, peptide2))
-            chains.append(Chain(structure2, peptide2.get_sequence(), i, peptide1))
+    interactions = []
+    # iterate through all pdb files and return a list of interaction objects
+    for pdb_file in pdb_files:
+        structure = parser.get_structure(pdb_file,pdb_file)
+        interactions.append(structure)
+    print(interactions)
+
+    # function to get all the chains of a list of interactions
+    def get_interacting_chains(interactions):
+        chains = []
+        for index in range(len(interactions)):
+            # build the peptide to obtain the sequences of the chains
+            ppb=PPBuilder()
+            peptide = ppb.build_peptides(interactions[index])
+            sequence_a = peptide[0].get_sequence()
+            sequence_b = peptide[1].get_sequence()
+            # build up the list of chains for each interaction 
+            chain_a, chain_b = interactions[index].get_chains()
+            chains.append(Interacting_Chain(chain_a, index, sequence_a, chain_b))
+            chains.append(Interacting_Chain(chain_b, index, sequence_b,chain_a))
+        return chains
 
     log.info("PDB interactions processed")
-    for i in range(len(chains)):
-        print(chains[i])
-
-    # for i in range(len(pdb_files)):
-    #     for record in SeqIO.parse(pdb_files[i], "pdb-seqres"):
-    #         # saves the record together with the index of the pdb file
-    #         chains = chains.append([record,i])
+    chains = get_interacting_chains(interactions)
+    for chain in chains:
+        print(chain)
 
 # SEQUENCE ALIGNMENTS
 
@@ -103,12 +112,8 @@ if __name__ == "__main__":
 sequences = []
 for i in range(len(chains)):
     for m in range(i):
-        print("i:", i)
-        print("m:", m)
         # just check sequence alignments if sequences are not in the same pair
         if (chains[i].get_file_index() != chains[m].get_file_index()):
-            print("Seq1:", chains[i].get_file_index())
-            print("Seq2:", chains[m].get_file_index())
             # find the best alignment for two sequences (first element of list of alignments)
             alignment = pairwise2.align.globalxx(chains[i].get_sequence(), chains[m].get_sequence())[0]
             aln_seq_1 = alignment[0]
@@ -142,16 +147,12 @@ for i in range(len(sequences)):
 
 # HELPER FUNCTIONS
 
-def get_superimpose_options(chain_to_superimpose):
-    for similar_seq in sequences:
-        if chain_to_superimpose in similar_seq:
-            return similar_seq
-
-# search for clashes here
-def get_superimpose_options(current_complex, pdb_list):
-    for similar_seq in sequences:
-        if chain_to_superimpose in similar_seq:
-            return similar_seq
+def get_superimpose_options(current_complex):
+    superimpose_options = []
+    for chain in current_complex:  
+        for similar_seq in sequences:
+            if chain in similar_seq:
+                return superimpose_options.append(similar_seq)
 
 # TODO: check both chains of starting complex and combine them to complete complex
 
@@ -203,9 +204,8 @@ def get_superimpose_options(current_complex, pdb_list):
 
 
 def create_macrocomplex(current_complex, threshold):
-    superimpose_options = get_superimpose_options(current_complex[0],pdb_seq)
+    superimpose_options = get_superimpose_options(current_complex[0])
     best_complex = current_complex
-    print("here")
     # starting complex has no superimposition options
     if not superimpose_options:
         # then just return the starting complex
@@ -216,11 +216,11 @@ def create_macrocomplex(current_complex, threshold):
             # no other superimposition options for the complex available (leaf)
             # or reached threshold
             # or TODO: ADD STOICHOMETRY option
-            if not get_superimpose_options(option_complex, pdb_seq) or \
+            if not get_superimpose_options(option_complex) or \
                 (threshold == 0) or \
                     False:
-                # if rmsd for option complex is lower than for the current best complex replace it
-                if option_complex[1] < best_complex[1]:
+                # if Z-Score for option complex is lower than for the current best complex replace it
+                if option_complex.calc_z_score < best_complex.calc_z_score:
                     best_complex = option_complex
             # reach threshold
             else:
@@ -234,10 +234,10 @@ def is_clashing(current_complex, chain_to_superimpose):
     backbone = {"CA", "C1\'"}
     model_atoms = [atom for atom in current_complex.get_atoms() if atom.id in backbone]
     chain_atoms = [atom for atom in chain_to_superimpose if atom.id in backbone]
-    nsearch = PDB.NeighborSearch(model_atoms) # Generates a neigbour search tree
+    n_search = PDB.NeighborSearch(model_atoms) # Generates a neigbour search tree
     clashes = 0
     for atom in chain_atoms:
-        clashes += bool(nsearch.search(atom.coord, 1.7))  # If this atom shows clashes, add 1 to the clashes counter
+        clashes += bool(n_search.search(atom.coord, 1.7))  # If this atom shows clashes, add 1 to the clashes counter
     if clashes/len(chain_atoms) >= 0.03:  # If more than 3% of atoms show clashes return yes
         return True
     else:  # Otherwise return no
@@ -285,11 +285,15 @@ def superimpose(current_complex, chain_b):
 
 # BUILDING UP THE COMPLEX
 
-# start with pdb-file with the most interactions
-
-
-start_pdb = interact_structure[index][0]
-starting_complex = Complex(start_pdb.get_atoms(), )
+starting_interaction = interactions[0]
+interaction_sum = 0
+# find pdb-file with the most interactions
+for interaction in interactions:
+    chain_a, chain_b = interaction.get_chains()
+    sum = chain_a + chain_b
+    if sum > interaction_sum :
+        starting_interaction = interaction
+starting_complex = Complex(starting_interaction, [starting_interaction.get_chain_a, starting_interaction.get_chain_b])
 create_macrocomplex(starting_complex, 100)
 
-# check for DNA 
+# TODO: check for DNA 
