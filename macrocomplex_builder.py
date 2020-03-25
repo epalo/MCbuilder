@@ -13,16 +13,23 @@ import loggingSetup
 #from DetectClash import detectClash
 
 # maybe transform into an extend of the actual pdb chain class and add function to retrieve sequence 
-class Interacting_Chain(Chain):
+class Interacting_Chain():
     """ DESCRIPTION """
 
-    def __init__(self, file_index, interacting_chain):
+    def __init__(self, chain, file_index, interacting_chain):
+        self.__chain = chain 
         self.__file_index = file_index
         self.__interacting_chain = interacting_chain
 
     def get_sequence(self):
         ppb=PPBuilder()
-        return ppb.build_peptides(self).get_sequence()
+        peptide = ppb.build_peptides(chain)
+        sequence = peptide.get_sequence()
+        print(sequence)
+        return sequence
+    
+    def get_chain(self):
+        return self.__chain 
 
     def get_file_index(self):
         return self.__file_index
@@ -55,20 +62,6 @@ class Complex(object):
         # how to calculate z_score? 
         return 
 
-# is an extension of the structure pdb class
-class Interaction(Structure):
-    """ DESCRIPTION """
-
-    def get_chain_a(self):
-        print(self)
-        chain_a =  self.get_chains()[0]
-        return chain_a
-    
-    def get_chain_b(self):
-        print(self)
-        chain_b =  self.get_chains()[1]
-        return chain_b
-
 
 #main function that is called when running the script
 if __name__ == "__main__":
@@ -92,29 +85,22 @@ if __name__ == "__main__":
     # iterate through all pdb files and return a list of interaction objects
     for pdb_file in pdb_files:
         structure = parser.get_structure(pdb_file,pdb_file)
-        interaction = Interaction(structure)
-        interactions.append(interaction)
+        interactions.append(structure)
     print(interactions)
 
     # function to get all the chains of a list of interactions
-    def get_chains(interactions):
+    def get_interacting_chains(interactions):
         chains = []
-        for interaction in interactions:
-           chains.append(interaction.get_chain_a().get_sequence(), interaction.get_chain_b().get_sequence())
+        for index in range(len(interactions)):
+            chain_a, chain_b = interactions[index].get_chains()
+            chains.append(Interacting_Chain(chain_a, index, chain_b))
+            chains.append(Interacting_Chain(chain_b, index, chain_a))
         return chains
-            
-    # TODO:function to get sequence of a chain????????????????? INSTEAD OF THE SHIT ABOVE?
-
 
     log.info("PDB interactions processed")
-    chains = get_chains(interactions)
+    chains = get_interacting_chains(interactions)
     for chain in chains:
         print(chain)
-
-    # for i in range(len(pdb_files)):
-    #     for record in SeqIO.parse(pdb_files[i], "pdb-seqres"):
-    #         # saves the record together with the index of the pdb file
-    #         chains = chains.append([record,i])
 
 # SEQUENCE ALIGNMENTS
 
@@ -122,12 +108,8 @@ if __name__ == "__main__":
 sequences = []
 for i in range(len(chains)):
     for m in range(i):
-        print("i:", i)
-        print("m:", m)
         # just check sequence alignments if sequences are not in the same pair
         if (chains[i].get_file_index() != chains[m].get_file_index()):
-            print("Seq1:", chains[i].get_file_index())
-            print("Seq2:", chains[m].get_file_index())
             # find the best alignment for two sequences (first element of list of alignments)
             alignment = pairwise2.align.globalxx(chains[i].get_sequence(), chains[m].get_sequence())[0]
             aln_seq_1 = alignment[0]
