@@ -256,24 +256,31 @@ def is_clashing(current_complex, chain_to_superimpose):
 
 
 def superimpose(current_complex, chain_b):
-    # TODO: add rmsd 
     # TODO: only with backbone
     # TODO: check all different positions ??? 
-    superimp = PDB.Superimposer()
-    atoms_a = []
-    atoms_b = []
-    best_superimposition = False
+
     # get superimposition positions in the current complex
     superimposition_positions = []
+
+    superimp = PDB.Superimposer()
+    best_superimposition = None
+    best_rmsd = 10
     for chain in superimposition_positions:
-        for elem in chain.get_structure().get_atoms():
+        atoms_a = []
+        atoms_b = []
+        for elem in chain.get_atoms():
             atoms_a.append(elem)
-        for elem in chain_b.get_structure().get_atoms():
+        for elem in chain_b.get_atoms():
             atoms_b.append(elem)
         # setting fixed and moving atoms 
         superimp.set_atoms(atoms_a, atoms_b)
-        # think about copy 
-    created_complex = Complex(superimp.apply(atoms_b), current_complex.get_chains().append(chain_b))
+        # apply the superimposition, TODO: think about copy??
+        superimposition = superimp.apply(atoms_b) 
+        rmsd = superimp.rms
+        if rmsd < best_rmsd:
+            best_superimposition = superimposition
+            best_rmsd = rmsd
+    created_complex = Complex(best_superimposition, current_complex.get_chains().append(chain_b))
     return created_complex
 
 # BUILDING UP THE COMPLEX
