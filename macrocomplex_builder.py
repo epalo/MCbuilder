@@ -111,7 +111,6 @@ if __name__ == "__main__":
     print(interactions)
 
 
-
     # get all the chains of a list of interactions
     chains = []
     for interaction in interactions:
@@ -160,6 +159,7 @@ if __name__ == "__main__":
             print("elem", i, el.get_file_index())
 
     # HELPER FUNCTIONS
+    # returns a list of all chains that are similar to the input chain
     def get_similar_chains(chain):
         for lst in sequences:
             print("list", lst)
@@ -169,13 +169,13 @@ if __name__ == "__main__":
         else:
             return []
 
+    # returns a list with all possible chains that can be added to a current complex
     def get_superimpose_options(current_complex):
         superimpose_options = []
-        for chain in current_complex:  
-            for similar_seq in sequences:
-                if chain in similar_seq:
-                    return superimpose_options.append(similar_seq)
-
+        for chain in current_complex.get_chains():  
+            similar_chains = get_similar_chains(chain)
+            superimpose_options.append(similar_chains)
+        return superimpose_options
     # TODO: check both chains of starting complex and combine them to complete complex
 
     # final_complexes = []
@@ -226,7 +226,7 @@ if __name__ == "__main__":
 
 
     def create_macrocomplex(current_complex, threshold):
-        superimpose_options = get_superimpose_options(current_complex.get_structure())
+        superimpose_options = get_superimpose_options(current_complex)
         best_complex = current_complex
         # starting complex has no superimposition options
         if not superimpose_options:
@@ -234,7 +234,7 @@ if __name__ == "__main__":
             return best_complex
         else:
             for option in superimpose_options:
-                option_complex = superimpose(current_complex.get_structure(), option)
+                option_complex = superimpose(current_complex, option)
                 # no other superimposition options for the complex available (leaf)
                 # or reached threshold
                 # or TODO: ADD STOICHOMETRY option
