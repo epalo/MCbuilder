@@ -52,6 +52,10 @@ def getUserInput():
 def getVerboseOption():
     return options.verbose
 
+def getOutputDirectory():
+    return options.outfile
+    
+
     # getting input files in fasta and pdb format
     # input_list = options.infile
     # fasta_files = []

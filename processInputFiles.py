@@ -4,6 +4,8 @@ import os
 import sys
 import loggingSetup
 import UserInteraction
+import macrocomplex_builder
+from Bio.PDB import PDBIO
 
 
 def processInput():
@@ -35,3 +37,10 @@ def processInput():
     log.info(f"{len(fasta_files)} FASTA file(s) and {len(pdb_files)} PDB file(s) were processed")
 
     return (fasta_files, pdb_files, log)
+
+
+def createPDB():
+    """ Create a PDB with the final complex """
+    io = PDBIO()
+    io.set_structure(best_complex.get_structure())
+    io.save(UserInteraction.getOutputDirectory())
