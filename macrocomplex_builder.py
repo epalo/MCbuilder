@@ -16,15 +16,15 @@ import loggingSetup
 class Interacting_Chain():
     """ DESCRIPTION """
 
-    def __init__(self, chain, file_index, sequence, interacting_chain):
-        self.__chain = chain 
+    def __init__(self, biopy_chain, file_index, sequence, interacting_chain):
+        self.__biopy_chain = biopy_chain 
         self.__file_index = file_index
         self.__structure = structure
         self.__sequence = sequence
         self.__interacting_chain = interacting_chain
     
-    def get_chain(self):
-        return self.__chain 
+    def get_biopy_chain(self):
+        return self.__biopy_chain 
 
     def get_file_index(self):
         return self.__file_index
@@ -34,6 +34,9 @@ class Interacting_Chain():
 
     def get_interacting_chain(self):
         return self.__interacting_chain
+    
+    def set_biopy_chain(self, biopy_chain):
+        self.__biopy_chain = biopy_chain
 
     def __len__(self):
         return len(self.__sequence)
@@ -57,7 +60,7 @@ class Complex(object):
         return self.__pdb_files
     
     def add_chain(self, chain):
-        return Complex(structure.get_model().add(chain.get_chain()),chains.append(chain))
+        return Complex(structure[0].add(chain.get_biopy_chain()),chains.append(chain))
     
     def calc_z_score(self):
         # how to calculate z_score? 
@@ -279,7 +282,7 @@ if __name__ == "__main__":
     # return all the chains of a current complex where a chain_b can possibly be superimposed
     def get_superimpose_positions(current_complex, chain_b):
         superimpose_positions = []
-        print("Chain id:", chain_b.get_chain().get_id())
+        print("Chain id:", chain_b.get_biopy_chain().get_id())
         homos_chain_b = get_homo_chains(chain_b)
         print("Homos chain b:",homos_chain_b)
         print("Current complex:",current_complex.get_chains())
@@ -300,23 +303,26 @@ if __name__ == "__main__":
         for chain in superimposition_positions:
             atoms_a = []
             atoms_b = []
-            for elem in chain.get_chain().get_atoms():
+            for elem in chain.get_biopy_chain().get_atoms():
                 atoms_a.append(elem)
             print("atoms a:",atoms_a)
-            for elem in chain_b.get_chain().get_atoms():
+            for elem in chain_b.get_biopy_chain().get_atoms():
                 atoms_b.append(elem)
             print("atoms b:",atoms_b)
             # setting fixed and moving atoms 
             superimp.set_atoms(atoms_a, atoms_b)
-            # apply the superimposition, TODO: think about copy??
-            copy_chain_b = chain_b.get_chain()
+            # apply the superimposition
+            copy_chain_b = chain_b.get_biopy_chain()
             superimp.apply(copy_chain_b)
             rmsd = superimp.rms
             if rmsd < best_rmsd:
                 best_superimposition = copy_chain_b
                 best_rmsd = rmsd
         print("Best superimposition:",copy_chain_b)
-        created_complex = current_complex.add_chain(best_superimposition)
+        # modify chain_b with the new biopy_chain
+        chain_b.set_biopy_chain(best_superimposition)
+        # TODO: how to add the best superimposition to the current complex!
+        created_complex = current_complex.add_chain(chain_b)
         return created_complex
 
     # BUILDING UP THE COMPLEX
