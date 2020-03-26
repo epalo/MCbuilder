@@ -16,7 +16,7 @@ import loggingSetup
 class Interacting_Chain():
     """ DESCRIPTION """
 
-    def __init__(self, biopy_chain, file_index, sequence, interacting_chain):
+    def __init__(self, biopy_chain, file_index, sequence, interacting_chain=None):
         self.__biopy_chain = biopy_chain 
         self.__file_index = file_index
         self.__sequence = sequence
@@ -35,7 +35,11 @@ class Interacting_Chain():
         return self.__interacting_chain
     
     def set_biopy_chain(self, biopy_chain):
+        print("biopy-chain:", biopy_chain)
         self.__biopy_chain = biopy_chain
+
+    def set_interacting_chain(self, interacting_chain):
+        self.__interacting_chain = interacting_chain
 
     def __len__(self):
         return len(self.__sequence)
@@ -112,9 +116,11 @@ if __name__ == "__main__":
         sequence_a = peptide[0].get_sequence()
         sequence_b = peptide[1].get_sequence()
         # build up the list of chains for each interaction 
-        chain_a, chain_b = model.get_chains()
-        interacting_a = Interacting_Chain(chain_a, i, sequence_a, chain_b)
-        interacting_b = Interacting_Chain(chain_b, i, sequence_b,chain_a)
+        biopy_chain_a, biopy_chain_b = model.get_chains()
+        interacting_a = Interacting_Chain(biopy_chain_a, i, sequence_a, biopy_chain_b)
+        interacting_b = Interacting_Chain(biopy_chain_b, i, sequence_b,biopy_chain_a)
+        interacting_a.set_interacting_chain(interacting_b)
+        interacting_b.set_interacting_chain(interacting_a)
         interactions.append(Interaction(model, interacting_a, interacting_b))
 
 
@@ -190,28 +196,37 @@ if __name__ == "__main__":
         else:
             for option in superimpose_options:
                 option_complex = superimpose(current_complex, option)
-                print("Option Complex", option_complex)
-                print("Current model:", option_complex.get_model())
-                # no other superimposition options for the complex available (leaf)
-                # or reached threshold
-                # or TODO: ADD STOICHOMETRY option
-                if not get_superimpose_options(option_complex) or \
-                    (threshold == 0) or \
-                        False:
-                    # if Z-Score for option complex is lower than for the current best complex replace it
-                    if option_complex.calc_z_score < best_complex.calc_z_score:
-                        best_complex = option_complex
-                # reach threshold
+                # if no option complex found don't go into recursion
+                if (option_complex == None):
+                    log.info("The current option could not be added!")
                 else:
-                    # if we didn't reach the leaf yet, recursive call
-                    print("recursion!")
-                    create_macrocomplex(option_complex ,threshold-1)
+                    log.info("Option complex could be found!")
+                    print("Option Complex", option_complex)
+                    print("Current model:", option_complex.get_model())
+                    # no other superimposition options for the complex available (leaf)
+                    # or reached threshold
+                    # or TODO: ADD STOICHOMETRY option
+                    if not get_superimpose_options(option_complex) or \
+                        (threshold == 0) or \
+                            False:
+                        # if Z-Score for option complex is lower than for the current best complex replace it
+                        if option_complex.calc_z_score < best_complex.calc_z_score:
+                            best_complex = option_complex
+                    # reach threshold
+                    else:
+                        # if we didn't reach the leaf yet, recursive call
+                        print("recursion!")
+                        create_macrocomplex(option_complex ,threshold-1)
         return best_complex
     
     def is_clashing(current_complex, atom_list):
         backbone = {"CA", "C1\'"}
         model_atoms = [atom for atom in current_complex.get_model().get_atoms() if atom.id in backbone]
         chain_atoms = [atom for atom in atom_list if atom.id in backbone]
+        for atom in model_atoms:
+            print(atom.get_coord())
+        for atom in chain_atoms:
+            print("Chain:",atom.get_coord())
         n_search = PDB.NeighborSearch(model_atoms) # Generates a neigbour search tree
         clashes = 0
         for atom in chain_atoms:
@@ -219,6 +234,7 @@ if __name__ == "__main__":
             clashes += bool(n_search.search(atom.coord, 1.7))  # If this atom shows clashes, add 1 to the clashes counter
         print(clashes)
         if clashes/len(chain_atoms) >= 0.03:  # If more than 3% of atoms show clashes return yes
+            print("here")
             return True
         else:  # Otherwise return no
             return False
@@ -236,13 +252,15 @@ if __name__ == "__main__":
         return superimpose_positions
 
     def superimpose(current_complex, chain_b):
-        # TODO: check for clashing 
         # TODO: only with backbone
         # TODO: check all different positions ???
+        
+        # if no complex can be created with the requested chain it returns None
+        created_complex = None
         superimposition_positions = get_superimpose_positions(current_complex, chain_b)
         print("Superimpose positions",superimposition_positions)
         superimp = PDB.Superimposer()
-        best_superimposition = None
+        best_superimposition_matrix = None
         best_rmsd = 10
         for chain in superimposition_positions:
             atoms_a = []
@@ -255,22 +273,30 @@ if __name__ == "__main__":
             print("atoms b:",atoms_b)
             # setting fixed and moving atoms, calculate the superimposition matrix
             superimp.set_atoms(atoms_a, atoms_b)
-            # copy the biopy_chain of chain_b to execute coordinate changes
-            copy_biopy_chain_b = chain_b.get_biopy_chain()
-            # apply the superimposition matrix to the copy of chain_b
-            superimp.apply(copy_biopy_chain_b)
             rmsd = superimp.rms
             # update the best superimposition according to its rmsd
             if rmsd < best_rmsd:
                 # check if the superimposition leads to clashes
-                if not (is_clashing(current_complex, copy_biopy_chain_b.get_atoms())):
-                    best_superimposition = copy_biopy_chain_b
+                if not (is_clashing(current_complex, chain_b.get_interacting_chain().get_biopy_chain().get_atoms())):
+                    best_superimposition_matrix = superimp
                     best_rmsd = rmsd
-        print("Best superimposition:",copy_biopy_chain_b)
-        # set biopy_chain in chain_b to the best superimposition coordinates
-        chain_b.set_biopy_chain(best_superimposition)
-        # TODO: how to add the best superimposition to the current complex!
-        created_complex = current_complex.add_chain(chain_b)
+
+        # backbone = {"CA", "C1\'"}
+        # chain_atoms1 = [atom for atom in chain_b.get_biopy_chain().get_atoms() if atom.id in backbone]
+        # for elem in chain_atoms1:
+        #     print("atoms b:",elem.get_coord())
+
+        # apply the superimposition matrix to chain_b and its interacting chain
+        best_superimposition_matrix.apply(chain_b.get_biopy_chain())
+        best_superimposition_matrix.apply(chain_b.get_interacting_chain().get_biopy_chain())
+        print(chain_b.get_biopy_chain())
+
+        # chain_atoms2 = [atom for atom in chain_b.get_biopy_chain().get_atoms() if atom.id in backbone]
+        # for elem in chain_atoms2:
+        #     print("atoms b:",elem.get_coord())
+
+        # TODO: add the best superimposition to the current complex!
+        created_complex = current_complex.add_chain(chain_b.get_interacting_chain())
         return created_complex
 
     # BUILDING UP THE COMPLEX
