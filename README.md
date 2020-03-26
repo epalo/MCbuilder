@@ -1,44 +1,70 @@
-# sbi-project
+# Macrocomplex Builder README
+Macrocomplex Builder is a standalone `python3` application developed by **Annika Merk**, **Elena Pareja Lorente** and **Paula Torren Peraire**. The purpose is to model the macro-complex (quaternary) structure of biomolecules, formed by proteins and DNA or only proteins given a folder with the structures of protein-protein and protein-DNA interactions in PDB format. 
+##Index
 
-## Index
-<!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
-- [Introduction](#Introduction)
-- [Background and Scientific Explanation](#Background-and-Scientific-explanation)
-- [Algorithm](#Algorithm)
-- [Tutorial](#Tutorial)
-- [Examples Analysis](#Examples-Analysis)
-- [Limitations](#limitations)
-- [References](#References)
-<!-- /TOC -->
 
-## Introduction
+- [Requirements](#Requirements)
+- [Installation](#Installation)
+- [Package Structure](#Structure-of-the-Package)
+- [Usage](#Usage)
+- [Analysis of examples](#analysis-of-the-examples)
+- [FAQS(?)](#FAQS)
 
-Due to the importance of knowing the structure of protein-protein interactions (PPIs) in the cell, the goal of this project is to perform an algorithm to modulate a protein macro-complex from individual pairs of interactions using Bioinformatics resources.
 
-## Background and Scientific Explanation
 
-Proteins are versatile molecules that play many critical roles in the body. Individual proteins are capable of producing a large variety of protein complexes, or even complexes with other molecules, such as DNA, that allow them to perform their function. Proteins with more than one polypeptide chain form complexes. These complexes are known as the quaternary structures of proteins. The importance of knowing the structure of these complexes is because it modulates the biological activity of the protein and the separation of the subunits often leads to the loss of functionality. It refers to the spatial arrangement of these chains as well as any interactions among them, be they covalent or non-covalent.
 
-Experimentally determining the full structure of a protein complex or quaternary structure is very costly and time-consuming. Therefore, it is essential to develop computational techniques that combine the experimental information and the data obtained from high-throughput methods which can correctly model the protein complexes.
+## Requirements
+For using Macrocomplex Builder, there are some requirements:
 
-To be able to establish these macrocomplexes we require a starting point, composed of Protein DataBank (PDB) files which feature experimentally determined structures. In our case, these structures are the combination of chains within our complex. As mentioned, experimentally determining the structure of a complex is problematic and so a suitable alternative is determining the physical structure of sections of the complex, i.e. the interaction between two chains within these complex, be they homo or heterodimers.
+* [Python 3](https://www.python.org/)
 
-The core of our program is based on superimposition, where if we have sufficient PDB files from our complex then we can superimpose these and build a much more complex quarternary structure, modelling any interactions which the experimentally obtained PDB files may not show.
+**Third-party packages**
 
-Superimposition is based on aligning two protein chain such that their carbon backbone lie one on top of the other as much as possible, where one chain is fixed and the other is rotated and translocated to minimize their separation. Though secondary structure can easily be different between distant homologues, their tertiary structure is more conserved and so homology can be more easily ascertained from this level.
+It was used several python modules for the tool development. These modules can be found in [PyPI](https://pypi.org/). 
 
-In this program, we establish superimposition to implement new proteins onto the macrocomplex. If two chains have a low RMSD (root-mean-square deviation) we can determine that they are the same chain and so interactions in the individual PDB files can be combined to give a greater image of the macrocomplex.
+* [biopython](https://pypi.org/project/biopython/)
+* [numpy](https://pypi.org/project/numpy/)
+<!--Preguntar si usamos algún paquete de estos más - no se si argparse y logging hay que ponerlo aquí. No me acuerdo si hacia falta instalarselo con PyPI-->
 
-Moreover, an accurate superimposition does not imply that a third chain is in that position. To be able to confirm whether a certain chain is a part of a macrocomplex in that location it is also important to check its surrounding chains and whether there are any steric clashes. This is the case of chains where, even though the chains superimpose correctly, the chain with which it is interacting occupies the space of a protein that is already there. This means that the interacting chains should not be placed in the complex, in that location.
 
->![Steric clashes in macrocomplex](protein_chains_sbi.png)
+## Installation
 
-To judge the presence of steric clashes the VanDerWaals radius is used, any atom from a different chain that is within a certain radius of an alpha carbon will be denoted as a clash. There are several non-covalent bonds found in proteins, such as hydrogen bonding, these types of interactions mean that the distance between two nuclei can be reduced. To reduce the impact of this, only the alpha carbon radii are measured since these are not able to form hydrogen bonds. Though their neighbouring atoms may be able to, this will have less of an impact on the carbon interactions.
+To use the tool, the user first has to download the package from Git and then install it via `setup.py` in the python site-packages.
 
-Finally, PDB files often only have a part of the protein structure and so we can rebuild the complete quaternary structure by using the relevant amino acid sequences, from FASTA files, the build-out our model of the structure.
-## Algorithm
-como todavia no tenemos bien diseñado el alg, no se bien que poner.
-### Input
+ ```bash
+ $ git clone https://github.com/anmeert/sbi-project.git
+ $ cd sbi-project
+ $ sudo python3 setup.py install
+ ``` 
+## Structure of the Package
+The package has been structured as follows:
+<!--ASK ANNI-->
 
-### Alignment
-The first step, after obtaining the information contained in the input, was to perform a **pairwise alignment** for each chain using the module `pairwise2` from the package `Bio` of `Biopython`. The objective of this alignment is to obtain sequences with **more than 95% identity** in order to later perform a structural alignment between them.
+## Usage
+
+In this section, an explanation of how to run the script from the command line and what are the required and optional arguments is provided. 
+
+The simples way to run it:
+
+ ```bash
+ $ macrocomplex_builder.py
+ ```
+In this case, it will run using the current folder as input. 
+
+Use `-h` to get information about the rest of the arguments: 
+
+```bash
+ $ macrocomplex_builder.py -h 
+# WHEN THE HELP IS DONE, COPY HERE 
+# (-i, -o --> poner que sino pone nombre, se llamará macrocomplex.pdb modificar)
+# (-chain_number, -stechiometry -v...)
+ 
+```
+## Analysis of the examples
+
+## FAQS
+
+
+
+
+
