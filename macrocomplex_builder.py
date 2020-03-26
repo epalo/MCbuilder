@@ -19,7 +19,6 @@ class Interacting_Chain():
     def __init__(self, biopy_chain, file_index, sequence, interacting_chain):
         self.__biopy_chain = biopy_chain 
         self.__file_index = file_index
-        self.__structure = structure
         self.__sequence = sequence
         self.__interacting_chain = interacting_chain
     
@@ -45,13 +44,13 @@ class Complex(object):
     """ DESCRIPTION """
 
 # chain attribute needed?
-    def __init__(self, structure, chains, pdb_files=False):
-        self.__structure = structure
+    def __init__(self, model, chains, pdb_files=False):
+        self.__model = model
         self.__chains = chains
         self.__pdb_files = pdb_files
 
-    def get_structure(self):
-        return self.__structure
+    def get_model(self):
+        return self.__model
 
     def get_chains(self):
         return self.__chains
@@ -60,20 +59,22 @@ class Complex(object):
         return self.__pdb_files
     
     def add_chain(self, chain):
-        return Complex(structure[0].add(chain.get_biopy_chain()),chains.append(chain))
+        self.get_model().add(chain.get_biopy_chain())
+        self.get_chains().append(chain)
     
     def calc_z_score(self):
         # how to calculate z_score? 
         return 
 
+# an interaction is a model out of two chains
 class Interaction():
-    def __init__(self, structure, chain_a, chain_b):
-        self.__structure = structure
+    def __init__(self, model, chain_a, chain_b):
+        self.__model = model
         self.__chain_a = chain_a
         self.__chain_b = chain_b
     
-    def get_structure(self):
-        return self.__structure 
+    def get_model(self):
+        return self.__model
 
     def get_chain_a(self):
         return self.__chain_a
@@ -103,17 +104,17 @@ if __name__ == "__main__":
     interactions = []
     # iterate through all pdb files and return a list of interaction objects
     for i in range(len(pdb_files)):
-        structure = parser.get_structure(pdb_files[i],pdb_files[i])
+        model = parser.get_structure(pdb_files[i],pdb_files[i])[0]
         ppb=PPBuilder()
         # build the peptide to obtain the sequences of the chains
-        peptide = ppb.build_peptides(structure)
+        peptide = ppb.build_peptides(model)
         sequence_a = peptide[0].get_sequence()
         sequence_b = peptide[1].get_sequence()
         # build up the list of chains for each interaction 
-        chain_a, chain_b = structure.get_chains()
+        chain_a, chain_b = model.get_chains()
         interacting_a = Interacting_Chain(chain_a, i, sequence_a, chain_b)
         interacting_b = Interacting_Chain(chain_b, i, sequence_b,chain_a)
-        interactions.append(Interaction(structure, interacting_a, interacting_b))
+        interactions.append(Interaction(model, interacting_a, interacting_b))
 
 
     # get all the chains of a list of interactions
@@ -236,7 +237,7 @@ if __name__ == "__main__":
             for option in superimpose_options:
                 option_complex = superimpose(current_complex, option)
                 print("Option Complex", option_complex)
-                print("Current Structure:", option_complex.get_structure())
+                print("Current model:", option_complex.get_model())
                 # no other superimposition options for the complex available (leaf)
                 # or reached threshold
                 # or TODO: ADD STOICHOMETRY option
@@ -309,17 +310,21 @@ if __name__ == "__main__":
             for elem in chain_b.get_biopy_chain().get_atoms():
                 atoms_b.append(elem)
             print("atoms b:",atoms_b)
-            # setting fixed and moving atoms 
+            # setting fixed and moving atoms, calculate the superimposition matrix
             superimp.set_atoms(atoms_a, atoms_b)
-            # apply the superimposition
+            # copy the biopy_chain of chain_b to execute coordinate changes
             copy_chain_b = chain_b.get_biopy_chain()
+            # apply the superimposition matrix to the copy of chain_b
             superimp.apply(copy_chain_b)
             rmsd = superimp.rms
+            # update the best superimposition according to its rmsd
             if rmsd < best_rmsd:
+                # check if the superimposition leads to clashes
+                #if (current_complex, )
                 best_superimposition = copy_chain_b
                 best_rmsd = rmsd
         print("Best superimposition:",copy_chain_b)
-        # modify chain_b with the new biopy_chain
+        # set biopy_chain in chain_b to the best superimposition coordinates
         chain_b.set_biopy_chain(best_superimposition)
         # TODO: how to add the best superimposition to the current complex!
         created_complex = current_complex.add_chain(chain_b)
@@ -327,15 +332,16 @@ if __name__ == "__main__":
 
     # BUILDING UP THE COMPLEX
 
-    starting_interaction = None
+    # the starting_model is the interaction with the most homologous chains to both chains
+    starting_model= None
     interaction_sum = 0
-    # find pdb-file with the most interactions
+    # find interaction with the most homo_chains
     for interaction in interactions:
         sum = len(get_homo_chains(interaction.get_chain_a())) + len(get_homo_chains(interaction.get_chain_b()))
         if sum > interaction_sum :
             starting_interaction = interaction
             interaction_sum = sum
-    starting_complex = Complex(starting_interaction, [starting_interaction.get_chain_a(), starting_interaction.get_chain_b()])
+    starting_complex = Complex(starting_interaction.get_model(), [starting_interaction.get_chain_a(), starting_interaction.get_chain_b()])
     create_macrocomplex(starting_complex, 100)
 
     # TODO: check for DNA
