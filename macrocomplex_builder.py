@@ -178,53 +178,6 @@ if __name__ == "__main__":
         return superimpose_options
     # TODO: check both chains of starting complex and combine them to complete complex
 
-    # final_complexes = []
-    # def create_macrocomplex(current_complex, superimpose_chain, threshold):
-    #     superimpose_options = get_superimpose_options(superimpose_chain)
-    #     # no other superimposition options -> reached a leaf of the tree
-    #     if not superimpose_options:
-    #         # append to list of final complexes
-    #         return superimpose(superimpose_chain,) 
-    #      # reach threshold
-    #     if (threshold == 0):
-    #         # append to list of final complexes
-    #         return 
-    #     for chain_option in superimpose_options:
-    #         # TODO: combine multiple superimpose options
-    #         superimposition = superimpose(superimpose_chain, chain_option)
-    #         created_complex = 
-    #         current_rmsd = superimpose(superimpose_chain, chain_option)
-    #         rmsd_threshold = 0
-    #         if created_complex.rms < rmsd_threshold:
-    #             if not is_clashing(current_complex, chain_option):
-    #             #if not is_clashing2(created_complex):
-    #                 create_macrocomplex(created_complex, chain_option.get_interaction(),threshold-1)
-
-
-    # def create_macrocomplex(current_complex, next_chain, threshold):
-    #     # gives us the new complex and the according rmsd
-    #     superimposition = superimpose(superimpose_chain, next_chain)
-        
-    #     superimpose_options = get_superimpose_options(superimposition[0],chains)
-    #     # new complex has no other superimposition options -> reached a leaf of the tree
-    #     if not superimpose_options:
-    #         # append to list of final complexes
-    #         return superimposition 
-    #      # reach threshold
-    #     if (threshold == 0):
-    #         # append to list of final complexes
-    #         return superimposition
-    #     ## add here case for stoichometry
-    #     if FALSE:
-    #         return superimposition
-        
-    #     for option in superimpose_options:
-    #         created_complex = create_macrocomplex(created_complex, option ,threshold-1)
-    #         current_structure = created_complex[]
-    #         current_rmsd = created_complex[1]
-                    
-
-
     def create_macrocomplex(current_complex, threshold):
         superimpose_options = get_superimpose_options(current_complex)
         best_complex = current_complex
@@ -253,8 +206,6 @@ if __name__ == "__main__":
                     print("recursion!")
                     create_macrocomplex(option_complex ,threshold-1)
         return best_complex
-            
-    
     
     def is_clashing(current_complex, chain_to_superimpose):
         backbone = {"CA", "C1\'"}
@@ -268,17 +219,6 @@ if __name__ == "__main__":
             return True
         else:  # Otherwise return no
             return False
-
-    # def is_clashing2(created_complex):
-    #     clashes = detectClash(created_complex.get_atoms())
-    #     sum = 0
-    #     for clashDict in clashes.values():
-    #         sum += len(clashDict)
-    #     numClashes = sum/2
-    #     if numClashes/len() >= 0.03:  # If more than 3% of atoms show clashes return yes
-    #         return True
-    #     else:  # Otherwise return no
-    #         return False
 
     # return all the chains of a current complex where a chain_b can possibly be superimposed
     def get_superimpose_positions(current_complex, chain_b):
