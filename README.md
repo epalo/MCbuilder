@@ -38,7 +38,18 @@ To use the tool, the user first has to download the package from Git and then in
  ``` 
 ## Structure of the Package
 The package has been structured as follows:
-<!--ASK ANNI-->
+<!--ASK ANNI, MAYBE THERE IS A BETTER WAY-->
+
+![Tree](tree.png)
+
+* `README.md`: 
+* `report.md`:
+* `UserInteraction.py`:
+* `loggingSetup.py`:
+* `macrocomplex_builder.py`:
+* `processInputFiles.py`:
+* `setup.py`:
+* `get_example_files.py`:
 
 ## Usage
 
