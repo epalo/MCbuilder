@@ -59,8 +59,9 @@ class Complex(object):
         return self.__pdb_files
     
     def add_chain(self, chain):
-        self.get_model().add(chain.get_biopy_chain())
-        self.get_chains().append(chain)
+        # call StructureBuilder class??
+        self.__model = model.add(chain.get_biopy_chain())
+        self.__chains = chains.append(chain)
     
     def calc_z_score(self):
         # how to calculate z_score? 
@@ -207,14 +208,16 @@ if __name__ == "__main__":
                     create_macrocomplex(option_complex ,threshold-1)
         return best_complex
     
-    def is_clashing(current_complex, chain_to_superimpose):
+    def is_clashing(current_complex, atom_list):
         backbone = {"CA", "C1\'"}
-        model_atoms = [atom for atom in current_complex.get_atoms() if atom.id in backbone]
-        chain_atoms = [atom for atom in chain_to_superimpose if atom.id in backbone]
+        model_atoms = [atom for atom in current_complex.get_model().get_atoms() if atom.id in backbone]
+        chain_atoms = [atom for atom in atom_list if atom.id in backbone]
         n_search = PDB.NeighborSearch(model_atoms) # Generates a neigbour search tree
         clashes = 0
         for atom in chain_atoms:
+            print(atom)
             clashes += bool(n_search.search(atom.coord, 1.7))  # If this atom shows clashes, add 1 to the clashes counter
+        print(clashes)
         if clashes/len(chain_atoms) >= 0.03:  # If more than 3% of atoms show clashes return yes
             return True
         else:  # Otherwise return no
@@ -253,17 +256,17 @@ if __name__ == "__main__":
             # setting fixed and moving atoms, calculate the superimposition matrix
             superimp.set_atoms(atoms_a, atoms_b)
             # copy the biopy_chain of chain_b to execute coordinate changes
-            copy_chain_b = chain_b.get_biopy_chain()
+            copy_biopy_chain_b = chain_b.get_biopy_chain()
             # apply the superimposition matrix to the copy of chain_b
-            superimp.apply(copy_chain_b)
+            superimp.apply(copy_biopy_chain_b)
             rmsd = superimp.rms
             # update the best superimposition according to its rmsd
             if rmsd < best_rmsd:
                 # check if the superimposition leads to clashes
-                #if (current_complex, )
-                best_superimposition = copy_chain_b
-                best_rmsd = rmsd
-        print("Best superimposition:",copy_chain_b)
+                if not (is_clashing(current_complex, copy_biopy_chain_b.get_atoms())):
+                    best_superimposition = copy_biopy_chain_b
+                    best_rmsd = rmsd
+        print("Best superimposition:",copy_biopy_chain_b)
         # set biopy_chain in chain_b to the best superimposition coordinates
         chain_b.set_biopy_chain(best_superimposition)
         # TODO: how to add the best superimposition to the current complex!
