@@ -15,11 +15,11 @@ def createLogger():
     if verbose:
             # create console handler for logger.
             soh = logging.StreamHandler()
-            soh.setLevel(level=logging.DEBUG)
+            soh.setLevel(level=logging.INFO)
             soh.setFormatter(formatter)
     # create file handler for logger.
     fh = logging.FileHandler('mbuilder.log')
-    fh.setLevel(level=logging.DEBUG)
+    fh.setLevel(level=logging.WARN)
     fh.setFormatter(formatter)
 
     # add handlers to logger.

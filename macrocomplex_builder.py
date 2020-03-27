@@ -12,28 +12,28 @@ import loggingSetup
 #import chimera
 #from DetectClash import detectClash
 
-# maybe transform into an extend of the actual pdb chain class and add function to retrieve sequence 
+# maybe transform into an extend of the actual pdb chain class and add function to retrieve sequence
 class Interacting_Chain():
     """ DESCRIPTION """
 
     def __init__(self, biopy_chain, file_index, sequence, interacting_chain=None):
-        self.__biopy_chain = biopy_chain 
+        self.__biopy_chain = biopy_chain
         self.__file_index = file_index
         self.__sequence = sequence
         self.__interacting_chain = interacting_chain
-    
+
     def get_biopy_chain(self):
-        return self.__biopy_chain 
+        return self.__biopy_chain
 
     def get_file_index(self):
         return self.__file_index
-    
+
     def get_sequence(self):
         return self.__sequence
 
     def get_interacting_chain(self):
         return self.__interacting_chain
-    
+
     def set_biopy_chain(self, biopy_chain):
         print("biopy-chain:", biopy_chain)
         self.__biopy_chain = biopy_chain
@@ -58,18 +58,18 @@ class Complex(object):
 
     def get_chains(self):
         return self.__chains
-    
+
     def get_pdb_files(self):
         return self.__pdb_files
-    
+
     def add_chain(self, chain):
         # call StructureBuilder class??
         self.__model = model.add(chain.get_biopy_chain())
         self.__chains = chains.append(chain)
-    
+
     def calc_z_score(self):
-        # how to calculate z_score? 
-        return 
+        # how to calculate z_score?
+        return
 
 # an interaction is a model out of two chains
 class Interaction():
@@ -77,16 +77,16 @@ class Interaction():
         self.__model = model
         self.__chain_a = chain_a
         self.__chain_b = chain_b
-    
+
     def get_model(self):
         return self.__model
 
     def get_chain_a(self):
         return self.__chain_a
-    
+
     def get_chain_b(self):
         return self.__chain_b
-    
+
 
 #main function that is called when running the script
 if __name__ == "__main__":
@@ -115,7 +115,7 @@ if __name__ == "__main__":
         peptide = ppb.build_peptides(model)
         sequence_a = peptide[0].get_sequence()
         sequence_b = peptide[1].get_sequence()
-        # build up the list of chains for each interaction 
+        # build up the list of chains for each interaction
         biopy_chain_a, biopy_chain_b = model.get_chains()
         interacting_a = Interacting_Chain(biopy_chain_a, i, sequence_a, biopy_chain_b)
         interacting_b = Interacting_Chain(biopy_chain_b, i, sequence_b,biopy_chain_a)
@@ -147,6 +147,7 @@ if __name__ == "__main__":
                 ident = sum(base1 == base2 for base1, base2 in zip(aln_seq_1, aln_seq_2))
                 if ident/al_length >= 0.95:
                     inserted = True
+                    log.info(f"{chains[i].get_biopy_chain().get_id()} and {chains[m].get_biopy_chain().get_id()} have 95% or more sequence identity")
                     for similar_seq in homo_chains:
                         if chains[i] in similar_seq:
                             if chains[m] not in similar_seq:
@@ -171,16 +172,22 @@ if __name__ == "__main__":
     def get_homo_chains(chain):
         for lst in homo_chains:
             if chain in lst:
+                log.info(f"Found homologs for chain {chain.get_biopy_chain().get_id()}")
                 return lst
         else:
+            log.info("No homologous chains found")
             return []
 
     # returns a list with all possible chains that can be added to a current complex
     def get_superimpose_options(current_complex):
         superimpose_options = []
-        for chain in current_complex.get_chains():  
+        superimpose_options_verbose = ''
+        for chain in current_complex.get_chains():
             similar_chains = get_homo_chains(chain)
             superimpose_options = superimpose_options + similar_chains
+        for option in superimpose_options:
+            superimpose_options_verbose = superimpose_options_verbose + " " + option.get_biopy_chain().get_id()
+        log.info(f"The following chains are homologous to those currently in the complex:{superimpose_options_verbose}")
         print("Superimpose options:", superimpose_options)
         return superimpose_options
     # TODO: check both chains of starting complex and combine them to complete complex
@@ -188,19 +195,22 @@ if __name__ == "__main__":
     def create_macrocomplex(current_complex, threshold):
         superimpose_options = get_superimpose_options(current_complex)
         best_complex = current_complex
+        print("best_complex",best_complex)
         # starting complex has no superimposition options
         if not superimpose_options:
             # then just return the starting complex
+            log.info("There are no superimposition options available")
             print("no options!")
             return best_complex
         else:
             for option in superimpose_options:
+                log.info(f"Attempting to superimpose chain {option.get_biopy_chain().get_id()}")
                 option_complex = superimpose(current_complex, option)
                 # if no option complex found don't go into recursion
                 if (option_complex == None):
-                    log.info("The current option could not be added!")
+                    log.warn("The current option could not be added!")
                 else:
-                    log.info("Option complex could be found!")
+                    log.info("Option complex was be found!")
                     print("Option Complex", option_complex)
                     print("Current model:", option_complex.get_model())
                     # no other superimposition options for the complex available (leaf)
@@ -267,20 +277,23 @@ if __name__ == "__main__":
             atoms_b = []
             for elem in chain.get_biopy_chain().get_atoms():
                 atoms_a.append(elem)
-            print("atoms a:",atoms_a)
+            # print("atoms a:",atoms_a)
             for elem in chain_b.get_biopy_chain().get_atoms():
                 atoms_b.append(elem)
-            print("atoms b:",atoms_b)
+            # print("atoms b:",atoms_b)
             # setting fixed and moving atoms, calculate the superimposition matrix
             superimp.set_atoms(atoms_a, atoms_b)
             rmsd = superimp.rms
             # update the best superimposition according to its rmsd
             if rmsd < best_rmsd:
                 # check if the superimposition leads to clashes
+                log.info(f"Checking whether {chain_b.get_interacting_chain().get_biopy_chain().get_id()} has any clashes")
                 if not (is_clashing(current_complex, chain_b.get_interacting_chain().get_biopy_chain().get_atoms())):
+                    log.info(f"Chain {chain_b.get_interacting_chain().get_biopy_chain().get_id()} did not have any clashes")
+                    print("feasible addition")
                     best_superimposition_matrix = superimp
                     best_rmsd = rmsd
-
+        print("matrix",best_superimposition_matrix)
         # backbone = {"CA", "C1\'"}
         # chain_atoms1 = [atom for atom in chain_b.get_biopy_chain().get_atoms() if atom.id in backbone]
         # for elem in chain_atoms1:
