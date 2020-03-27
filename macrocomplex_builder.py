@@ -191,12 +191,11 @@ if __name__ == "__main__":
         # starting complex has no superimposition options
         if not superimpose_options:
             # then just return the starting complex
-            print("no options!")
+            log.info("There are no files that can be added to the complex!")
             return best_complex
         else:
             for option in superimpose_options:
                 option_complex = superimpose(current_complex, option)
-                # if no option complex found don't go into recursion
                 if (option_complex == None):
                     log.info("The current option could not be added!")
                 else:
