@@ -208,7 +208,7 @@ if __name__ == "__main__":
                 option_complex = superimpose(current_complex, option)
                 # if no option complex found don't go into recursion
                 if (option_complex == None):
-                    log.warn("The current option could not be added!")
+                    log.warning("The current option could not be added!")
                 else:
                     log.info("Option complex was be found!")
                     print("Option Complex", option_complex)
@@ -264,7 +264,7 @@ if __name__ == "__main__":
     def superimpose(current_complex, chain_b):
         # TODO: only with backbone
         # TODO: check all different positions ???
-        
+
         # if no complex can be created with the requested chain it returns None
         created_complex = None
         superimposition_positions = get_superimpose_positions(current_complex, chain_b)

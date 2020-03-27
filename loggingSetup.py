@@ -19,7 +19,7 @@ def createLogger():
             soh.setFormatter(formatter)
     # create file handler for logger.
     fh = logging.FileHandler('mbuilder.log')
-    fh.setLevel(level=logging.WARN)
+    fh.setLevel(level=logging.WARNING)
     fh.setFormatter(formatter)
 
     # add handlers to logger.
