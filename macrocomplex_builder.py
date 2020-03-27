@@ -206,7 +206,6 @@ if __name__ == "__main__":
             for option in superimpose_options:
                 log.info(f"Attempting to superimpose chain {option.get_biopy_chain().get_id()}")
                 option_complex = superimpose(current_complex, option)
-                # if no option complex found don't go into recursion
                 if (option_complex == None):
                     log.warning("The current option could not be added!")
                 else:
