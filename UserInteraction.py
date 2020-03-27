@@ -1,5 +1,6 @@
 # imports
 import argparse
+import re
 # import os
 # import sys
 
@@ -31,11 +32,11 @@ parser.add_argument('-v', '--verbose',
                     default=False,
                     help="Print progression log to standard error")
 
-parser.add_argument('-p', '--pattern',
-                    dest="pattern",
+parser.add_argument('-s', '--stoichiometry',
+                    dest="stoich",
                     action="store",
                     default=None,
-                    help="Regular expression pattern to search in the translated sequences")
+                    help="Set stoichiometry for the macrocomplex. Input in standard form (e.g. A1B4C6)")
 
 parser.add_argument('-r', '--random',
                     dest="random_output_num",
@@ -54,7 +55,18 @@ def getVerboseOption():
 
 def getOutputDirectory():
     return options.outfile
-    
+
+def getStoichiometry():
+    if options.stoich:
+        regex = re.compile("([A-Z]+[0-9]+)", re.IGNORECASE)
+        stoich = {}
+        stoich_all = regex.findall(options.stoich)
+        for chain in stoich_all:
+            stoich[chain[0]] = int(chain[1:])
+        return stoich
+    else:
+        return options.stoich
+
 
     # getting input files in fasta and pdb format
     # input_list = options.infile
