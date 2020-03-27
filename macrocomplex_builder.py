@@ -47,10 +47,11 @@ class Complex(object):
     """ DESCRIPTION """
 
 # chain attribute needed?
-    def __init__(self, model, chains, pdb_files=False):
+    def __init__(self, model, chains, pdb_files=False, stoichiometry=False):
         self.__model = model
         self.__chains = chains
         self.__pdb_files = pdb_files
+        self.__stoichiometry = stoichiometry
 
     def get_model(self):
         return self.__model
@@ -60,6 +61,12 @@ class Complex(object):
 
     def get_pdb_files(self):
         return self.__pdb_files
+    
+    def get_stoichiometry(self):
+        return self.__stoichiometry
+    
+    def set_stoichiometry(self):
+        self.__stoichiometry = stoichiometry
 
     def set_model(self, model):
         self.__model = model
@@ -103,8 +110,8 @@ if __name__ == "__main__":
     fasta_files, pdb_files, log = processInputFiles.processInput()
     stoichiometry = UserInteraction.getStoichiometry()
     log.warning(f"{stoichiometry}")
+    stoich_complex = {}
     if stoichiometry:
-        stoich_complex = {}
         log.info("Stoichiometry has been set.")
 # PARSING OF DATA
 # TODO: insert case of empty fasta file
@@ -218,9 +225,6 @@ if __name__ == "__main__":
                 option_complex = superimpose(current_complex, option)
                 if (option_complex == None):
                     log.warning("The current option could not be added!")
-                elif stoich_complex[option.get_interacting_chain().get_biopy_chain().get_id()] >= stoichiometry[option.get_interacting_chain().get_biopy_chain().get_id()]:
-                    log.info(f"Chain {option.get_interacting_chain().get_biopy_chain().get_id()} has reached its stoichiometry limit.")
-                    continue
                 else:
                     log.info("Option complex was be found!")
                     print("Option Complex", option_complex)
@@ -230,12 +234,18 @@ if __name__ == "__main__":
                     # or TODO: ADD STOICHOMETRY option
 
                     if not get_superimpose_options(option_complex) or \
-                        (threshold == 0) or \
-                            False:
+                        (threshold == 0):
                         # if Z-Score for option complex is lower than for the current best complex replace it
                         if option_complex.calc_z_score < best_complex.calc_z_score:
                             best_complex = option_complex
                     # reach threshold
+                    elif stoichiometry:
+                        if option_complex.get_stoichiometry()[option.get_interacting_chain().get_biopy_chain().get_id()] >= \
+                                    stoichiometry[option.get_interacting_chain().get_biopy_chain().get_id()]:
+                            log.info(f"Chain {option.get_interacting_chain().get_biopy_chain().get_id()} has reached its stoichiometry limit.")
+                            # if Z-Score for option complex is lower than for the current best complex replace it
+                            if option_complex.calc_z_score < best_complex.calc_z_score:
+                                best_complex = option_complex
                     else:
                         # if we didn't reach the leaf yet, recursive call
                         print("recursion!")
@@ -256,7 +266,7 @@ if __name__ == "__main__":
         for atom in chain_atoms:
             #print(atom)
             clashes += bool(n_search.search(atom.coord, 1.7))  # If this atom shows clashes, add 1 to the clashes counter
-        print("Num of clashes:", clashes)
+        # print("Num of clashes:", clashes)
         if clashes/len(chain_atoms) >= 0.03:  # If more than 3% of atoms show clashes return yes
             log.info("Leads to clashes!")
             return True
@@ -333,7 +343,10 @@ if __name__ == "__main__":
         if sum > interaction_sum :
             starting_interaction = interaction
             interaction_sum = sum
-    starting_complex = Complex(starting_interaction.get_model(), [starting_interaction.get_chain_a(), starting_interaction.get_chain_b()])
+    if stoichiometry:
+        starting_complex = Complex(starting_interaction.get_model(), [starting_interaction.get_chain_a(), starting_interaction.get_chain_b()],stoich_complex)
+    else:
+        starting_complex = Complex(starting_interaction.get_model(), [starting_interaction.get_chain_a(), starting_interaction.get_chain_b()])
     create_macrocomplex(starting_complex, 20)
 
     # TODO: check for DNA
