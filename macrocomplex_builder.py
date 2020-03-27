@@ -91,6 +91,8 @@ class Interaction():
     def get_chain_b(self):
         return self.__chain_b
 
+#TODO : Update UserInter stoichiometry if chain id number
+#TODO : How to join homologous chains so that under one name
 
 #main function that is called when running the script
 if __name__ == "__main__":
@@ -99,8 +101,11 @@ if __name__ == "__main__":
     # obtaining fasta and pdb files
 
     fasta_files, pdb_files, log = processInputFiles.processInput()
-
-
+    stoichiometry = UserInteraction.getStoichiometry()
+    log.warning(f"{stoichiometry}")
+    if stoichiometry:
+        stoich_complex = {}
+        log.info("Stoichiometry has been set.")
 # PARSING OF DATA
 # TODO: insert case of empty fasta file
     seq_record_list = []
@@ -126,8 +131,9 @@ if __name__ == "__main__":
         interacting_a.set_interacting_chain(interacting_b)
         interacting_b.set_interacting_chain(interacting_a)
         interactions.append(Interaction(model, interacting_a, interacting_b))
-
-
+        if stoichiometry:
+            stoich_complex.setdefault(biopy_chain_a.get_id(), 0)
+            stoich_complex.setdefault(biopy_chain_b.get_id(), 0)
     # get all the chains of a list of interactions
     chains = []
     for interaction in interactions:
@@ -211,7 +217,10 @@ if __name__ == "__main__":
                 log.info(f"Attempting to superimpose chain {option.get_biopy_chain().get_id()}")
                 option_complex = superimpose(current_complex, option)
                 if (option_complex == None):
-                    log.warn("The current option could not be added!")
+                    log.warning("The current option could not be added!")
+                elif stoich_complex[option.get_interacting_chain().get_biopy_chain().get_id()] >= stoichiometry[option.get_interacting_chain().get_biopy_chain().get_id()]:
+                    log.info(f"Chain {option.get_interacting_chain().get_biopy_chain().get_id()} has reached its stoichiometry limit.")
+                    continue
                 else:
                     log.info("Option complex was be found!")
                     print("Option Complex", option_complex)
@@ -219,6 +228,7 @@ if __name__ == "__main__":
                     # no other superimposition options for the complex available (leaf)
                     # or reached threshold
                     # or TODO: ADD STOICHOMETRY option
+
                     if not get_superimpose_options(option_complex) or \
                         (threshold == 0) or \
                             False:
@@ -229,6 +239,8 @@ if __name__ == "__main__":
                     else:
                         # if we didn't reach the leaf yet, recursive call
                         print("recursion!")
+                        if stoichiometry:
+                            stoich_complex[option.get_interacting_chain().get_biopy_chain().get_id()]+= 1
                         create_macrocomplex(option_complex ,threshold-1)
         return best_complex
     
@@ -263,6 +275,8 @@ if __name__ == "__main__":
     def superimpose(current_complex, chain_b):
         # TODO: only with backbone
         # TODO: check all different positions ???
+
+        # if no complex can be created with the requested chain it returns None
         created_complex = None
         superimposition_positions = get_superimpose_positions(current_complex, chain_b)
         superimp = PDB.Superimposer()
