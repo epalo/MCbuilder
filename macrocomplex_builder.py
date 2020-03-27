@@ -62,10 +62,15 @@ class Complex(object):
     def get_pdb_files(self):
         return self.__pdb_files
 
+    def set_model(self, model):
+        self.__model = model
+    
+    def set_chains(self,chains):
+        self.__chains = chains
+
     def add_chain(self, chain):
-        # call StructureBuilder class??
-        self.__model = model.add(chain.get_biopy_chain())
-        self.__chains = chains.append(chain)
+        self.__model.add(chain.get_biopy_chain())
+        self.__chains.append(chain)
 
     def calc_z_score(self):
         # how to calculate z_score?
@@ -206,6 +211,7 @@ if __name__ == "__main__":
             for option in superimpose_options:
                 log.info(f"Attempting to superimpose chain {option.get_biopy_chain().get_id()}")
                 option_complex = superimpose(current_complex, option)
+                print("Option",option_complex)
                 if (option_complex == None):
                     log.warn("The current option could not be added!")
                 else:
@@ -299,7 +305,6 @@ if __name__ == "__main__":
         #     print("atoms b:",elem.get_coord())
 
         # apply the superimposition matrix to chain_b and its interacting chain
-        best_superimposition_matrix.apply(chain_b.get_biopy_chain())
         best_superimposition_matrix.apply(chain_b.get_interacting_chain().get_biopy_chain())
         print(chain_b.get_biopy_chain())
 
@@ -308,8 +313,10 @@ if __name__ == "__main__":
         #     print("atoms b:",elem.get_coord())
 
         # TODO: add the best superimposition to the current complex!
-        created_complex = current_complex.add_chain(chain_b.get_interacting_chain())
-        return created_complex
+        print(current_complex)
+        current_complex.add_chain(chain_b.get_interacting_chain())
+        print(current_complex)
+        return current_complex
 
     # BUILDING UP THE COMPLEX
 
