@@ -39,8 +39,8 @@ def processInput():
     return (fasta_files, pdb_files, log)
 
 
-def createPDB():
+def createPDB(best_complex):
     """ Create a PDB with the final complex """
     io = PDBIO()
-    io.set_structure(best_complex.get_structure())
+    io.set_structure(best_complex.get_model())
     io.save(UserInteraction.getOutputDirectory())

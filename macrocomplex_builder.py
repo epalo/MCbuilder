@@ -9,6 +9,7 @@ import argparse, os, sys, UserInteraction
 import processInputFiles
 import random
 import loggingSetup
+import random
 #import chimera
 #from DetectClash import detectClash
 
@@ -47,7 +48,7 @@ class Complex(object):
     """ DESCRIPTION """
 
 # chain attribute needed?
-    def __init__(self, model, chains, pdb_files=False, stoichiometry=False):
+    def __init__(self, model, chains, pdb_files=False, stoichiometry=None):
         self.__model = model
         self.__chains = chains
         self.__pdb_files = pdb_files
@@ -61,16 +62,16 @@ class Complex(object):
 
     def get_pdb_files(self):
         return self.__pdb_files
-    
+
     def get_stoichiometry(self):
         return self.__stoichiometry
-    
+
     def set_stoichiometry(self):
         self.__stoichiometry = stoichiometry
 
     def set_model(self, model):
         self.__model = model
-    
+
     def set_chains(self,chains):
         self.__chains = chains
 
@@ -106,13 +107,8 @@ if __name__ == "__main__":
     """ Macrocomplex builder based on structure superimposition."""
 
     # obtaining fasta and pdb files
-
+    number_list = ['1','2','3','4','5','6','7','8','9']
     fasta_files, pdb_files, log = processInputFiles.processInput()
-    stoichiometry = UserInteraction.getStoichiometry()
-    log.warning(f"{stoichiometry}")
-    stoich_complex = {}
-    if stoichiometry:
-        log.info("Stoichiometry has been set.")
 # PARSING OF DATA
 # TODO: insert case of empty fasta file
     seq_record_list = []
@@ -138,9 +134,9 @@ if __name__ == "__main__":
         interacting_a.set_interacting_chain(interacting_b)
         interacting_b.set_interacting_chain(interacting_a)
         interactions.append(Interaction(model, interacting_a, interacting_b))
-        if stoichiometry:
-            stoich_complex.setdefault(biopy_chain_a.get_id(), 0)
-            stoich_complex.setdefault(biopy_chain_b.get_id(), 0)
+        # if stoichiometry:
+        #     stoich_complex.setdefault(biopy_chain_a.get_id(), 0)
+        #     stoich_complex.setdefault(biopy_chain_b.get_id(), 0)
     # get all the chains of a list of interactions
     chains = []
     for interaction in interactions:
@@ -148,9 +144,24 @@ if __name__ == "__main__":
         chains.append(interaction.get_chain_b())
     log.info("PDB interactions processed")
 
+    stoichiometry_temp = UserInteraction.getStoichiometry()
+    stoichiometry = {}
+    stoich_complex = {}
+    if stoichiometry_temp:
+        for stoich_chain in stoichiometry_temp:
+            for elem in chains:
+                if stoich_chain == elem.get_biopy_chain().get_id() and elem.get_biopy_chain() not in stoichiometry_temp:
+                    print(stoich_chain)
+                    print(elem.get_biopy_chain().get_full_id())
+
+                    stoichiometry[elem.get_biopy_chain()] = stoichiometry_temp[stoich_chain]
+        log.info(f"Stoichiometry has been set.{stoichiometry}")
+
+
 # SEQUENCE ALIGNMENTS
 
 # find the sequences that occur multiple times in pdb files and save all proteins for each structural aln in a separate list
+    clashes_dict = {}
     homo_chains = []
     for i in range(len(chains)):
         for m in range(i):
@@ -205,19 +216,24 @@ if __name__ == "__main__":
         for option in superimpose_options:
             superimpose_options_verbose = superimpose_options_verbose + " " + option.get_biopy_chain().get_id()
         log.info(f"The following chains are homologous to those currently in the complex:{superimpose_options_verbose}")
-        print("Superimpose options:", superimpose_options)
+        # print("Superimpose options:", superimpose_options)
         return superimpose_options
-    # TODO: check both chains of starting complex and combine them to complete complex
 
+    def create_stoich_complex(chain, stoich_complex):
+        similar_chains = get_homo_chains(chain.get_chain_a())
+        for chain in similar_chains:
+            chain
+
+    # TODO: check both chains of starting complex and combine them to complete complex
     def create_macrocomplex(current_complex, threshold):
         superimpose_options = get_superimpose_options(current_complex)
         best_complex = current_complex
-        print("best_complex",best_complex)
+        # print("best_complex",best_complex)
         # starting complex has no superimposition options
         if not superimpose_options:
             # then just return the starting complex
             log.info("There are no superimposition options available")
-            print("no options!")
+            # print("no options!")
             return best_complex
         else:
             for option in superimpose_options:
@@ -227,8 +243,8 @@ if __name__ == "__main__":
                     log.warning("The current option could not be added!")
                 else:
                     log.info("Option complex was be found!")
-                    print("Option Complex", option_complex)
-                    print("Current model:", option_complex.get_model())
+                    # print("Option Complex", option_complex)
+                    # print("Current model:", option_complex.get_model())
                     # no other superimposition options for the complex available (leaf)
                     # or reached threshold
                     # or TODO: ADD STOICHOMETRY option
@@ -240,6 +256,7 @@ if __name__ == "__main__":
                             best_complex = option_complex
                     # reach threshold
                     elif stoichiometry:
+                        print(option_complex.get_stoichiometry())
                         if option_complex.get_stoichiometry()[option.get_interacting_chain().get_biopy_chain().get_id()] >= \
                                     stoichiometry[option.get_interacting_chain().get_biopy_chain().get_id()]:
                             log.info(f"Chain {option.get_interacting_chain().get_biopy_chain().get_id()} has reached its stoichiometry limit.")
@@ -253,11 +270,11 @@ if __name__ == "__main__":
                             stoich_complex[option.get_interacting_chain().get_biopy_chain().get_id()]+= 1
                         create_macrocomplex(option_complex ,threshold-1)
         return best_complex
-    
-    def is_clashing(current_complex, atom_list):
+
+    def is_clashing(current_complex, chain):
         backbone = {"CA", "C1\'"}
         model_atoms = [atom for atom in current_complex.get_model().get_atoms() if atom.id in backbone]
-        chain_atoms = [atom for atom in atom_list if atom.id in backbone]
+        chain_atoms = [atom for atom in chain.get_atoms() if atom.id in backbone]
         # for atom in model_atoms:
         #     print(atom.get_coord())
         for atom in chain_atoms:
@@ -269,6 +286,8 @@ if __name__ == "__main__":
         # print("Num of clashes:", clashes)
         if clashes/len(chain_atoms) >= 0.03:  # If more than 3% of atoms show clashes return yes
             log.info("Leads to clashes!")
+            clashes_dict[chain] = [chain for chain in current_complex.get_chains()]
+            # print("Clashes dict: ", clashes_dict)
             return True
         else:  # Otherwise return no
             return False
@@ -308,12 +327,12 @@ if __name__ == "__main__":
             if rmsd < best_rmsd:
                 # check if the superimposition leads to clashes
                 log.info(f"Checking whether {chain_b.get_interacting_chain().get_biopy_chain().get_id()} has any clashes")
-                if not (is_clashing(current_complex, chain_b.get_interacting_chain().get_biopy_chain().get_atoms())):
-                    log.info(f"Chain {chain_b.get_interacting_chain().get_biopy_chain().get_id()} did not have any clashes")
-                    print("feasible addition")
+                if not (is_clashing(current_complex, chain_b.get_interacting_chain().get_biopy_chain())):
+                    log.info(f"Chain {chain_b.get_interacting_chain().get_biopy_chain().get_id()} did not have any clashes. Feasible addition.")
+                    # print("feasible addition")
                     best_superimposition_matrix = superimp
                     best_rmsd = rmsd
-        
+
         # backbone = {"CA", "C1\'"}
         # chain_atoms1 = [atom for atom in chain_b.get_biopy_chain().get_atoms() if atom.id in backbone]
         # for elem in chain_atoms1:
@@ -327,9 +346,15 @@ if __name__ == "__main__":
             # chain_atoms2 = [atom for atom in chain_b.get_biopy_chain().get_atoms() if atom.id in backbone]
             # for elem in chain_atoms2:
             #     print("atoms b:",elem.get_coord())
-           
-            created_complex.add_chain(chain_b.get_interacting_chain())
-            print(created_complex)
+            try:
+                created_complex.add_chain(chain_b.get_interacting_chain())
+            except PDB.PDBExceptions.PDBConstructionException:
+                log.warning(f"ID twice error current id {chain_b.get_interacting_chain().get_biopy_chain().get_id()}.")
+                chain_b.get_interacting_chain().get_biopy_chain().id = chain_b.get_interacting_chain().get_biopy_chain().id + random.choice(number_list)
+                log.warning(f"ID twice error new id {chain_b.get_interacting_chain().get_biopy_chain().get_id()}.")
+                created_complex.add_chain(chain_b.get_interacting_chain())
+            # created_complex.add_chain(chain_b.get_interacting_chain())
+            # print(created_complex)
         return created_complex
 
     # BUILDING UP THE COMPLEX
@@ -339,14 +364,17 @@ if __name__ == "__main__":
     interaction_sum = 0
     # find interaction with the most homo_chains
     for interaction in interactions:
+        if stoichiometry:
+            create_stoich_complex(interaction, stoich_complex)
         sum = len(get_homo_chains(interaction.get_chain_a())) + len(get_homo_chains(interaction.get_chain_b()))
         if sum > interaction_sum :
             starting_interaction = interaction
             interaction_sum = sum
     if stoichiometry:
+        log.info(f"This is the stoich complex {stoich_complex}")
         starting_complex = Complex(starting_interaction.get_model(), [starting_interaction.get_chain_a(), starting_interaction.get_chain_b()],stoich_complex)
     else:
         starting_complex = Complex(starting_interaction.get_model(), [starting_interaction.get_chain_a(), starting_interaction.get_chain_b()])
-    create_macrocomplex(starting_complex, 20)
-
+    best_complex = create_macrocomplex(starting_complex, 20)
+    processInputFiles.createPDB(best_complex)
     # TODO: check for DNA
