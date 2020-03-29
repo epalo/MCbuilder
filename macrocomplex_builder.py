@@ -190,7 +190,12 @@ if __name__ == "__main__":
                             inserted = False
                             break
                     if inserted:
-                        homo_chains.append([chains[i], chains[m]])
+                        homo_chains.append([chains[i], chains[m]]) 
+    
+    for elem in homo_chains:
+        print("Next list:")
+        for el in elem:
+            print(el.get_biopy_chain().get_id())                
     log.info(f"{len(homo_chains)} homologous chains found")
 
 
