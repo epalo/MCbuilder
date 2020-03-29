@@ -241,6 +241,7 @@ if __name__ == "__main__":
                 option_complex = superimpose(current_complex, option)
                 if (option_complex == None):
                     log.warning("The current option could not be added!")
+                    print("Nothing added")
                 else:
                     log.info("Option complex was be found!")
                     # print("Option Complex", option_complex)
@@ -342,9 +343,8 @@ if __name__ == "__main__":
                     # print("feasible addition")
                     best_rmsd = rmsd
                     best_chain_position = chain_to_try
-                    print(best_rmsd)
-                    for atom in best_chain_position.get_biopy_chain().get_atoms():
-                        print("best chain", atom.get_coord())
+                    #for atom in best_chain_position.get_biopy_chain().get_atoms():
+                        #print("best chain", atom.get_coord())
 
         # backbone = {"CA", "C1\'"}
         # chain_atoms1 = [atom for atom in chain_b.get_biopy_chain().get_atoms() if atom.id in backbone]
@@ -361,6 +361,9 @@ if __name__ == "__main__":
             #     print("atoms b:",elem.get_coord())
             try:
                 created_complex.add_chain(best_chain_position)
+                print(best_chain_position.get_biopy_chain().get_id())
+                print(best_chain_position.get_interacting_chain().get_biopy_chain().get_id())
+                print(best_rmsd)
             except PDB.PDBExceptions.PDBConstructionException:
                 log.warning(f"ID twice error current id {best_chain_position.get_biopy_chain().get_id()}.")
                 # chain_to_add = copy.copy(chain_b.get_interacting_chain())
@@ -389,6 +392,8 @@ if __name__ == "__main__":
         log.info(f"This is the stoich complex {stoich_complex}")
         starting_complex = Complex(starting_interaction.get_model(), [starting_interaction.get_chain_a(), starting_interaction.get_chain_b()],stoich_complex)
     else:
+        print("Start",starting_interaction.get_chain_a().get_biopy_chain().get_id())
+        print("Start",starting_interaction.get_chain_b().get_biopy_chain().get_id())
         starting_complex = Complex(starting_interaction.get_model(), [starting_interaction.get_chain_a(), starting_interaction.get_chain_b()])
     best_complex = create_macrocomplex(starting_complex, 20)
     processInputFiles.createPDB(best_complex)
