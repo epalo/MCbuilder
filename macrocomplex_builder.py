@@ -6,12 +6,8 @@ from Bio.PDB.Polypeptide import PPBuilder
 from Bio.PDB.Chain import Chain
 from Bio.PDB.Structure import Structure
 import argparse, os, sys, UserInteraction
-#import processInputFiles
-# import random
-# import loggingSetup
 import random , copy
-#import chimera
-#from DetectClash import detectClash
+
 
 # maybe transform into an extend of the actual pdb chain class and add function to retrieve sequence
 class Interacting_Chain():
@@ -79,6 +75,7 @@ class Complex(object):
         self.__model.add(chain.get_biopy_chain())
         self.__chains.append(chain)
 
+
     def calc_z_score(self):
         # how to calculate z_score?
         return
@@ -138,10 +135,7 @@ if __name__ == "__main__":
         interactions.append(Interaction(model, interacting_a, interacting_b))
         chains.append(interacting_a)
         chains.append(interacting_b)
-        # if stoichiometry:
-        #     stoich_complex.setdefault(biopy_chain_a.get_id(), 0)
-        #     stoich_complex.setdefault(biopy_chain_b.get_id(), 0)
-    # get all the chains of a list of interactions
+
     log.info("PDB interactions processed")
 
     stoichiometry_temp = UserInteraction.get_stoichiometry()
@@ -203,13 +197,15 @@ if __name__ == "__main__":
     # HELPER FUNCTIONS
     # returns a list of chains out of a list of chains that are similar to the input chain
     def get_homo_chains(chain):
+        to_return = []
         for lst in homo_chains:
+            print("list", len(lst))
             if chain in lst:
                 log.info(f"Found homologs for chain {chain.get_biopy_chain().get_id()}")
-                return lst
-        else:
-            log.info("No homologous chains found")
-            return []
+                print("get homo options", lst)
+                to_return = lst
+                break
+        return to_return
 
     # returns a list with all possible chains that can be added to a current complex
     def get_superimpose_options(current_complex):
@@ -249,8 +245,6 @@ if __name__ == "__main__":
                 log.warning("The current option could not be added!")
             else:
                 log.info("Option complex was be found!")
-                # print("Option Complex", option_complex)
-                # print("Current model:", option_complex.get_model())
                 # no other superimposition options for the complex available (leaf)
                 # or reached threshold
                 # or TODO: ADD STOICHOMETRY option
@@ -286,26 +280,16 @@ if __name__ == "__main__":
         backbone = {"CA", "C1\'"}
         model_atoms = [atom for atom in current_complex.get_model().get_atoms() if atom.id in backbone]
         chain_atoms = [atom for atom in atom_list if atom.id in backbone]
-        # for atom in model_atoms:
-        #     print(atom.get_coord())
         clashes_list = []
         chain_list = []
         # for atom in chain_atoms:
         n_search = PDB.NeighborSearch(model_atoms) # Generates a neigbour search tree
         clashes = 0
         for atom in chain_atoms:
-            #print(atom)
             clashes += bool(n_search.search(atom.coord, 1.7))  # If this atom shows clashes, add 1 to the clashes counter
-            # clashes_list.append(n_search.search(atom.coord, 1.7))
         # print("Num of clashes:", clashes)
         if clashes/len(chain_atoms) >= 0.03:  # If more than 3% of atoms show clashes return yes
-            # for item in clashes_list:
-            #     chain_list.append(PDB.Selection.unfold_entities(item, 'C'))
-            #
-            # print(clashes_list)
             log.info(f"Leads to clashes! {chain_list}")
-            # clashes_dict[chain] = [chain for chain in chain.get_coords()]
-            # print("Clashes dict: ", clashes_dict)
             return True
         else:  # Otherwise return no
             return False
@@ -325,21 +309,20 @@ if __name__ == "__main__":
 
         # if no complex can be created with the requested chain it returns None
         created_complex = None
-        print("chain to superimp",chain_to_superimp)
         superimposition_options = get_homo_chains(chain_to_superimp)
         superimp = PDB.Superimposer()
         best_chain_position = None
         best_rmsd = 10
+        print("super_options", superimposition_options)
+        if superimposition_options == []:
+            print("CHAIN THATS NOT WORKING:", chain_to_superimp.get_biopy_chain().get_id())
         for chain in superimposition_options:
-            print("chain from options", chain)
             atoms_a = []
             atoms_b = []
             for elem in chain.get_biopy_chain().get_atoms():
                 atoms_a.append(elem)
-            # print("atoms a:",atoms_a)
             for elem in chain_to_superimp.get_biopy_chain().get_atoms():
                 atoms_b.append(elem)
-            # print("atoms b:",atoms_b)
             # setting fixed and moving atoms, calculate the superimposition matrix
             superimp.set_atoms(atoms_a, atoms_b)
             rmsd = superimp.rms
@@ -351,45 +334,43 @@ if __name__ == "__main__":
                 superimp.apply(chain_to_try.get_biopy_chain())
                 if not (is_clashing(current_complex, chain_to_try.get_biopy_chain().get_atoms())):
                     log.info(f"Chain {chain.get_interacting_chain().get_biopy_chain().get_id()} did not have any clashes. Feasible addition.")
-                    # print("feasible addition")
+
                     best_rmsd = rmsd
                     best_chain_position = chain_to_try
-                    #for atom in best_chain_position.get_biopy_chain().get_atoms():
-                        #print("best chain", atom.get_coord())
 
-        # backbone = {"CA", "C1\'"}
-        # chain_atoms1 = [atom for atom in chain_b.get_biopy_chain().get_atoms() if atom.id in backbone]
-        # for elem in chain_atoms1:
-        #     print("atoms b:",elem.get_coord())
 
         # apply the superimposition matrix to chain_b and its interacting chain
         if not (best_chain_position == None):
             created_complex = current_complex
-            # best_superimposition_matrix.apply(chain_b.get_interacting_chain().get_biopy_chain())
 
-            # chain_atoms2 = [atom for atom in chain_b.get_biopy_chain().get_atoms() if atom.id in backbone]
-            # for elem in chain_atoms2:
-            #     print("atoms b:",elem.get_coord())
             try:
                 created_complex.add_chain(best_chain_position)
                 print(best_chain_position.get_biopy_chain().get_id())
                 print(best_chain_position.get_interacting_chain().get_biopy_chain().get_id())
                 print(best_rmsd)
+                i=0
+                for list in homo_chains:
+                    chain_names = [chain.get_biopy_chain() for chain in list]
+                    if best_chain_position.get_biopy_chain() in chain_names:
+                        break
+                    i+=1
+                homo_chains[i].append(best_chain_position)
             except PDB.PDBExceptions.PDBConstructionException:
-                # log.warning(f"ID twice error current id {best_chain_position.get_biopy_chain().get_id()}.")
-                # chain_to_add = copy.copy(chain_b.get_interacting_chain())
-                # log.warning(f"ID twice error current id {chain_to_add.get_biopy_chain().get_id()}.")
-                # log.warning(f"current list {number_list}. Length {len(number_list)}")
+                original = best_chain_position
                 new_id = random.choice(number_list)
                 best_chain_position.get_biopy_chain().id = new_id
                 number_list.remove(new_id)
-                # log.warning(f"updated list {number_list}. Length {len(number_list)}")
-                # log.warning(f"ID twice error new id {best_chain_position.get_biopy_chain().get_id()}.")
-                current_chains = [chain for chain in created_complex.get_model().get_chains()]
-                # log.warning(f"chain list {current_chains}.")
+                i=0
+                for list in homo_chains:
+                    chain_names = [chain.get_biopy_chain() for chain in list]
+                    if original.get_biopy_chain() in chain_names:
+                        break
+                    i+=1
+                homo_chains[i].append(best_chain_position)
                 created_complex.add_chain(best_chain_position)
-            # created_complex.add_chain(chain_b.get_interacting_chain())
-            # print(created_complex)
+                for s in homo_chains:
+                    print("HERE!!")
+                    print(*s)
         return created_complex
 
     # BUILDING UP THE COMPLEX
