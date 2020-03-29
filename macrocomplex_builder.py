@@ -107,7 +107,7 @@ if __name__ == "__main__":
     """ Macrocomplex builder based on structure superimposition."""
 
     # obtaining fasta and pdb files
-    number_list = ['1','2','3','4','5','6','7','8','9']
+    number_list = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
     fasta_files, pdb_files, log = UserInteraction.process_input()
 # PARSING OF DATA
 # TODO: insert case of empty fasta file
@@ -250,6 +250,7 @@ if __name__ == "__main__":
 
                     if not get_superimpose_options(option_complex) or \
                         (threshold == 0):
+                        return best_complex
                         # if Z-Score for option complex is lower than for the current best complex replace it
                         if option_complex.calc_z_score < best_complex.calc_z_score:
                             best_complex = option_complex
@@ -348,10 +349,12 @@ if __name__ == "__main__":
             try:
                 created_complex.add_chain(chain_b.get_interacting_chain())
             except PDB.PDBExceptions.PDBConstructionException:
-                log.warning(f"ID twice error current id {chain_b.get_interacting_chain().get_biopy_chain().get_id()}.")
-                chain_b.get_interacting_chain().get_biopy_chain().id = chain_b.get_interacting_chain().get_biopy_chain().id + random.choice(number_list)
-                log.warning(f"ID twice error new id {chain_b.get_interacting_chain().get_biopy_chain().get_id()}.")
-                created_complex.add_chain(chain_b.get_interacting_chain())
+                log.warning(f"ID twice error current id {best_chain_position.get_biopy_chain().get_id()}.")
+                # chain_to_add = copy.copy(chain_b.get_interacting_chain())
+                # log.warning(f"ID twice error current id {chain_to_add.get_biopy_chain().get_id()}.")
+                best_chain_position.get_biopy_chain().id = random.choice(number_list)
+                log.warning(f"ID twice error new id {best_chain_position.get_biopy_chain().get_id()}.")
+                created_complex.add_chain(best_chain_position)
             # created_complex.add_chain(chain_b.get_interacting_chain())
             # print(created_complex)
         return created_complex
