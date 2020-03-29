@@ -3,7 +3,6 @@ import argparse
 import re
 import os
 import sys
-import UserInteraction
 import macrocomplex_builder
 import logging
 from Bio.PDB import PDBIO

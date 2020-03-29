@@ -5,12 +5,12 @@ from Bio import SeqIO, PDB, pairwise2
 from Bio.PDB.Polypeptide import PPBuilder
 from Bio.PDB.Chain import Chain
 from Bio.PDB.Structure import Structure
-import argparse, os, sys, UserInteraction
+import argparse, os, sys, user_interaction
 import random , copy
 
 
 # maybe transform into an extend of the actual pdb chain class and add function to retrieve sequence
-class Interacting_Chain():
+class InteractingChain():
     """ DESCRIPTION """
 
     def __init__(self, biopy_chain, file_index, sequence, interacting_chain=None):
@@ -111,7 +111,7 @@ if __name__ == "__main__":
 
     # obtaining fasta and pdb files
     number_list = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
-    fasta_files, pdb_files, log = UserInteraction.process_input()
+    fasta_files, pdb_files, log = user_interaction.process_input()
 # PARSING OF DATA
 # TODO: insert case of empty fasta file
     seq_record_list = []
@@ -133,8 +133,8 @@ if __name__ == "__main__":
         sequence_b = peptide[1].get_sequence()
         # build up the list of chains for each interaction
         biopy_chain_a, biopy_chain_b = model.get_chains()
-        interacting_a = Interacting_Chain(biopy_chain_a, i, sequence_a, biopy_chain_b)
-        interacting_b = Interacting_Chain(biopy_chain_b, i, sequence_b,biopy_chain_a)
+        interacting_a = InteractingChain(biopy_chain_a, i, sequence_a, biopy_chain_b)
+        interacting_b = InteractingChain(biopy_chain_b, i, sequence_b,biopy_chain_a)
         interacting_a.set_interacting_chain(interacting_b)
         interacting_b.set_interacting_chain(interacting_a)
         interactions.append(Interaction(model, interacting_a, interacting_b))
@@ -143,7 +143,7 @@ if __name__ == "__main__":
 
     log.info("PDB interactions processed")
 
-    stoichiometry_temp = UserInteraction.get_stoichiometry()
+    stoichiometry_temp = user_interaction.get_stoichiometry()
     stoichiometry = {}
     stoich_complex = {}
     if stoichiometry_temp:
@@ -403,5 +403,5 @@ if __name__ == "__main__":
         print("Start",starting_interaction.get_chain_b().get_biopy_chain().get_id())
         starting_complex = Complex(starting_interaction.get_model(), [starting_interaction.get_chain_a(), starting_interaction.get_chain_b()])
     best_complex = create_macrocomplex(starting_complex, 20)
-    UserInteraction.create_output_PDB(best_complex)
+    user_interaction.create_output_PDB(best_complex)
     # TODO: check for DNA
