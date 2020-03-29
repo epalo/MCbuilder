@@ -230,6 +230,15 @@ if __name__ == "__main__":
         for chain in similar_chains:
             chain
 
+    def update_homo_chains(original, best_chain_position):
+        i=0
+        for list in homo_chains:
+            chain_names = [chain.get_biopy_chain() for chain in list]
+            if original.get_biopy_chain() in chain_names:
+                break
+            i+=1
+        homo_chains[i].append(best_chain_position)
+
     # TODO: check both chains of starting complex and combine them to complete complex
     def create_macrocomplex(current_complex, threshold):
         # superimpose_options = get_superimpose_options(current_complex)
@@ -349,13 +358,14 @@ if __name__ == "__main__":
                 superimp.apply(chain_to_try.get_biopy_chain())
                 if not (is_clashing(current_complex, chain_to_try)):
                     log.info(f"Chain {chain.get_interacting_chain().get_biopy_chain().get_id()} did not have any clashes. Feasible addition.")
-
+                    original = chain.get_interacting_chain()
                     best_rmsd = rmsd
                     best_chain_position = chain_to_try
 
 
         # apply the superimposition matrix to chain_b and its interacting chain
         if not (best_chain_position == None):
+            update_homo_chains(original, best_chain_position)
             created_complex = current_complex
 
             try:
@@ -363,29 +373,13 @@ if __name__ == "__main__":
                 print(best_chain_position.get_biopy_chain().get_id())
                 print(best_chain_position.get_interacting_chain().get_biopy_chain().get_id())
                 print(best_rmsd)
-                i=0
-                for list in homo_chains:
-                    chain_names = [chain.get_biopy_chain() for chain in list]
-                    if best_chain_position.get_biopy_chain() in chain_names:
-                        break
-                    i+=1
-                homo_chains[i].append(best_chain_position)
+
             except PDB.PDBExceptions.PDBConstructionException:
                 original = best_chain_position
                 new_id = random.choice(number_list)
                 best_chain_position.get_biopy_chain().id = new_id
                 number_list.remove(new_id)
-                i=0
-                for list in homo_chains:
-                    chain_names = [chain.get_biopy_chain() for chain in list]
-                    if original.get_biopy_chain() in chain_names:
-                        break
-                    i+=1
-                homo_chains[i].append(best_chain_position)
                 created_complex.add_chain(best_chain_position)
-                for s in homo_chains:
-                    print("HERE!!")
-                    print(*s)
         return created_complex
 
     # BUILDING UP THE COMPLEX
