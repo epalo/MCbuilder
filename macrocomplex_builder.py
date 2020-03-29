@@ -354,12 +354,12 @@ if __name__ == "__main__":
             try:
                 created_complex.add_chain(chain_b.get_interacting_chain())
             except PDB.PDBExceptions.PDBConstructionException:
-                log.warning(f"ID twice error current id {best_chain_position.get_biopy_chain().get_id()}.")
+                log.warning(f"ID twice error current id {chain_b.get_interacting_chain().get_biopy_chain().get_id()}.")
                 # chain_to_add = copy.copy(chain_b.get_interacting_chain())
                 # log.warning(f"ID twice error current id {chain_to_add.get_biopy_chain().get_id()}.")
-                best_chain_position.get_biopy_chain().id = random.choice(number_list)
-                log.warning(f"ID twice error new id {best_chain_position.get_biopy_chain().get_id()}.")
-                created_complex.add_chain(best_chain_position)
+                chain_b.get_interacting_chain().get_biopy_chain().id = random.choice(number_list)
+                log.warning(f"ID twice error new id {chain_b.get_interacting_chain().get_biopy_chain().get_id()}.")
+                created_complex.add_chain(chain_b.get_interacting_chain())
             # created_complex.add_chain(chain_b.get_interacting_chain())
             # print(created_complex)
         return created_complex
