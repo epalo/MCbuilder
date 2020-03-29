@@ -242,6 +242,7 @@ if __name__ == "__main__":
         # else:
         best_complex = current_complex
         for option in current_complex.get_chains():
+            print("option from complex", option)
             log.info(f"Attempting to superimpose chain {option.get_biopy_chain().get_id()}")
             option_complex = superimpose(current_complex, option)
             if (option_complex == None):
@@ -271,6 +272,9 @@ if __name__ == "__main__":
                             best_complex = option_complex
                 else:
                     # if we didn't reach the leaf yet, recursive call
+                    currently = [chain for chain in option_complex.get_model().get_chains()]
+                    log.warning(f"Currently in complex: {currently}")
+                    log.warning("recursion!")
                     print("recursion!")
 
                     if stoichiometry:
@@ -321,11 +325,13 @@ if __name__ == "__main__":
 
         # if no complex can be created with the requested chain it returns None
         created_complex = None
+        print("chain to superimp",chain_to_superimp)
         superimposition_options = get_homo_chains(chain_to_superimp)
         superimp = PDB.Superimposer()
         best_chain_position = None
         best_rmsd = 10
         for chain in superimposition_options:
+            print("chain from options", chain)
             atoms_a = []
             atoms_b = []
             for elem in chain.get_biopy_chain().get_atoms():
@@ -341,13 +347,13 @@ if __name__ == "__main__":
             if rmsd < best_rmsd:
                 # check if the superimposition leads to clashes
                 log.info(f"Checking whether {chain.get_interacting_chain().get_biopy_chain().get_id()} has any clashes")
-                chain_to_try = chain.get_interacting_chain()
+                chain_to_try = copy.copy(chain.get_interacting_chain())
                 superimp.apply(chain_to_try.get_biopy_chain())
                 if not (is_clashing(current_complex, chain_to_try.get_biopy_chain().get_atoms())):
                     log.info(f"Chain {chain.get_interacting_chain().get_biopy_chain().get_id()} did not have any clashes. Feasible addition.")
                     # print("feasible addition")
                     best_rmsd = rmsd
-                    best_chain_position = chain.get_interacting_chain()
+                    best_chain_position = chain_to_try
                     #for atom in best_chain_position.get_biopy_chain().get_atoms():
                         #print("best chain", atom.get_coord())
 
@@ -370,17 +376,17 @@ if __name__ == "__main__":
                 print(best_chain_position.get_interacting_chain().get_biopy_chain().get_id())
                 print(best_rmsd)
             except PDB.PDBExceptions.PDBConstructionException:
-                log.warning(f"ID twice error current id {best_chain_position.get_biopy_chain().get_id()}.")
+                # log.warning(f"ID twice error current id {best_chain_position.get_biopy_chain().get_id()}.")
                 # chain_to_add = copy.copy(chain_b.get_interacting_chain())
                 # log.warning(f"ID twice error current id {chain_to_add.get_biopy_chain().get_id()}.")
-                log.warning(f"current list {number_list}. Length {len(number_list)}")
+                # log.warning(f"current list {number_list}. Length {len(number_list)}")
                 new_id = random.choice(number_list)
                 best_chain_position.get_biopy_chain().id = new_id
                 number_list.remove(new_id)
-                log.warning(f"updated list {number_list}. Length {len(number_list)}")
-                log.warning(f"ID twice error new id {best_chain_position.get_biopy_chain().get_id()}.")
+                # log.warning(f"updated list {number_list}. Length {len(number_list)}")
+                # log.warning(f"ID twice error new id {best_chain_position.get_biopy_chain().get_id()}.")
                 current_chains = [chain for chain in created_complex.get_model().get_chains()]
-                log.warning(f"chain list {current_chains}.")
+                # log.warning(f"chain list {current_chains}.")
                 created_complex.add_chain(best_chain_position)
             # created_complex.add_chain(chain_b.get_interacting_chain())
             # print(created_complex)
