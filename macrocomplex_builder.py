@@ -40,6 +40,11 @@ class Interacting_Chain():
     def __len__(self):
         return len(self.__sequence)
 
+    def get_ca_atoms(self):
+        backbone = {"CA", "C1\'"}
+        model_atoms = [atom for atom in self.get_biopy_chain().get_atoms() if atom.id in backbone]
+        return model_atoms
+
 class Complex(object):
     """ DESCRIPTION """
 
@@ -276,10 +281,12 @@ if __name__ == "__main__":
                     create_macrocomplex(option_complex ,threshold-1)
         return best_complex
 
-    def is_clashing(current_complex, atom_list):
+    def is_clashing(current_complex, chain):
         backbone = {"CA", "C1\'"}
         model_atoms = [atom for atom in current_complex.get_model().get_atoms() if atom.id in backbone]
-        chain_atoms = [atom for atom in atom_list if atom.id in backbone]
+        chain_atoms = chain.get_ca_atoms()
+        # for atom in model_atoms:
+        #     print(atom.get_coord())
         clashes_list = []
         chain_list = []
         # for atom in chain_atoms:
@@ -303,6 +310,10 @@ if __name__ == "__main__":
                 superimpose_positions.append(chain)
         return superimpose_positions
 
+
+
+
+
     def superimpose(current_complex, chain_to_superimp):
         # TODO: only with backbone
         # TODO: check all different positions ???
@@ -319,10 +330,14 @@ if __name__ == "__main__":
         for chain in superimposition_options:
             atoms_a = []
             atoms_b = []
-            for elem in chain.get_biopy_chain().get_atoms():
-                atoms_a.append(elem)
-            for elem in chain_to_superimp.get_biopy_chain().get_atoms():
-                atoms_b.append(elem)
+            atoms_a = chain.get_ca_atoms()
+            # for elem in chain.get_biopy_chain().get_atoms():
+            #     atoms_a.append(elem)
+            # print("atoms a:",atoms_a)
+            atoms_b = chain_to_superimp.get_ca_atoms()
+            # for elem in chain_to_superimp.get_biopy_chain().get_atoms():
+            #     atoms_b.append(elem)
+            # print("atoms b:",atoms_b)
             # setting fixed and moving atoms, calculate the superimposition matrix
             superimp.set_atoms(atoms_a, atoms_b)
             rmsd = superimp.rms
@@ -332,7 +347,7 @@ if __name__ == "__main__":
                 log.info(f"Checking whether {chain.get_interacting_chain().get_biopy_chain().get_id()} has any clashes")
                 chain_to_try = copy.copy(chain.get_interacting_chain())
                 superimp.apply(chain_to_try.get_biopy_chain())
-                if not (is_clashing(current_complex, chain_to_try.get_biopy_chain().get_atoms())):
+                if not (is_clashing(current_complex, chain_to_try)):
                     log.info(f"Chain {chain.get_interacting_chain().get_biopy_chain().get_id()} did not have any clashes. Feasible addition.")
 
                     best_rmsd = rmsd
