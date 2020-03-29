@@ -7,8 +7,8 @@ from Bio.PDB.Chain import Chain
 from Bio.PDB.Structure import Structure
 import argparse, os, sys, UserInteraction
 #import processInputFiles
-import random
-import loggingSetup
+# import random
+# import loggingSetup
 import random , copy
 #import chimera
 #from DetectClash import detectClash
@@ -191,12 +191,12 @@ if __name__ == "__main__":
                             inserted = False
                             break
                     if inserted:
-                        homo_chains.append([chains[i], chains[m]]) 
-    
+                        homo_chains.append([chains[i], chains[m]])
+
     for elem in homo_chains:
         print("Next list:")
         for el in elem:
-            print(el.get_biopy_chain().get_id())                
+            print(el.get_biopy_chain().get_id())
     log.info(f"{len(homo_chains)} homologous chains found")
 
 
@@ -272,7 +272,7 @@ if __name__ == "__main__":
                 else:
                     # if we didn't reach the leaf yet, recursive call
                     print("recursion!")
-                    
+
                     if stoichiometry:
                         stoich_complex[option.get_interacting_chain().get_biopy_chain().get_id()]+= 1
                     create_macrocomplex(option_complex ,threshold-1)
@@ -340,14 +340,14 @@ if __name__ == "__main__":
             # update the best superimposition according to its rmsd
             if rmsd < best_rmsd:
                 # check if the superimposition leads to clashes
-                log.info(f"Checking whether {chain_b.get_interacting_chain().get_biopy_chain().get_id()} has any clashes")
-                chain_to_try = chain_b.get_interacting_chain()
+                log.info(f"Checking whether {chain.get_interacting_chain().get_biopy_chain().get_id()} has any clashes")
+                chain_to_try = chain.get_interacting_chain()
                 superimp.apply(chain_to_try.get_biopy_chain())
                 if not (is_clashing(current_complex, chain_to_try.get_biopy_chain().get_atoms())):
-                    log.info(f"Chain {chain_b.get_interacting_chain().get_biopy_chain().get_id()} did not have any clashes. Feasible addition.")
+                    log.info(f"Chain {chain.get_interacting_chain().get_biopy_chain().get_id()} did not have any clashes. Feasible addition.")
                     # print("feasible addition")
                     best_rmsd = rmsd
-                    best_chain_position = chain_to_try
+                    best_chain_position = chain.get_interacting_chain()
                     #for atom in best_chain_position.get_biopy_chain().get_atoms():
                         #print("best chain", atom.get_coord())
 
@@ -373,8 +373,14 @@ if __name__ == "__main__":
                 log.warning(f"ID twice error current id {best_chain_position.get_biopy_chain().get_id()}.")
                 # chain_to_add = copy.copy(chain_b.get_interacting_chain())
                 # log.warning(f"ID twice error current id {chain_to_add.get_biopy_chain().get_id()}.")
-                best_chain_position.get_biopy_chain().id = random.choice(number_list)
+                log.warning(f"current list {number_list}. Length {len(number_list)}")
+                new_id = random.choice(number_list)
+                best_chain_position.get_biopy_chain().id = new_id
+                number_list.remove(new_id)
+                log.warning(f"updated list {number_list}. Length {len(number_list)}")
                 log.warning(f"ID twice error new id {best_chain_position.get_biopy_chain().get_id()}.")
+                current_chains = [chain for chain in created_complex.get_model().get_chains()]
+                log.warning(f"chain list {current_chains}.")
                 created_complex.add_chain(best_chain_position)
             # created_complex.add_chain(chain_b.get_interacting_chain())
             # print(created_complex)
