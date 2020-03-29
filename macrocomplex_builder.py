@@ -6,9 +6,9 @@ from Bio.PDB.Polypeptide import PPBuilder
 from Bio.PDB.Chain import Chain
 from Bio.PDB.Structure import Structure
 import argparse, os, sys, UserInteraction
-import processInputFiles
+#import processInputFiles
 import random
-import loggingSetup
+#import loggingSetup
 import random
 #import chimera
 #from DetectClash import detectClash
@@ -108,7 +108,7 @@ if __name__ == "__main__":
 
     # obtaining fasta and pdb files
     number_list = ['1','2','3','4','5','6','7','8','9']
-    fasta_files, pdb_files, log = processInputFiles.processInput()
+    fasta_files, pdb_files, log = UserInteraction.process_input()
 # PARSING OF DATA
 # TODO: insert case of empty fasta file
     seq_record_list = []
@@ -119,6 +119,7 @@ if __name__ == "__main__":
 # TODO: insert case of empty pdb-file
     parser = PDB.PDBParser()
     interactions = []
+    chains = []
     # iterate through all pdb files and return a list of interaction objects
     for i in range(len(pdb_files)):
         model = parser.get_structure(pdb_files[i],pdb_files[i])[0]
@@ -134,17 +135,15 @@ if __name__ == "__main__":
         interacting_a.set_interacting_chain(interacting_b)
         interacting_b.set_interacting_chain(interacting_a)
         interactions.append(Interaction(model, interacting_a, interacting_b))
+        chains.append(interacting_a)
+        chains.append(interacting_b)
         # if stoichiometry:
         #     stoich_complex.setdefault(biopy_chain_a.get_id(), 0)
         #     stoich_complex.setdefault(biopy_chain_b.get_id(), 0)
     # get all the chains of a list of interactions
-    chains = []
-    for interaction in interactions:
-        chains.append(interaction.get_chain_a())
-        chains.append(interaction.get_chain_b())
     log.info("PDB interactions processed")
 
-    stoichiometry_temp = UserInteraction.getStoichiometry()
+    stoichiometry_temp = UserInteraction.get_stoichiometry()
     stoichiometry = {}
     stoich_complex = {}
     if stoichiometry_temp:
@@ -376,5 +375,5 @@ if __name__ == "__main__":
     else:
         starting_complex = Complex(starting_interaction.get_model(), [starting_interaction.get_chain_a(), starting_interaction.get_chain_b()])
     best_complex = create_macrocomplex(starting_complex, 20)
-    processInputFiles.createPDB(best_complex)
+    UserInteraction.create_output_PDB(best_complex)
     # TODO: check for DNA

@@ -1,8 +1,12 @@
 # imports
 import argparse
 import re
-# import os
-# import sys
+import os
+import sys
+import UserInteraction
+import macrocomplex_builder
+import logging
+from Bio.PDB import PDBIO
 
 # def getUserInput():
 """ Import user data.
@@ -47,16 +51,16 @@ parser.add_argument('-r', '--random',
 
 options = parser.parse_args()
 
-def getUserInput():
+def get_userinput():
     return options.infile
 
-def getVerboseOption():
+def get_verbose_option():
     return options.verbose
 
-def getOutputDirectory():
+def get_output_directory():
     return options.outfile
 
-def getStoichiometry():
+def get_stoichiometry():
     if options.stoich:
         regex = re.compile("([A-Z]+[0-9]+)", re.IGNORECASE)
         stoich = {}
@@ -67,27 +71,66 @@ def getStoichiometry():
     else:
         return options.stoich
 
+verbose =  get_verbose_option()
+# create logger
+def create_logger():
+    log = logging.getLogger(__name__)
+    log.setLevel(level=logging.INFO)
 
-    # getting input files in fasta and pdb format
-    # input_list = options.infile
-    # fasta_files = []
-    # pdb_files = []
-    # if len(input_list) == 0:
-    #     input_list = [os.getcwd()]
-    # for input in input_list:
-    #     if os.path.isdir(input):
-    #         print(os.listdir(input))
-    #         fasta_files = [os.path.join(input, f) for f in os.listdir(input) if f.endswith(".fa") or f.endswith(".fasta")]
-    #         pdb_files = [os.path.join(input, f) for f in os.listdir(input) if f.endswith(".pdb")]
-    #     elif os.path.isfile(input) and (input.endswith(".fa") or input.endswith(".fasta")):
-    #         fasta_files.append(input)
-    #     elif os.path.isfile(input) and (input.endswith(".pdb")):
-    #         pdb_files.append(input)
-    #
-    #
-    # if len(fasta_files) == 0 and len(pdb_files) == 0:
-    #     raise Exception("No fasta or pdb files were found")
-    # if len(fasta_files) == 0 or len(pdb_files) == 0:
-    #     raise Exception("fasta or pdb file is missing")
+    # create formatter and add it to the handlers
+    formatter = logging.Formatter('%(asctime)s - %(message)s')
 
-    # return (fasta_files, pdb_files)
+    if verbose:
+            # create console handler for logger.
+            soh = logging.StreamHandler()
+            soh.setLevel(level=logging.INFO)
+            soh.setFormatter(formatter)
+    # create file handler for logger.
+    fh = logging.FileHandler('mbuilder.log')
+    fh.setLevel(level=logging.WARNING)
+    fh.setFormatter(formatter)
+
+    # add handlers to logger.
+    if verbose:
+        log.addHandler(soh)
+
+    log.addHandler(fh)
+
+    return log
+
+
+def process_input():
+    """ Read pdb and FASTA files. """
+    log = create_logger()
+    log.info("Initialized")
+    input_list = get_userinput()
+    fasta_files = []
+    pdb_files = []
+    if len(input_list) == 0:
+        input_list = [os.getcwd()]
+    for input in input_list:
+        if os.path.isdir(input):
+            print(os.listdir(input))
+            fasta_files = [os.path.join(input, f) for f in os.listdir(input) if f.endswith(".fa") or f.endswith(".fasta")]
+            pdb_files = [os.path.join(input, f) for f in os.listdir(input) if f.endswith(".pdb")]
+        elif os.path.isfile(input) and (input.endswith(".fa") or input.endswith(".fasta")):
+            fasta_files.append(input)
+        elif os.path.isfile(input) and (input.endswith(".pdb")):
+            pdb_files.append(input)
+
+
+    if len(fasta_files) == 0 and len(pdb_files) == 0:
+        raise Exception("No fasta or pdb files were found")
+    if len(fasta_files) == 0 or len(pdb_files) == 0:
+        raise Exception("fasta or pdb file is missing")
+
+    log.info(f"{len(fasta_files)} FASTA file(s) and {len(pdb_files)} PDB file(s) were processed")
+
+    return (fasta_files, pdb_files, log)
+
+#
+def create_output_PDB(best_complex):
+    """ Create a PDB with the final complex """
+    io = PDBIO()
+    io.set_structure(best_complex.get_model())
+    io.save(get_output_directory())
