@@ -106,6 +106,7 @@ class Interaction():
 if __name__ == "__main__":
     """ Macrocomplex builder based on structure superimposition."""
 
+
     # obtaining fasta and pdb files
     number_list = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
     fasta_files, pdb_files, log = UserInteraction.process_input()
@@ -225,50 +226,51 @@ if __name__ == "__main__":
 
     # TODO: check both chains of starting complex and combine them to complete complex
     def create_macrocomplex(current_complex, threshold):
-        superimpose_options = get_superimpose_options(current_complex)
+        # superimpose_options = get_superimpose_options(current_complex)
+        # # print("best_complex",best_complex)
+        # # starting complex has no superimposition options
+        # if not superimpose_options:
+        #     # then just return the starting complex
+        #     log.info("There are no superimposition options available")
+        #     # print("no options!")
+        #     return best_complex
+        # else:
         best_complex = current_complex
-        # print("best_complex",best_complex)
-        # starting complex has no superimposition options
-        if not superimpose_options:
-            # then just return the starting complex
-            log.info("There are no superimposition options available")
-            # print("no options!")
-            return best_complex
-        else:
-            for option in superimpose_options:
-                log.info(f"Attempting to superimpose chain {option.get_biopy_chain().get_id()}")
-                option_complex = superimpose(current_complex, option)
-                if (option_complex == None):
-                    log.warning("The current option could not be added!")
-                else:
-                    log.info("Option complex was be found!")
-                    # print("Option Complex", option_complex)
-                    # print("Current model:", option_complex.get_model())
-                    # no other superimposition options for the complex available (leaf)
-                    # or reached threshold
-                    # or TODO: ADD STOICHOMETRY option
+        for option in current_complex.get_chains():
+            log.info(f"Attempting to superimpose chain {option.get_biopy_chain().get_id()}")
+            option_complex = superimpose(current_complex, option)
+            if (option_complex == None):
+                log.warning("The current option could not be added!")
+            else:
+                log.info("Option complex was be found!")
+                # print("Option Complex", option_complex)
+                # print("Current model:", option_complex.get_model())
+                # no other superimposition options for the complex available (leaf)
+                # or reached threshold
+                # or TODO: ADD STOICHOMETRY option
 
-                    if not get_superimpose_options(option_complex) or \
-                        (threshold == 0):
-                        return best_complex
+                if not get_superimpose_options(option_complex) or \
+                    (threshold == 0):
+                    return best_complex
+                    # if Z-Score for option complex is lower than for the current best complex replace it
+                    if option_complex.calc_z_score < best_complex.calc_z_score:
+                        best_complex = option_complex
+                # reach threshold
+                elif stoichiometry:
+                    print(option_complex.get_stoichiometry())
+                    if option_complex.get_stoichiometry()[option.get_interacting_chain().get_biopy_chain().get_id()] >= \
+                                stoichiometry[option.get_interacting_chain().get_biopy_chain().get_id()]:
+                        log.info(f"Chain {option.get_interacting_chain().get_biopy_chain().get_id()} has reached its stoichiometry limit.")
                         # if Z-Score for option complex is lower than for the current best complex replace it
                         if option_complex.calc_z_score < best_complex.calc_z_score:
                             best_complex = option_complex
-                    # reach threshold
-                    elif stoichiometry:
-                        print(option_complex.get_stoichiometry())
-                        if option_complex.get_stoichiometry()[option.get_interacting_chain().get_biopy_chain().get_id()] >= \
-                                    stoichiometry[option.get_interacting_chain().get_biopy_chain().get_id()]:
-                            log.info(f"Chain {option.get_interacting_chain().get_biopy_chain().get_id()} has reached its stoichiometry limit.")
-                            # if Z-Score for option complex is lower than for the current best complex replace it
-                            if option_complex.calc_z_score < best_complex.calc_z_score:
-                                best_complex = option_complex
-                    else:
-                        # if we didn't reach the leaf yet, recursive call
-                        print("recursion!")
-                        if stoichiometry:
-                            stoich_complex[option.get_interacting_chain().get_biopy_chain().get_id()]+= 1
-                        create_macrocomplex(option_complex ,threshold-1)
+                else:
+                    # if we didn't reach the leaf yet, recursive call
+                    print("recursion!")
+                    
+                    if stoichiometry:
+                        stoich_complex[option.get_interacting_chain().get_biopy_chain().get_id()]+= 1
+                    create_macrocomplex(option_complex ,threshold-1)
         return best_complex
 
     def is_clashing(current_complex, chain):
@@ -301,23 +303,23 @@ if __name__ == "__main__":
                 superimpose_positions.append(chain)
         return superimpose_positions
 
-    def superimpose(current_complex, chain_b):
+    def superimpose(current_complex, chain_to_superimp):
         # TODO: only with backbone
         # TODO: check all different positions ???
 
         # if no complex can be created with the requested chain it returns None
         created_complex = None
-        superimposition_positions = get_superimpose_positions(current_complex, chain_b)
+        superimposition_options = get_homo_chains(chain_to_superimp)
         superimp = PDB.Superimposer()
         best_superimposition_matrix = None
         best_rmsd = 10
-        for chain in superimposition_positions:
+        for chain in superimposition_options:
             atoms_a = []
             atoms_b = []
             for elem in chain.get_biopy_chain().get_atoms():
                 atoms_a.append(elem)
             # print("atoms a:",atoms_a)
-            for elem in chain_b.get_biopy_chain().get_atoms():
+            for elem in chain_to_superimp.get_biopy_chain().get_atoms():
                 atoms_b.append(elem)
             # print("atoms b:",atoms_b)
             # setting fixed and moving atoms, calculate the superimposition matrix
@@ -326,12 +328,13 @@ if __name__ == "__main__":
             # update the best superimposition according to its rmsd
             if rmsd < best_rmsd:
                 # check if the superimposition leads to clashes
-                log.info(f"Checking whether {chain_b.get_interacting_chain().get_biopy_chain().get_id()} has any clashes")
-                if not (is_clashing(current_complex, chain_b.get_interacting_chain().get_biopy_chain())):
-                    log.info(f"Chain {chain_b.get_interacting_chain().get_biopy_chain().get_id()} did not have any clashes. Feasible addition.")
+                log.info(f"Checking whether {chain.get_interacting_chain().get_biopy_chain().get_id()} has any clashes")
+                if not (is_clashing(current_complex, chain.get_interacting_chain().get_biopy_chain())):
+                    log.info(f"Chain {chain.get_interacting_chain().get_biopy_chain().get_id()} did not have any clashes. Feasible addition.")
                     # print("feasible addition")
                     best_superimposition_matrix = superimp
                     best_rmsd = rmsd
+                    best_chain = chain
 
         # backbone = {"CA", "C1\'"}
         # chain_atoms1 = [atom for atom in chain_b.get_biopy_chain().get_atoms() if atom.id in backbone]
@@ -341,20 +344,22 @@ if __name__ == "__main__":
         # apply the superimposition matrix to chain_b and its interacting chain
         if not (best_superimposition_matrix == None):
             created_complex = current_complex
-            best_superimposition_matrix.apply(chain_b.get_interacting_chain().get_biopy_chain())
+            best_superimposition_matrix.apply(best_chain.get_interacting_chain().get_biopy_chain())
 
             # chain_atoms2 = [atom for atom in chain_b.get_biopy_chain().get_atoms() if atom.id in backbone]
             # for elem in chain_atoms2:
             #     print("atoms b:",elem.get_coord())
             try:
-                created_complex.add_chain(chain_b.get_interacting_chain())
+                created_complex.add_chain(best_chain.get_interacting_chain())
             except PDB.PDBExceptions.PDBConstructionException:
-                log.warning(f"ID twice error current id {chain_b.get_interacting_chain().get_biopy_chain().get_id()}.")
+                log.warning(f"ID twice error current id {best_chain.get_interacting_chain().get_biopy_chain().get_id()}.")
                 # chain_to_add = copy.copy(chain_b.get_interacting_chain())
                 # log.warning(f"ID twice error current id {chain_to_add.get_biopy_chain().get_id()}.")
-                chain_b.get_interacting_chain().get_biopy_chain().id = random.choice(number_list)
-                log.warning(f"ID twice error new id {chain_b.get_interacting_chain().get_biopy_chain().get_id()}.")
-                created_complex.add_chain(chain_b.get_interacting_chain())
+                new_id = random.choice(number_list)
+                best_chain.get_interacting_chain().get_biopy_chain().id = new_id
+                number_list.remove(new_id)
+                log.warning(f"ID twice error new id {best_chain.get_interacting_chain().get_biopy_chain().get_id()}.")
+                created_complex.add_chain(best_chain.get_interacting_chain())
             # created_complex.add_chain(chain_b.get_interacting_chain())
             # print(created_complex)
         return created_complex
