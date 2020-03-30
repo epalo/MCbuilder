@@ -1,11 +1,12 @@
 # imports
+from Bio import SeqIO, PDB, pairwise2
 from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
-from Bio import SeqIO, PDB, pairwise2
 from Bio.PDB.Polypeptide import PPBuilder
 from Bio.PDB.Chain import Chain
 from Bio.PDB.Structure import Structure
 import argparse, os, sys, UserInteraction
+import logging
 import random , copy
 from InteractingChain import InteractingChain
 from Complex import Complex
@@ -111,7 +112,7 @@ if __name__ == "__main__":
             interaction_sum = sum
     if stoichiometry:
         # set starting complex with stoichometry
-        starting_complex = Complex(starting_interaction.get_model(), [starting_interaction.get_chain_a())
+        starting_complex = Complex(starting_interaction.get_model(), [starting_interaction.get_chain_a(), starting_interaction.get_chain_b()])
         starting_complex.set_stoich_complex(stoichiometry)
         starting_complex.add_to_stoich(starting_interaction.get_chain_a(), homo_chains)
         starting_complex.add_to_stoich(starting_interaction.get_chain_b(), homo_chains)

@@ -1,16 +1,8 @@
-from Bio.Seq import Seq
-from Bio.Alphabet import IUPAC
-from Bio import SeqIO, PDB, pairwise2
-from Bio.PDB.Polypeptide import PPBuilder
-from Bio.PDB.Chain import Chain
-from Bio.PDB.Structure import Structure
-import argparse, os, sys, UserInteraction
-import random , copy
+import copy
 from InteractingChain import InteractingChain
-from Interaction import Interaction
-import logging
 
 class Complex(object):
+
     """ DESCRIPTION """
 
     def __init__(self, model, chains, pdb_files=False, stoich_complex=None):
