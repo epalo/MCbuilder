@@ -42,12 +42,12 @@ parser.add_argument('-s', '--stoichiometry',
                     default=None,
                     help="Set stoichiometry for the macrocomplex. Input in standard form (e.g. A1B4C6)")
 
-parser.add_argument('-r', '--random',
-                    dest="random_output_num",
+parser.add_argument('-l', '--limit',
+                    dest="limit",
                     action="store",
                     default=None,
                     type=int,
-                    help="Random how many sequence to print")
+                    help="Limit number of chains in the protein")
 
 options = parser.parse_args()
 
@@ -71,6 +71,11 @@ def get_stoichiometry():
         return stoich
     else:
         return options.stoich
+
+def get_protein_limit():
+    return options.limit
+
+
 
 verbose =  get_verbose_option()
 # create logger
