@@ -48,7 +48,6 @@ class InteractingChain():
 class Complex(object):
     """ DESCRIPTION """
 
-# chain attribute needed?
     def __init__(self, model, chains, pdb_files=False, stoich_complex=None):
         self.__model = model
         self.__chains = chains
@@ -85,7 +84,7 @@ class Complex(object):
         # how to calculate z_score?
         return
 
-# each entry in the stoichiometry is one representation for all homo-chains, so if a homologous chain occurs also the counter has to be set up 
+    # each entry in the stoichiometry is one representation for all homo-chains, so if a homologous chain occurs also the counter has to be set up 
     def add_to_stoich(self, chain):
         if not self.__stoich_complex == None:
             # get all the homo-chains for the chain to add
@@ -137,25 +136,25 @@ class Interaction():
     def get_chain_b(self):
         return self.__chain_b
 
-#TODO : Update UserInter stoichiometry if chain id number
-#TODO : How to join homologous chains so that under one name
-
 #main function that is called when running the script
 if __name__ == "__main__":
     """ Macrocomplex builder based on structure superimposition."""
 
-
+    # USER INPUT
     # obtaining fasta and pdb files
     number_list = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
     fasta_files, pdb_files, log = user_interaction.process_input()
-# PARSING OF DATA
-# TODO: insert case of empty fasta file
+
+    # PARSING OF DATA
+
+    # TODO: insert case of empty fasta file
+    # fasta files still needed????
     seq_record_list = []
     for seq in fasta_files:
         for seq_record in SeqIO.parse(seq, "fasta"):
             seq_record_list.append(seq_record)
 
-# TODO: insert case of empty pdb-file
+    # TODO: insert case of empty pdb-file
     parser = PDB.PDBParser()
     interactions = []
     chains = []
@@ -185,7 +184,7 @@ if __name__ == "__main__":
     log.info(f"Stoichiometry has been set.{stoichiometry}")
 
 
-# SEQUENCE ALIGNMENTS
+# SEQUENCE ALIGNMENTS 
 
 # find the sequences that occur multiple times in pdb files and save all proteins for each structural aln in a separate list
     clashes_dict = {}
@@ -226,8 +225,6 @@ if __name__ == "__main__":
     #         print(el.get_biopy_chain().get_id())
     log.info(f"{len(homo_chains)} homologous chains found")
 
-
-    # HELPER FUNCTIONS
     # returns a list of chains out of a list of chains that are similar to the input chain
     def get_homo_chains(chain):
         to_return = []
@@ -248,13 +245,7 @@ if __name__ == "__main__":
         for option in superimpose_options:
             superimpose_options_verbose = superimpose_options_verbose + " " + option.get_biopy_chain().get_id()
         log.info(f"The following chains are homologous to those currently in the complex:{superimpose_options_verbose}")
-        # print("Superimpose options:", superimpose_options)
         return superimpose_options
-
-    # def create_stoich_complex(chain, stoich_complex):
-    #     similar_chains = get_homo_chains(chain.get_chain_a())
-    #     for chain in similar_chains:
-    #         chain
 
     def create_stoich_complex(stoichiometry):
         stoich_complex = {}
@@ -272,7 +263,6 @@ if __name__ == "__main__":
             i+=1
         homo_chains[i].append(best_chain_position)
 
-    # TODO: check both chains of starting complex and combine them to complete complex
     def create_macrocomplex(current_complex, threshold):
         # superimpose_options = get_superimpose_options(current_complex)
         # # print("best_complex",best_complex)
@@ -284,7 +274,7 @@ if __name__ == "__main__":
         #     return best_complex
         # else:
         best_complex = current_complex
-        for option in current_complex.get_chains():
+        for option in get_superimpose_options(current_complex):
             print("option from complex", option)
             log.info(f"Attempting to superimpose chain {option.get_biopy_chain().get_id()}")
             print("stoich of current complex before superimposition:", current_complex.get_stoich_complex())
@@ -319,16 +309,13 @@ if __name__ == "__main__":
         backbone = {"CA", "C1\'"}
         model_atoms = [atom for atom in current_complex.get_model().get_atoms() if atom.id in backbone]
         chain_atoms = chain.get_ca_atoms()
-        # for atom in model_atoms:
-        #     print(atom.get_coord())
-        clashes_list = []
+
         chain_list = []
         # for atom in chain_atoms:
         n_search = PDB.NeighborSearch(model_atoms) # Generates a neigbour search tree
         clashes = 0
         for atom in chain_atoms:
             clashes += bool(n_search.search(atom.coord, 1.7))  # If this atom shows clashes, add 1 to the clashes counter
-        # print("Num of clashes:", clashes)
         if clashes/len(chain_atoms) >= 0.03:  # If more than 3% of atoms show clashes return yes
             log.info(f"Leads to clashes! {chain_list}")
             return True
@@ -345,12 +332,7 @@ if __name__ == "__main__":
         return superimpose_positions
 
 
-
-
-
     def superimpose(current_complex, chain_to_superimp):
-        # TODO: only with backbone
-
         # if no complex can be created with the requested chain it returns None
         created_complex = None
         superimposition_options = get_homo_chains(chain_to_superimp)
@@ -445,4 +427,3 @@ if __name__ == "__main__":
     best_complex = create_macrocomplex(starting_complex, 20)
     user_interaction.create_output_PDB(best_complex)
     # TODO: check for DNA
-
