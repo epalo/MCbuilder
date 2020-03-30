@@ -49,11 +49,11 @@ class Complex(object):
     """ DESCRIPTION """
 
 # chain attribute needed?
-    def __init__(self, model, chains, pdb_files=False, stoichiometry=None):
+    def __init__(self, model, chains, pdb_files=False, stoich_complex=None):
         self.__model = model
         self.__chains = chains
         self.__pdb_files = pdb_files
-        self.__stoichiometry = stoichiometry
+        self.__stoich_complex = stoich_complex
 
     def get_model(self):
         return self.__model
@@ -64,11 +64,11 @@ class Complex(object):
     def get_pdb_files(self):
         return self.__pdb_files
 
-    def get_stoichiometry(self):
-        return self.__stoichiometry
+    def get_stoich_complex(self):
+        return self.__stoich_complex
 
-    def set_stoichiometry(self):
-        self.__stoichiometry = stoichiometry
+    def set_stoich_complex(self):
+        self.__stoich_complex = stoich_complex
 
     def set_model(self, model):
         self.__model = model
@@ -84,6 +84,21 @@ class Complex(object):
     def calc_z_score(self):
         # how to calculate z_score?
         return
+
+# each entry in the stoichiometry is one representation for all homo-chains, so if a homologous chain occurs also the counter has to be set up 
+    def add_to_stoich(self, chain):
+        if not self.__stoich_complex == None:
+            # get all the homo-chains for the chain to add
+            homo_chain_ids = []
+            print("homo-chains:", get_homo_chains(chain))
+            for elem in get_homo_chains(chain):
+                homo_chain_ids.append(elem.get_biopy_chain().get_id())
+            # remove duplicates
+            homo_chain_ids = list(dict.fromkeys(homo_chain_ids))
+            print("homo chain ids:", homo_chain_ids)
+            for id in homo_chain_ids:
+                if id in self.__stoich_complex:
+                    self.__stoich_complex[id] += 1
 
 # an interaction is a model out of two chains
 class Interaction():
@@ -138,23 +153,15 @@ if __name__ == "__main__":
         interacting_a.set_interacting_chain(interacting_b)
         interacting_b.set_interacting_chain(interacting_a)
         interactions.append(Interaction(model, interacting_a, interacting_b))
+        # create a list that contains all the interacting chains
         chains.append(interacting_a)
         chains.append(interacting_b)
-
+    
     log.info("PDB interactions processed")
 
-    stoichiometry_temp = user_interaction.get_stoichiometry()
-    stoichiometry = {}
-    stoich_complex = {}
-    if stoichiometry_temp:
-        for stoich_chain in stoichiometry_temp:
-            for elem in chains:
-                if stoich_chain == elem.get_biopy_chain().get_id() and elem.get_biopy_chain() not in stoichiometry_temp:
-                    print(stoich_chain)
-                    print(elem.get_biopy_chain().get_full_id())
-
-                    stoichiometry[elem.get_biopy_chain()] = stoichiometry_temp[stoich_chain]
-        log.info(f"Stoichiometry has been set.{stoichiometry}")
+    stoichiometry = user_interaction.get_stoichiometry()
+    print(stoichiometry)
+    log.info(f"Stoichiometry has been set.{stoichiometry}")
 
 
 # SEQUENCE ALIGNMENTS
@@ -225,10 +232,17 @@ if __name__ == "__main__":
         # print("Superimpose options:", superimpose_options)
         return superimpose_options
 
-    def create_stoich_complex(chain, stoich_complex):
-        similar_chains = get_homo_chains(chain.get_chain_a())
-        for chain in similar_chains:
-            chain
+    # def create_stoich_complex(chain, stoich_complex):
+    #     similar_chains = get_homo_chains(chain.get_chain_a())
+    #     for chain in similar_chains:
+    #         chain
+
+    def create_stoich_complex(stoichiometry):
+        stoich_complex = {}
+        for id in stoichiometry:
+            stoich_complex[id] = 0
+        return stoich_complex
+
 
     def update_homo_chains(original, best_chain_position):
         i=0
@@ -255,6 +269,7 @@ if __name__ == "__main__":
             print("option from complex", option)
             log.info(f"Attempting to superimpose chain {option.get_biopy_chain().get_id()}")
             option_complex = superimpose(current_complex, option)
+            # don't go into recursion of there is no option-complex found 
             if (option_complex == None):
                 log.warning("The current option could not be added!")
             else:
@@ -269,12 +284,12 @@ if __name__ == "__main__":
                     # if Z-Score for option complex is lower than for the current best complex replace it
                     if option_complex.calc_z_score < best_complex.calc_z_score:
                         best_complex = option_complex
-                # reach threshold
+                # if stoichiometry has been set check if the limits are reached
                 elif stoichiometry:
-                    print(option_complex.get_stoichiometry())
-                    if option_complex.get_stoichiometry()[option.get_interacting_chain().get_biopy_chain().get_id()] >= \
-                                stoichiometry[option.get_interacting_chain().get_biopy_chain().get_id()]:
-                        log.info(f"Chain {option.get_interacting_chain().get_biopy_chain().get_id()} has reached its stoichiometry limit.")
+                    print(option_complex.get_stoich_complex())
+                    # check if stoichiometry has reached its limit for all chains (the two dictionaries are equal)
+                    if option_complex.get_stoich_complex() == stoichiometry:
+                        log.info(f"Complex {option_complex} has reached its stoichiometry limit.")
                         # if Z-Score for option complex is lower than for the current best complex replace it
                         if option_complex.calc_z_score < best_complex.calc_z_score:
                             best_complex = option_complex
@@ -284,9 +299,6 @@ if __name__ == "__main__":
                     log.warning(f"Currently in complex: {currently}")
                     log.warning("recursion!")
                     print("recursion!")
-
-                    if stoichiometry:
-                        stoich_complex[option.get_interacting_chain().get_biopy_chain().get_id()]+= 1
                     create_macrocomplex(option_complex ,threshold-1)
         return best_complex
 
@@ -370,6 +382,13 @@ if __name__ == "__main__":
 
             try:
                 created_complex.add_chain(best_chain_position)
+                print(created_complex)
+                print("Stoich:",created_complex.get_stoich_complex())
+                print("checking for id:", best_chain_position.get_biopy_chain().get_id())
+                print("chain object:", best_chain_position)
+                # if the added chain is specified in the stoichiometry change the counter of the added chain
+                created_complex.add_to_stoich(best_chain_position)
+                print("Stoich:",created_complex.get_stoich_complex())
                 print(best_chain_position.get_biopy_chain().get_id())
                 print(best_chain_position.get_interacting_chain().get_biopy_chain().get_id())
                 print(best_rmsd)
@@ -380,6 +399,13 @@ if __name__ == "__main__":
                 best_chain_position.get_biopy_chain().id = new_id
                 number_list.remove(new_id)
                 created_complex.add_chain(best_chain_position)
+            # created_complex.add_chain(chain_b.get_interacting_chain())
+            # print(created_complex)
+            # if stoichiometry limits are overfull set the option complex to None
+            if best_chain_position.get_biopy_chain().get_id() in created_complex.get_stoich_complex():
+                if created_complex.get_stoich_complex()[best_chain_position.get_biopy_chain().get_id()] > \
+                   stoichiometry[best_chain_position.get_biopy_chain().get_id()]:
+                   created_complex = None
         return created_complex
 
     # BUILDING UP THE COMPLEX
@@ -389,19 +415,23 @@ if __name__ == "__main__":
     interaction_sum = 0
     # find interaction with the most homo_chains
     for interaction in interactions:
-        if stoichiometry:
-            create_stoich_complex(interaction, stoich_complex)
         sum = len(get_homo_chains(interaction.get_chain_a())) + len(get_homo_chains(interaction.get_chain_b()))
         if sum > interaction_sum :
             starting_interaction = interaction
             interaction_sum = sum
     if stoichiometry:
-        log.info(f"This is the stoich complex {stoich_complex}")
-        starting_complex = Complex(starting_interaction.get_model(), [starting_interaction.get_chain_a(), starting_interaction.get_chain_b()],stoich_complex)
+        # set starting complex with stoichometry
+        stoich_complex = create_stoich_complex(stoichiometry)
+        starting_complex = Complex(starting_interaction.get_model(), [starting_interaction.get_chain_a(), starting_interaction.get_chain_b()], stoich_complex=stoich_complex)
+        starting_complex.add_to_stoich(starting_interaction.get_chain_a())
+        starting_complex.add_to_stoich(starting_interaction.get_chain_b())
     else:
-        print("Start",starting_interaction.get_chain_a().get_biopy_chain().get_id())
-        print("Start",starting_interaction.get_chain_b().get_biopy_chain().get_id())
+        # starting complex without stoichiometry
+        print("set again")
         starting_complex = Complex(starting_interaction.get_model(), [starting_interaction.get_chain_a(), starting_interaction.get_chain_b()])
+    print("Start",starting_interaction.get_chain_a().get_biopy_chain().get_id())
+    print("Start",starting_interaction.get_chain_b().get_biopy_chain().get_id())
     best_complex = create_macrocomplex(starting_complex, 20)
     user_interaction.create_output_PDB(best_complex)
     # TODO: check for DNA
+

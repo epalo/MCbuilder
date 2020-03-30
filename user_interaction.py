@@ -7,6 +7,7 @@ import macrocomplex_builder
 import logging
 from Bio.PDB import PDBIO
 
+
 # def getUserInput():
 """ Import user data.
 
@@ -49,6 +50,7 @@ parser.add_argument('-r', '--random',
                     help="Random how many sequence to print")
 
 options = parser.parse_args()
+
 
 def get_userinput():
     return options.infile
