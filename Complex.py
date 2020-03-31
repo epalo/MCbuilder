@@ -128,15 +128,15 @@ class Complex(object):
                     self.__logger.warning(f"Currently in complex: {currently}")
                     self.__logger.warning("recursion!")
                     print("recursion!")
-                    new_complex = option_complex.create_macrocomplex(chain_list, protein_limit, stoich, updated_numbers)
+                    new_complex = option_complex.create_macrocomplex(chain_list, protein_limit, stoich, updated_numbers, initial_chains)
                     if len(new_complex.get_chains()) > len(best_complex.get_chains()):
                         best_complex = option_complex
         len(best_complex.get_chains())
         return best_complex
-
-    def superimpose(self, chain_to_superimp, chain_list, stoich, number_list):
-                    option_complex.create_macrocomplex(chain_list, protein_limit, stoich, updated_numbers, initial_chains)
-        return best_complex
+    #
+    # def superimpose(self, chain_to_superimp, chain_list, stoich, number_list):
+    #         option_complex.create_macrocomplex(chain_list, protein_limit, stoich, updated_numbers, initial_chains)
+    #     return best_complex
 
 
     def superimpose(self, chain_to_superimp, chain_list, stoich, number_list, initial_chains):

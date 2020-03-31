@@ -121,7 +121,7 @@ if __name__ == "__main__":
 
     # BUILDING THE MODEL WITH THE STARTING COMPLEX
     number_list = list(range(0,10000))
-    best_complex = starting_complex.create_macrocomplex(homo_chains,protein_limit, stoichiometry, number_list)
+    best_complex = starting_complex.create_macrocomplex(homo_chains,protein_limit, stoichiometry, number_list, chains)
     print("FINAL COMPLEX:",best_complex)
     print("NUMBER OF CHAINS:", len(best_complex.get_chains()))
     for chain in best_complex.get_model().get_chains():
@@ -130,5 +130,9 @@ if __name__ == "__main__":
     # rename IDS to one
     best_complex = starting_complex.create_macrocomplex(homo_chains,protein_limit, stoichiometry, number_list, chains)
     print("ready to print")
+    new_id_list = list(string.ascii_letters)
+    for chain in best_complex.get_model().get_chains():
+        chain.id = random.choice(new_id_list)
+        new_id_list.remove(chain.id)
     UserInteraction.create_output_PDB(best_complex)
     exit(1)
