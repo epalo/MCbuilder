@@ -34,7 +34,7 @@ class Complex(object):
     def add_chain(self, chain):
         self.__model.add(chain.get_biopy_chain())
         self.__chains.append(chain)
-    
+
     def set_stoich_complex(self, stoich):
         stoich_complex = {}
         for id in stoich:
@@ -45,7 +45,7 @@ class Complex(object):
         # how to calculate z_score?
         return
 
-    # each entry in the stoichiometry is one representation for all homo-chains, so if a homologous chain occurs also the counter has to be set up 
+    # each entry in the stoichiometry is one representation for all homo-chains, so if a homologous chain occurs also the counter has to be set up
     def add_to_stoich(self, chain, chain_list):
         if not self.__stoich_complex == None:
             # get all the homo-chains for the chain to add
@@ -58,7 +58,7 @@ class Complex(object):
             for id in homo_chain_ids:
                 if id in self.__stoich_complex:
                     self.__stoich_complex[id] += 1
-    
+
     def stoich_is_complete(self, stoich):
         is_complete = False
         if stoich:
@@ -69,16 +69,16 @@ class Complex(object):
                     break
                 is_complete = True
         return is_complete
-    
+
     def stoich_is_overfull(self, stoich):
         is_overfull = False
         if stoich:
             for id in stoich:
                 if not self.__stoich_complex[id] <= stoich[id]:
                     is_overfull = True
-                    break 
+                    break
                 is_overfull = False
-        return is_overfull 
+        return is_overfull
 
     # returns a list with all possible chains that can be added to a current complex
     def get_superimpose_options(self, chain_list):
@@ -89,6 +89,7 @@ class Complex(object):
         return superimpose_options
 
     def create_macrocomplex(self, chain_list, protein_limit, stoich, number_list):
+
         # superimpose_options = get_superimpose_options(current_complex)
         # # print("best_complex",best_complex)
         # # starting complex has no superimposition options
@@ -104,14 +105,14 @@ class Complex(object):
             self.__logger.info(f"Attempting to superimpose chain {option.get_biopy_chain().get_id()}")
             print("stoich of current complex before superimposition:", self.__stoich_complex)
             option_complex, updated_numbers = self.superimpose(option, chain_list, stoich, number_list)
-            # don't go into recursion of there is no option-complex found 
+            # don't go into recursion of there is no option-complex found
             if (option_complex == None):
                 self.__logger.warning("The current option could not be added!")
             else:
                 self.__logger.info("Option complex was be found!")
                 # no other superimposition options for the complex available (leaf)
                 # or reached threshold
-                # or reached stoichiometry 
+                # or reached stoichiometry
                 print("stoich of current complex after superimposition:", option_complex.get_stoich_complex())
                 if (not self.get_superimpose_options(chain_list)) or \
                     len(option_complex.get_chains()) == protein_limit or \
@@ -120,7 +121,7 @@ class Complex(object):
                     return best_complex
                     # if Z-Score for option complex is lower than for the current best complex replace it
                     # if option_complex.calc_z_score < best_complex.calc_z_score:
-                    #     best_complex = option_complex    
+                    #     best_complex = option_complex
                 else:
                     # if we didn't reach the leaf yet, recursive call
                     currently = [chain for chain in option_complex.get_model().get_chains()]
@@ -158,7 +159,7 @@ class Complex(object):
             if rmsd < best_rmsd:
                 # check if the superimposition leads to clashes
                 self.__logger.info(f"Checking whether {chain.get_interacting_chain().get_biopy_chain().get_id()} has any clashes")
-                chain_to_try = copy.copy(chain.get_interacting_chain())
+                chain_to_try = copy.deepcopy(chain.get_interacting_chain())
                 superimp.apply(chain_to_try.get_biopy_chain())
                 if not (self.is_clashing(chain_to_try)):
                     self.__logger.info(f"Chain {chain.get_interacting_chain().get_biopy_chain().get_id()} did not have any clashes. Feasible addition.")
@@ -200,7 +201,7 @@ class Complex(object):
                 created_complex = None
         print("returned complex:", created_complex)
         return created_complex, number_list
-    
+
     def is_clashing(self, chain):
         backbone = {"CA", "C1\'"}
         model_atoms = [atom for atom in self.__model.get_atoms() if atom.id in backbone]
@@ -217,7 +218,7 @@ class Complex(object):
             return True
         else:  # Otherwise return no
             return False
-    
+
     # return all the chains of a current complex where a chain_b can possibly be superimposed
     def get_superimpose_positions(self, chain_b):
         superimpose_positions = []
@@ -235,4 +236,3 @@ class Complex(object):
                 break
             i+=1
         chain_list[i].append(best_chain_position)
-
