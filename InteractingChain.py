@@ -38,7 +38,6 @@ class InteractingChain():
         to_return = []
         for lst in list_of_chains:
             if self in lst:
-                log.info(f"Found homologs for chain {self.__biopy_chain().get_id()}")
                 to_return = lst
                 break
         return to_return

@@ -1,12 +1,11 @@
 # imports
-from Bio import SeqIO, PDB, pairwise2
 from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
+from Bio import SeqIO, PDB, pairwise2
 from Bio.PDB.Polypeptide import PPBuilder
 from Bio.PDB.Chain import Chain
 from Bio.PDB.Structure import Structure
 import argparse, os, sys, UserInteraction
-import logging
 import random , copy
 from InteractingChain import InteractingChain
 from Complex import Complex
@@ -106,25 +105,21 @@ if __name__ == "__main__":
     interaction_sum = 0
     # find interaction with the most homo_chains
     for interaction in interactions:
-        sum = len(interaction.get_chain_a().get_homo_chains()) + len(interaction.get_chain_b().get_homo_chains())
+        sum = len(interaction.get_chain_a().get_homo_chains(homo_chains)) + len(interaction.get_chain_b().get_homo_chains(homo_chains))
         if sum > interaction_sum :
             starting_interaction = interaction
             interaction_sum = sum
-    if stoichiometry:
         # set starting complex with stoichometry
-        starting_complex = Complex(starting_interaction.get_model(), [starting_interaction.get_chain_a(), starting_interaction.get_chain_b()])
+    starting_complex = Complex(starting_interaction.get_model(), [starting_interaction.get_chain_a(), starting_interaction.get_chain_b()], log)
+    starting_complex.add_to_stoich(starting_interaction.get_chain_a(), homo_chains)
+    starting_complex.add_to_stoich(starting_interaction.get_chain_b(), homo_chains)
+    if stoichiometry:
         starting_complex.set_stoich_complex(stoichiometry)
-        starting_complex.add_to_stoich(starting_interaction.get_chain_a(), homo_chains)
-        starting_complex.add_to_stoich(starting_interaction.get_chain_b(), homo_chains)
-    else:
-        # starting complex without stoichiometry
-        print("set again")
-        starting_complex = Complex(starting_interaction.get_model(), [starting_interaction.get_chain_a(), starting_interaction.get_chain_b()])
     print("Start",starting_interaction.get_chain_a().get_biopy_chain().get_id())
     print("Start",starting_interaction.get_chain_b().get_biopy_chain().get_id())
     
     # BUILDING THE MODEL WITH THE STARTING COMPLEX
-    best_complex = starting_complex.create_macrocomplex(homo_chains, 20)
+    best_complex = starting_complex.create_macrocomplex(homo_chains, 20, stoichiometry)
     UserInteraction.create_output_PDB(best_complex)
 
 
