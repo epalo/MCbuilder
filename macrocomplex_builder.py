@@ -33,14 +33,42 @@ if __name__ == "__main__":
     parser = PDB.PDBParser()
     interactions = []
     chains = []
+
+# TODO: we have to put this dictionaries somewhere, maybe we have to create a function or a class for all this.
+    protein = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
+               'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N',
+               'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W',
+               'ALA': 'A', 'VAL': 'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M', "UNK": "X"}
+    dna = {'DA': 'A', 'DC': 'C', 'DG': 'G', 'DT': 'T'}
+    rna = {'A': 'A', 'C': 'C', 'G': 'G', 'U': 'U'}
     # iterate through all pdb files and return a list of interaction objects
     for i in range(len(pdb_files)):
         model = parser.get_structure(pdb_files[i],pdb_files[i])[0]
+        sequence_a = ""
+        sequence_b = ""
+        sequence = ""
         ppb=PPBuilder()
-        # build the peptide to obtain the sequences of the chains
         peptide = ppb.build_peptides(model)
-        sequence_a = peptide[0].get_sequence()
-        sequence_b = peptide[1].get_sequence()
+        for chain in model.get_chains():
+            for res in chain.get_residues():
+                if res.resname in protein:
+                    if sequence_a:
+                        if 1 in peptide:
+                            sequence_b = peptide[1].get_sequence()
+                        else:
+                            sequence_b = peptide[0].get_sequence()
+                    else:
+                        sequence_a = peptide[0].get_sequence()
+                if res.resname.strip(" ") in dna:
+                    sequence = sequence + dna[res.resname.strip(" ")]
+                    if sequence_a:
+                        sequence_b = sequence_b + dna[res.resname.strip(" ")]
+                if res.resname.strip(" ") in rna:
+                    sequence = sequence + rna[res.resname.strip(" ")]
+                    if sequence_a:
+                        sequence_b = sequence_b + rna[res.resname.strip(" ")]
+            if sequence_a == "" and sequence:
+                sequence_a = sequence
         # build up the list of chains for each interaction
         biopy_chain_a, biopy_chain_b = model.get_chains()
         interacting_a = InteractingChain(biopy_chain_a, i, sequence_a, biopy_chain_b)
