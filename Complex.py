@@ -117,7 +117,8 @@ class Complex(object):
                     len(option_complex.get_chains()) == protein_limit or \
                         option_complex.stoich_is_complete(stoich):
                     print("returning the final complex!")
-                    return best_complex
+                    if len(option_complex.get_chains()) > len(self.__chains):
+                        best_complex = option_complex
                     # if Z-Score for option complex is lower than for the current best complex replace it
                     # if option_complex.calc_z_score < best_complex.calc_z_score:
                     #     best_complex = option_complex    
@@ -129,7 +130,6 @@ class Complex(object):
                     print("recursion!")
                     option_complex.create_macrocomplex(chain_list, protein_limit, stoich, updated_numbers)
         return best_complex
-
 
     def superimpose(self, chain_to_superimp, chain_list, stoich, number_list):
         # if no complex can be created with the requested chain it returns None
