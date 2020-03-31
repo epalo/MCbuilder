@@ -114,11 +114,11 @@ class Complex(object):
                 # or reached threshold
                 # or reached stoichiometry
                 print("stoich of current complex after superimposition:", option_complex.get_stoich_complex())
-                if (not self.get_superimpose_options(chain_list)) or \
-                    len(option_complex.get_chains()) == protein_limit or \
+                if  len(option_complex.get_chains()) == protein_limit or \
                         option_complex.stoich_is_complete(stoich):
                     print("returning the final complex!")
-                    return best_complex
+                    print("Length of best complex:",len(option_complex.get_chains()))
+                    return option_complex
                     # if Z-Score for option complex is lower than for the current best complex replace it
                     # if option_complex.calc_z_score < best_complex.calc_z_score:
                     #     best_complex = option_complex
@@ -128,6 +128,13 @@ class Complex(object):
                     self.__logger.warning(f"Currently in complex: {currently}")
                     self.__logger.warning("recursion!")
                     print("recursion!")
+                    new_complex = option_complex.create_macrocomplex(chain_list, protein_limit, stoich, updated_numbers)
+                    if len(new_complex.get_chains()) > len(best_complex.get_chains()):
+                        best_complex = option_complex
+        len(best_complex.get_chains())
+        return best_complex
+
+    def superimpose(self, chain_to_superimp, chain_list, stoich, number_list):
                     option_complex.create_macrocomplex(chain_list, protein_limit, stoich, updated_numbers, initial_chains)
         return best_complex
 
