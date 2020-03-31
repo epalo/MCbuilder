@@ -134,7 +134,6 @@ def process_input():
 
     return (fasta_files, pdb_files, log)
 
-#
 def create_output_PDB(best_complex):
     """ Create a PDB with the final complex """
     io = PDBIO()
