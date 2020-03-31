@@ -83,15 +83,12 @@ class Complex(object):
     # returns a list with all possible chains that can be added to a current complex
     def get_superimpose_options(self, chain_list):
         superimpose_options = []
-        superimpose_options_verbose = ''
         for chain in self.__chains:
             similar_chains = chain.get_homo_chains(chain_list)
             superimpose_options = superimpose_options + similar_chains
-        for option in superimpose_options:
-            superimpose_options_verbose = superimpose_options_verbose + " " + option.get_biopy_chain().get_id()
         return superimpose_options
 
-    def create_macrocomplex(self, chain_list, protein_limit, stoich):
+    def create_macrocomplex(self, chain_list, protein_limit, stoich, number_list):
         # superimpose_options = get_superimpose_options(current_complex)
         # # print("best_complex",best_complex)
         # # starting complex has no superimposition options
@@ -106,7 +103,7 @@ class Complex(object):
             print("option from complex", option)
             self.__logger.info(f"Attempting to superimpose chain {option.get_biopy_chain().get_id()}")
             print("stoich of current complex before superimposition:", self.__stoich_complex)
-            option_complex = self.superimpose(option, chain_list, stoich)
+            option_complex, updated_numbers = self.superimpose(option, chain_list, stoich, number_list)
             # don't go into recursion of there is no option-complex found 
             if (option_complex == None):
                 self.__logger.warning("The current option could not be added!")
@@ -130,11 +127,11 @@ class Complex(object):
                     self.__logger.warning(f"Currently in complex: {currently}")
                     self.__logger.warning("recursion!")
                     print("recursion!")
-                    option_complex.create_macrocomplex(chain_list, protein_limit, stoich)
+                    option_complex.create_macrocomplex(chain_list, protein_limit, stoich, updated_numbers)
         return best_complex
 
 
-    def superimpose(self, chain_to_superimp, chain_list, stoich):
+    def superimpose(self, chain_to_superimp, chain_list, stoich, number_list):
         # if no complex can be created with the requested chain it returns None
         created_complex = None
         superimposition_options = chain_to_superimp.get_homo_chains(chain_list)
@@ -172,7 +169,8 @@ class Complex(object):
 
         # apply the superimposition matrix to chain_b and its interacting chain
         if not (best_chain_position == None):
-            number_list = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+            #new_id_list = list(string.ascii_letters)
+            #reached_structure = {}
             new_id = random.choice(number_list)
             best_chain_position.get_biopy_chain().id = new_id
             number_list.remove(new_id)
@@ -201,7 +199,7 @@ class Complex(object):
                 print("stoich is overfull!!!")
                 created_complex = None
         print("returned complex:", created_complex)
-        return created_complex
+        return created_complex, number_list
     
     def is_clashing(self, chain):
         backbone = {"CA", "C1\'"}

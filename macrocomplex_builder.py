@@ -10,6 +10,7 @@ import random , copy
 from InteractingChain import InteractingChain
 from Complex import Complex
 from Interaction import Interaction
+import string
 
 #main function that is called when running the script
 if __name__ == "__main__":
@@ -119,7 +120,8 @@ if __name__ == "__main__":
     print("Start",starting_interaction.get_chain_b().get_biopy_chain().get_id())
     
     # BUILDING THE MODEL WITH THE STARTING COMPLEX
-    best_complex = starting_complex.create_macrocomplex(homo_chains,protein_limit, stoichiometry)
+    number_list = list(range(0,10000))
+    best_complex = starting_complex.create_macrocomplex(homo_chains,protein_limit, stoichiometry, number_list)
     print("ready to print")
     UserInteraction.create_output_PDB(best_complex)
     exit(1)
