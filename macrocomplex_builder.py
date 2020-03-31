@@ -51,11 +51,11 @@ if __name__ == "__main__":
         # create a list that contains all the interacting chains
         chains.append(interacting_a)
         chains.append(interacting_b)
-    
+
     log.info("PDB interactions processed")
 
-    
-    # SEQUENCE ALIGNMENTS 
+
+    # SEQUENCE ALIGNMENTS
 
     # find the sequences that occur multiple times in pdb files and save all proteins for each structural aln in a separate list
     clashes_dict = {}
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     #     for el in elem:
     #         print(el.get_biopy_chain().get_id())
     log.info(f"{len(homo_chains)} homologous chains found")
-    
+
     # SETTING THE STOICHIOMETRY
     stoichiometry = UserInteraction.get_stoichiometry()
     print(stoichiometry)
@@ -118,13 +118,10 @@ if __name__ == "__main__":
         starting_complex.add_to_stoich(starting_interaction.get_chain_b(), homo_chains)
     print("Start",starting_interaction.get_chain_a().get_biopy_chain().get_id())
     print("Start",starting_interaction.get_chain_b().get_biopy_chain().get_id())
-    
+
     # BUILDING THE MODEL WITH THE STARTING COMPLEX
     number_list = list(range(0,10000))
-    best_complex = starting_complex.create_macrocomplex(homo_chains,protein_limit, stoichiometry, number_list)
+    best_complex = starting_complex.create_macrocomplex(homo_chains,protein_limit, stoichiometry, number_list, chains)
     print("ready to print")
     UserInteraction.create_output_PDB(best_complex)
     exit(1)
-
-
-
