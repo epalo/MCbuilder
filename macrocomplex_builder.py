@@ -12,6 +12,75 @@ from Complex import Complex
 from Interaction import Interaction
 import string
 
+######################################################
+# HELPER FUNCTIONS
+
+protein = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
+            'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N',
+            'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W',
+            'ALA': 'A', 'VAL': 'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M', "UNK": "X"}
+dna = {'DA': 'A', 'DC': 'C', 'DG': 'G', 'DT': 'T'}
+rna = {'A': 'A', 'C': 'C', 'G': 'G', 'U': 'U'}
+
+def all_residues_in_dict(chain, type_dict):
+    for residue in chain.get_residues():
+        if not residue.resname in type_dict:
+            return False
+    return True
+    
+def build_sequence(chain, type_dict):
+    sequence = ""
+    for residue in chain.get_residues():
+        sequence = sequence + type_dict[residue.resname.strip(" ")]
+    return sequence
+
+def get_sequence_for_chain(chain):
+    if all_residues_in_dict(chain, dna):
+        # all residues are dna
+        return build_sequence(chain, dna)
+    if all_residues_in_dict(chain, rna):
+        # all residues are rna
+        return build_sequence(chain,rna)
+    else:
+        ppb=PPBuilder()
+        peptide = ppb.build_peptides(chain)
+        return peptide[0].get_sequence()
+
+# function gets a list of interacting chains and returns a list of lists with homologous chains
+def find_homologous_chains(chains):
+    homologous_chains = []
+    for i in range(len(chains)):
+        for j in range(i):
+            # just do sequence alignments if chains are not in the same interacting pair
+            if (chains[i].get_file_index() != chains[j].get_file_index()):
+                # find the best alignment for two homo_chains (first element of list of alignments)
+                alignment = pairwise2.align.globalxx(chains[i].get_sequence(), chains[j].get_sequence())[0]
+                # aln_seq_1 = alignment[0]
+                # aln_seq_2 = alignment[1]
+                #al_length = len(alignment[0])
+                #ident = sum(base1 == base2 for base1, base2 in zip(aln_seq_1, aln_seq_2))
+                if alignment[2]/alignment[4] >= 0.95:
+                    inserted = True
+                    log.info(f"{chains[i].get_biopy_chain().get_id()} and {chains[j].get_biopy_chain().get_id()} have 95% or more sequence identity")
+                    for similar_seq in homologous_chains:
+                        if chains[i] in similar_seq:
+                            if chains[j] not in similar_seq:
+                                similar_seq.append(chains[j])
+                                inserted = False
+                                break
+                        if chains[j] in similar_seq:
+                            if chains[i] not in similar_seq:
+                                similar_seq.append(chains[i])
+                                inserted = False
+                                break
+                        if chains[j] in similar_seq and chains[i] in similar_seq:
+                            inserted = False
+                            break
+                    if inserted:
+                        homologous_chains.append([chains[i], chains[j]])
+    return homologous_chains
+
+
 #main function that is called when running the script
 if __name__ == "__main__":
     """ Macrocomplex builder based on structure superimposition."""
@@ -116,73 +185,3 @@ if __name__ == "__main__":
     UserInteraction.create_output_PDB(best_complex)
     exit(1)
 
-######################################################
-# HELPER FUNCTIONS
-
-protein = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
-            'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N',
-            'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W',
-            'ALA': 'A', 'VAL': 'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M', "UNK": "X"}
-dna = {'DA': 'A', 'DC': 'C', 'DG': 'G', 'DT': 'T'}
-rna = {'A': 'A', 'C': 'C', 'G': 'G', 'U': 'U'}
-
-def all_residues_in_dict(chain, type_dict):
-    for residue in chain.get_residues():
-        if not residue.resname in type_dict:
-            return False
-    return True
-    
-def build_sequence(chain, type_dict):
-    sequence = ""
-    for residue in chain.get_residues():
-        sequence = sequence + type_dict[residue.resname.strip(" ")]
-    return sequence
-
-def get_sequence_for_chain(chain):
-    if all_residues_in_dict(chain, protein):
-        # all residues are aminoacids
-        ppb=PPBuilder()
-        peptide = ppb.build_peptides(chain)
-        return peptide[0].get_sequence()
-    if all_residues_in_dict(chain, dna):
-        # all residues are dna
-        return build_sequence(chain, dna)
-    if all_residues_in_dict(chain, rna):
-        # all residues are rna
-        return build_sequence(chain,rna)
-    else:
-        print("exception!")
-
-# function gets a list of interacting chains and returns a list of lists with homologous chains
-def find_homologous_chains(chains):
-    homologous_chains = []
-    for i in range(len(chains)):
-        for j in range(i):
-            # just do sequence alignments if chains are not in the same interacting pair
-            if (chains[i].get_file_index() != chains[j].get_file_index()):
-                # find the best alignment for two homo_chains (first element of list of alignments)
-                alignment = pairwise2.align.globalxx(chains[i].get_sequence(), chains[j].get_sequence())[0]
-                aln_seq_1 = alignment[0]
-                aln_seq_2 = alignment[1]
-                #al_length = len(alignment[0])
-                #ident = sum(base1 == base2 for base1, base2 in zip(aln_seq_1, aln_seq_2))
-                if alignment[2]/alignment[4] >= 0.95:
-                    inserted = True
-                    log.info(f"{chains[i].get_biopy_chain().get_id()} and {chains[j].get_biopy_chain().get_id()} have 95% or more sequence identity")
-                    for similar_seq in homologous_chains:
-                        if chains[i] in similar_seq:
-                            if chains[j] not in similar_seq:
-                                similar_seq.append(chains[j])
-                                inserted = False
-                                break
-                        if chains[j] in similar_seq:
-                            if chains[i] not in similar_seq:
-                                similar_seq.append(chains[i])
-                                inserted = False
-                                break
-                        if chains[j] in similar_seq and chains[i] in similar_seq:
-                            inserted = False
-                            break
-                    if inserted:
-                        homologous_chains.append([chains[i], chains[j]])
-    return homologous_chains
