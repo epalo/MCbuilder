@@ -1,6 +1,8 @@
 ﻿__pycache__
 mbuilder.log
 mbuilder2.log
-output.pdb
-ouput2.pdb
 test.py
+test2.py
+example
+readthrough.txt
+*.pdb

@@ -32,7 +32,7 @@ class InteractingChain():
         backbone = {"CA", "C1\'"}
         model_atoms = [atom for atom in self.get_biopy_chain().get_atoms() if atom.id in backbone]
         return model_atoms
-    
+
     # returns a list of chains out of a list of chains that are similar to the input chain
     def get_homo_chains(self, list_of_chains):
         to_return = []

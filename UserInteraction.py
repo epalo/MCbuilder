@@ -49,6 +49,12 @@ parser.add_argument('-l', '--limit',
                     type=int,
                     help="Limit number of chains in the protein")
 
+parser.add_argument('-c', '--complete',
+                    dest="complete",
+                    action="store_true",
+                    default=False,
+                    help="Run full recutsion. Explores all possibilities")
+
 options = parser.parse_args()
 
 
@@ -60,6 +66,9 @@ def get_verbose_option():
 
 def get_output_directory():
     return options.outfile
+
+def get_runtype_option():
+    return options.complete
 
 def get_stoichiometry():
     if options.stoich:

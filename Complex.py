@@ -1,6 +1,8 @@
 from Bio import SeqIO, PDB, pairwise2
 import copy, random
 from InteractingChain import InteractingChain
+import UserInteraction
+import string
 
 class Complex(object):
 
@@ -86,21 +88,60 @@ class Complex(object):
         for chain in self.__chains:
             similar_chains = chain.get_homo_chains(chain_list)
             superimpose_options = superimpose_options + similar_chains
+
         return superimpose_options
 
     def create_macrocomplex(self, chain_list, protein_limit, stoich, number_list, initial_chains):
-
-        # superimpose_options = get_superimpose_options(current_complex)
-        # # print("best_complex",best_complex)
-        # # starting complex has no superimposition options
-        # if not superimpose_options:
-        #     # then just return the starting complex
-        #     log.info("There are no superimposition options available")
-        #     # print("no options!")
-        #     return best_complex
-        # else:
         best_complex = self
-        for option in [option for option in self.get_superimpose_options(chain_list) if option in initial_chains]:
+        current_complex = self
+        option_complex = self
+
+        # for option in [option for option in self.get_superimpose_options(chain_list) if option in initial_chains]:
+        for option in current_complex.get_chains():
+            # print("option from complex", option.get_biopy_chain())
+            # self.__logger.info(f"Attempting to superimpose chain {option.get_biopy_chain().get_id()}")
+            # print("stoich of current complex before superimposition:", self.__stoich_complex)
+            option_complex, updated_numbers = self.superimpose(option, chain_list, stoich, number_list, initial_chains)
+            # don't go into recursion of there is no option-complex found
+            if (option_complex == None):
+                self.__logger.warning("The current option could not be added!")
+            else:
+                self.__logger.info("Option complex was be found!")
+                # no other superimposition options for the complex available (leaf)
+                # or reached threshold
+                # or reached stoichiometry
+                # print("stoich of current complex after superimposition:", option_complex.get_stoich_complex())
+        if  len(option_complex.get_chains()) == protein_limit or \
+                option_complex.stoich_is_complete(stoich) or \
+                len(option_complex.get_chains()) == len(current_complex.get_chains()):
+
+            new_id_list = list(string.ascii_letters)
+            for chain in option_complex.get_model().get_chains():
+                chain.id = random.choice(new_id_list)
+                new_id_list.remove(chain.id)
+
+            UserInteraction.create_output_PDB(option_complex)
+            exit(1)
+            return option_complex
+            # if Z-Score for option complex is lower than for the current best complex replace it
+            # if option_complex.calc_z_score < best_complex.calc_z_score:
+            #     best_complex = option_complex
+        else:
+            # if we didn't reach the leaf yet, recursive call
+            currently = [chain for chain in option_complex.get_model().get_chains()]
+            self.__logger.warning(f"Currently in complex: {currently}")
+            self.__logger.warning("recursion!")
+            print("recursion!")
+            new_complex = option_complex.create_macrocomplex(chain_list, protein_limit, stoich, updated_numbers, initial_chains)
+            if len(new_complex.get_chains()) > len(best_complex.get_chains()):
+                best_complex = option_complex
+        len(best_complex.get_chains())
+        return best_complex
+
+    def create_macrocomplex_full(self, chain_list, protein_limit, stoich, number_list, initial_chains):
+
+        best_complex = self
+        for option in self.get_superimpose_options(chain_list):
             # print("option from complex", option.get_biopy_chain())
             self.__logger.info(f"Attempting to superimpose chain {option.get_biopy_chain().get_id()}")
             # print("stoich of current complex before superimposition:", self.__stoich_complex)
@@ -116,8 +157,14 @@ class Complex(object):
                 # print("stoich of current complex after superimposition:", option_complex.get_stoich_complex())
                 if  len(option_complex.get_chains()) == protein_limit or \
                         option_complex.stoich_is_complete(stoich):
-                    # print("returning the final complex!")
-                    # print("Length of best complex:",len(option_complex.get_chains()))
+                    print(option_complex.get_chains())
+                    # new_id_list = list(string.ascii_letters)
+                    # for chain in option_complex.get_model().get_chains():
+                    #     chain.id = random.choice(new_id_list)
+                    #     new_id_list.remove(chain.id)
+                    # print(option_complex.get_chains())
+                    # UserInteraction.create_output_PDB(option_complex)
+                    # exit(1)
                     return option_complex
                     # if Z-Score for option complex is lower than for the current best complex replace it
                     # if option_complex.calc_z_score < best_complex.calc_z_score:
@@ -128,38 +175,30 @@ class Complex(object):
                     self.__logger.warning(f"Currently in complex: {currently}")
                     self.__logger.warning("recursion!")
                     print("recursion!")
-                    new_complex = option_complex.create_macrocomplex(chain_list, protein_limit, stoich, updated_numbers, initial_chains)
+                    new_complex = option_complex.create_macrocomplex_full(chain_list, protein_limit, stoich, updated_numbers, initial_chains)
                     if len(new_complex.get_chains()) > len(best_complex.get_chains()):
                         best_complex = option_complex
         len(best_complex.get_chains())
         return best_complex
-    #
-    # def superimpose(self, chain_to_superimp, chain_list, stoich, number_list):
-    #         option_complex.create_macrocomplex(chain_list, protein_limit, stoich, updated_numbers, initial_chains)
-    #     return best_complex
 
 
     def superimpose(self, chain_to_superimp, chain_list, stoich, number_list, initial_chains):
         # if no complex can be created with the requested chain it returns None
+
         created_complex = None
-        superimposition_options = [chain for chain in chain_to_superimp.get_homo_chains(chain_list) if chain in initial_chains]
-        # print(superimposition_options)
+
+        superimposition_options = [chain for chain in chain_to_superimp.get_homo_chains(chain_list)]
+
         superimp = PDB.Superimposer()
         best_chain_position = None
         best_rmsd = 0.5
-        # if superimposition_options == []:
-            # print("CHAIN THATS NOT WORKING:", chain_to_superimp.get_biopy_chain().get_id())
+
         for chain in superimposition_options:
             atoms_a = []
             atoms_b = []
             atoms_a = chain_to_superimp.get_ca_atoms()
-            # for elem in chain.get_biopy_chain().get_atoms():
-            #     atoms_a.append(elem)
-            # print("atoms a:",atoms_a)
             atoms_b = chain.get_ca_atoms()
-            # for elem in chain_to_superimp.get_biopy_chain().get_atoms():
-            #     atoms_b.append(elem)
-            # print("atoms b:",atoms_b)
+
             # setting fixed and moving atoms, calculate the superimposition matrix
             superimp.set_atoms(atoms_a, atoms_b)
             rmsd = superimp.rms
@@ -186,28 +225,17 @@ class Complex(object):
             self.update_homo_chains(original, best_chain_position, chain_list)
             created_complex = copy.deepcopy(self)
 
-            try:
-                created_complex.add_chain(best_chain_position)
-                # print(created_complex)
-                # print("Stoich before adding:",created_complex.get_stoich_complex())
-                # print("checking for id:", best_chain_position.get_biopy_chain().get_id())
-                # print("chain object:", best_chain_position)
+            created_complex.add_chain(best_chain_position)
                 # if the added chain is specified in the stoichiometry change the counter of the added chain
-                created_complex.add_to_stoich(best_chain_position,chain_list)
-                # print("Stoich after adding:",created_complex.get_stoich_complex())
-                # print(best_chain_position.get_biopy_chain().get_id())
-                # print(best_chain_position.get_interacting_chain().get_biopy_chain().get_id())
-                # print(best_rmsd)
+            created_complex.add_to_stoich(best_chain_position,chain_list)
 
-            except PDB.PDBExceptions.PDBConstructionException:
-                created_complex.add_chain(best_chain_position)
-            # created_complex.add_chain(chain_b.get_interacting_chain())
-            # print(created_complex)
+
             # if stoichiometry limits are overfull set the option complex to None
             if created_complex.stoich_is_overfull(stoich):
                 # print("stoich is overfull!!!")
                 created_complex = None
-        # print("returned complex:", created_complex)
+        else:
+            created_complex = self
         return created_complex, number_list
 
     def is_clashing(self, chain):
