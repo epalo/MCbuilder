@@ -15,10 +15,7 @@ import string
 ######################################################
 # HELPER FUNCTIONS
 
-protein = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
-            'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N',
-            'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W',
-            'ALA': 'A', 'VAL': 'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M', "UNK": "X"}
+
 dna = {'DA': 'A', 'DC': 'C', 'DG': 'G', 'DT': 'T'}
 rna = {'A': 'A', 'C': 'C', 'G': 'G', 'U': 'U'}
 
@@ -27,7 +24,7 @@ def all_residues_in_dict(chain, type_dict):
         if not residue.resname.strip() in type_dict:
             return False
     return True
-    
+
 def build_sequence(chain, type_dict):
     sequence = ""
     for residue in chain.get_residues():
@@ -35,17 +32,17 @@ def build_sequence(chain, type_dict):
     return sequence
 
 def get_sequence_for_chain(chain):
-    if all_residues_in_dict(chain, protein):
-        # all residues are aminoacids
-        ppb=PPBuilder()
-        peptide = ppb.build_peptides(chain)
-        return peptide[0].get_sequence()
     if all_residues_in_dict(chain, dna):
         # all residues are dna
         return build_sequence(chain, dna)
     if all_residues_in_dict(chain, rna):
         # all residues are rna
         return build_sequence(chain,rna)
+
+    ppb=PPBuilder()
+    peptide = ppb.build_peptides(chain)
+    if peptide:
+        return peptide[0].get_sequence()
     else:
         raise Exception("This program does not support heteroatoms")
 
@@ -91,7 +88,7 @@ if __name__ == "__main__":
     # obtaining fasta and pdb files
     fasta_files, pdb_files, log = UserInteraction.process_input()
     protein_limit = UserInteraction.get_protein_limit()
-    
+
     ######################################################
     #  PARSING DATA
 
@@ -111,7 +108,7 @@ if __name__ == "__main__":
   # iterate through all pdb files and return a list of interaction objects
     for i in range(len(pdb_files)):
         model = parser.get_structure(pdb_files[i],pdb_files[i])[0]
-        # get sequences 
+        # get sequences
         chain_a, chain_b = model.get_chains()
         sequence_a = get_sequence_for_chain(chain_a)
         sequence_b = get_sequence_for_chain(chain_b)
@@ -131,7 +128,7 @@ if __name__ == "__main__":
     ######################################################
     # SEQUENCE ALIGNMENTS
     homo_chains = find_homologous_chains(chains)
-	
+
     log.info(f"{len(homo_chains)} homologous chains found")
 
     ######################################################
@@ -151,7 +148,7 @@ if __name__ == "__main__":
         if sum > interaction_sum :
             starting_interaction = interaction
             interaction_sum = sum
-            
+
     starting_complex = Complex(starting_interaction.get_model(), [starting_interaction.get_chain_a(), starting_interaction.get_chain_b()], log)
     if stoichiometry:
         starting_complex.set_stoich_complex(stoichiometry)
@@ -185,4 +182,3 @@ if __name__ == "__main__":
         new_id_list.remove(chain.id)
     UserInteraction.create_output_PDB(best_complex)
     exit(1)
-
