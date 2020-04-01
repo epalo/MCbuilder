@@ -36,7 +36,12 @@ Moreover, an accurate superimposition does not imply that a third chain is in th
 To judge the presence of steric clashes the VanDerWaals radius is used, any atom from a different chain that is within a certain radius of an alpha carbon will be denoted as a clash. There are several non-covalent bonds found in proteins, such as hydrogen bonding, these types of interactions mean that the distance between two nuclei can be reduced. To reduce the impact of this, only the alpha carbon radii are measured since these are not able to form hydrogen bonds. Though their neighbouring atoms may be able to, this will have less of an impact on the carbon interactions.
 
 Finally, PDB files often only have a part of the protein structure and so we can rebuild the complete quaternary structure by using the relevant amino acid sequences, from FASTA files, the build-out our model of the structure.
+
 ## Algorithm
+
+Once we have run quality control through the input files, assutring that the files introduced are either psb or fasta files we initiate the
+
+
 como todavia no tenemos bien diseñado el alg, no se bien que poner.
 ### Input
 
