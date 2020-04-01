@@ -16,11 +16,14 @@ import string
 if __name__ == "__main__":
     """ Macrocomplex builder based on structure superimposition."""
 
-    # USER INPUT
+    ######################################################
+    #  USER INPUT
     # obtaining fasta and pdb files
     fasta_files, pdb_files, log = UserInteraction.process_input()
     protein_limit = UserInteraction.get_protein_limit()
-    # PARSING OF DATA
+    
+    ######################################################
+    #  PARSING DATA
 
     # TODO: insert case of empty fasta file
     # fasta files still needed????
@@ -34,40 +37,6 @@ if __name__ == "__main__":
     interactions = []
     chains = []
 
-# TODO: we have to put this dictionaries somewhere, maybe we have to create a function or a class for all this.
-    protein = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
-               'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N',
-               'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W',
-               'ALA': 'A', 'VAL': 'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M', "UNK": "X"}
-    dna = {'DA': 'A', 'DC': 'C', 'DG': 'G', 'DT': 'T'}
-    rna = {'A': 'A', 'C': 'C', 'G': 'G', 'U': 'U'}
-
-    def all_residues_in_list(chain, type_dict):
-        for residue in chain.get_residues():
-            if not residue.resname in type_dict:
-                return False
-        return True
-        
-    def build_sequence(chain, type_dict):
-        sequence = ""
-        for residue in chain.get_residues():
-            sequence = sequence + type_dict[residue.resname.strip(" ")]
-        return sequence
-    
-    def get_sequence_for_chain(chain):
-        if all_residues_in_list(chain, protein):
-            # all residues are aminoacids
-            ppb=PPBuilder()
-            peptide = ppb.build_peptides(chain)
-            return peptide[0].get_sequence()
-        if all_residues_in_list(chain, dna):
-            # all residues are dna
-            return build_sequence(chain, dna)
-        if all_residues_in_list(chain, rna):
-            # all residues are rna
-            return build_sequence(chain,rna)
-        else:
-            print("exception!")
 
   # iterate through all pdb files and return a list of interaction objects
     for i in range(len(pdb_files)):
@@ -88,65 +57,31 @@ if __name__ == "__main__":
         chains.append(interacting_a)
         chains.append(interacting_b)
 
-    log.info("PDB interactions processed")
-
-
+    ######################################################
     # SEQUENCE ALIGNMENTS
+    homo_chains = find_homologous_chains(chains)
 
-    # find the sequences that occur multiple times in pdb files and save all proteins for each structural aln in a separate list
-    clashes_dict = {}
-    homo_chains = []
-    for i in range(len(chains)):
-        for m in range(i):
-            # just check sequence alignments if homo_chains are not in the same pair
-            if (chains[i].get_file_index() != chains[m].get_file_index()):
-                # find the best alignment for two homo_chains (first element of list of alignments)
-                alignment = pairwise2.align.globalxx(chains[i].get_sequence(), chains[m].get_sequence())[0]
-                aln_seq_1 = alignment[0]
-                aln_seq_2 = alignment[1]
-                al_length = len(alignment[0])
-                ident = sum(base1 == base2 for base1, base2 in zip(aln_seq_1, aln_seq_2))
-                if ident/al_length >= 0.95:
-                    inserted = True
-                    log.info(f"{chains[i].get_biopy_chain().get_id()} and {chains[m].get_biopy_chain().get_id()} have 95% or more sequence identity")
-                    for similar_seq in homo_chains:
-                        if chains[i] in similar_seq:
-                            if chains[m] not in similar_seq:
-                                similar_seq.append(chains[m])
-                                inserted = False
-                                break
-                        if chains[m] in similar_seq:
-                            if chains[i] not in similar_seq:
-                                similar_seq.append(chains[i])
-                                inserted = False
-                                break
-                        if chains[m] in similar_seq and chains[i] in similar_seq:
-                            inserted = False
-                            break
-                    if inserted:
-                        homo_chains.append([chains[i], chains[m]])
-
-    # for elem in homo_chains:
-    #     print("Next list:")
-    #     for el in elem:
-    #         print(el.get_biopy_chain().get_id())
+    log.info("PDB interactions processed")
     log.info(f"{len(homo_chains)} homologous chains found")
 
+    ######################################################
     # SETTING THE STOICHIOMETRY
     stoichiometry = UserInteraction.get_stoichiometry()
     print(stoichiometry)
     log.info(f"Stoichiometry has been set.{stoichiometry}")
 
-    # the starting_model is the interaction with the most homologous chains to both chains
+    ######################################################
+    #SETTING THE STARTING COMPLEX
+
+    #the starting_model is the interaction with the most homologous chains to both chains
     starting_model= None
     interaction_sum = 0
-    # find interaction with the most homo_chains
     for interaction in interactions:
         sum = len(interaction.get_chain_a().get_homo_chains(homo_chains)) + len(interaction.get_chain_b().get_homo_chains(homo_chains))
         if sum > interaction_sum :
             starting_interaction = interaction
             interaction_sum = sum
-        # set starting complex with stoichometry
+            
     starting_complex = Complex(starting_interaction.get_model(), [starting_interaction.get_chain_a(), starting_interaction.get_chain_b()], log)
     if stoichiometry:
         starting_complex.set_stoich_complex(stoichiometry)
@@ -163,7 +98,9 @@ if __name__ == "__main__":
     # for chain in best_complex.get_model().get_chains():
     #     print("CHAIN IDS", chain.get_id())
 
-    # rename IDS to one
+    ######################################################
+    # BUILDING THE COMPLEX
+
     number_list = list(range(0,10000))
     if UserInteraction.get_runtype_option():
         best_complex = starting_complex.create_macrocomplex_full(homo_chains,protein_limit, stoichiometry, number_list, homo_chains)
@@ -178,3 +115,75 @@ if __name__ == "__main__":
         new_id_list.remove(chain.id)
     UserInteraction.create_output_PDB(best_complex)
     exit(1)
+
+######################################################
+# HELPER FUNCTIONS
+
+protein = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
+            'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N',
+            'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W',
+            'ALA': 'A', 'VAL': 'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M', "UNK": "X"}
+dna = {'DA': 'A', 'DC': 'C', 'DG': 'G', 'DT': 'T'}
+rna = {'A': 'A', 'C': 'C', 'G': 'G', 'U': 'U'}
+
+def all_residues_in_dict(chain, type_dict):
+    for residue in chain.get_residues():
+        if not residue.resname in type_dict:
+            return False
+    return True
+    
+def build_sequence(chain, type_dict):
+    sequence = ""
+    for residue in chain.get_residues():
+        sequence = sequence + type_dict[residue.resname.strip(" ")]
+    return sequence
+
+def get_sequence_for_chain(chain):
+    if all_residues_in_dict(chain, protein):
+        # all residues are aminoacids
+        ppb=PPBuilder()
+        peptide = ppb.build_peptides(chain)
+        return peptide[0].get_sequence()
+    if all_residues_in_dict(chain, dna):
+        # all residues are dna
+        return build_sequence(chain, dna)
+    if all_residues_in_dict(chain, rna):
+        # all residues are rna
+        return build_sequence(chain,rna)
+    else:
+        print("exception!")
+
+# function gets a list of interacting chains and returns a list of lists with homologous chains
+def find_homologous_chains(chains):
+    homologous_chains = []
+    for i in range(len(chains)):
+        for j in range(i):
+            # just do sequence alignments if chains are not in the same interacting pair
+            if (chains[i].get_file_index() != chains[j].get_file_index()):
+                # find the best alignment for two homo_chains (first element of list of alignments)
+                alignment = pairwise2.align.globalxx(chains[i].get_sequence(), chains[j].get_sequence())[0]
+                aln_seq_1 = alignment[0]
+                aln_seq_2 = alignment[1]
+                al_length = len(alignment[0])
+                # calculate the identity of the alignment
+                ident = sum(base1 == base2 for base1, base2 in zip(aln_seq_1, aln_seq_2))
+                if ident/al_length >= 0.95:
+                    inserted = True
+                    log.info(f"{chains[i].get_biopy_chain().get_id()} and {chains[j].get_biopy_chain().get_id()} have 95% or more sequence identity")
+                    for similar_seq in homologous_chains:
+                        if chains[i] in similar_seq:
+                            if chains[j] not in similar_seq:
+                                similar_seq.append(chains[j])
+                                inserted = False
+                                break
+                        if chains[j] in similar_seq:
+                            if chains[i] not in similar_seq:
+                                similar_seq.append(chains[i])
+                                inserted = False
+                                break
+                        if chains[j] in similar_seq and chains[i] in similar_seq:
+                            inserted = False
+                            break
+                    if inserted:
+                        homologous_chains.append([chains[i], chains[j]])
+    return homologous_chains
