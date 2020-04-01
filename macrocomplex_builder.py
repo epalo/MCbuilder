@@ -96,9 +96,9 @@ if __name__ == "__main__":
                 alignment = pairwise2.align.globalxx(chains[i].get_sequence(), chains[m].get_sequence())[0]
                 aln_seq_1 = alignment[0]
                 aln_seq_2 = alignment[1]
-                al_length = len(alignment[0])
-                ident = sum(base1 == base2 for base1, base2 in zip(aln_seq_1, aln_seq_2))
-                if ident/al_length >= 0.95:
+                # al_length = len(alignment[0])
+                # ident = sum(base1 == base2 for base1, base2 in zip(aln_seq_1, aln_seq_2) if base1 != '-')
+                if alignment[2]/alignment[4] >= 0.95:
                     inserted = True
                     log.info(f"{chains[i].get_biopy_chain().get_id()} and {chains[m].get_biopy_chain().get_id()} have 95% or more sequence identity")
                     for similar_seq in homo_chains:
