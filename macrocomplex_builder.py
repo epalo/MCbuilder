@@ -44,7 +44,8 @@ def get_sequence_for_chain(chain):
     if peptide:
         return peptide[0].get_sequence()
     else:
-        raise Exception("This program does not support heteroatoms")
+        log.warning("This program does not support heteroatoms")
+        return None
 
 # function gets a list of interacting chains and returns a list of lists with homologous chains
 def find_homologous_chains(chains):
@@ -113,6 +114,8 @@ if __name__ == "__main__":
         sequence_a = get_sequence_for_chain(chain_a)
         sequence_b = get_sequence_for_chain(chain_b)
 
+        if sequence_a == None or sequence_b == None:
+            continue
         # build up the list of chains for each interaction
         biopy_chain_a, biopy_chain_b = model.get_chains()
         interacting_a = InteractingChain(biopy_chain_a, i, sequence_a, biopy_chain_b)
