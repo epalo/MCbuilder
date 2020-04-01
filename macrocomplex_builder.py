@@ -24,7 +24,7 @@ rna = {'A': 'A', 'C': 'C', 'G': 'G', 'U': 'U'}
 
 def all_residues_in_dict(chain, type_dict):
     for residue in chain.get_residues():
-        if not residue.resname in type_dict:
+        if not residue.resname.strip() in type_dict:
             return False
     return True
     
@@ -35,6 +35,11 @@ def build_sequence(chain, type_dict):
     return sequence
 
 def get_sequence_for_chain(chain):
+    if all_residues_in_dict(chain, protein):
+        # all residues are aminoacids
+        ppb=PPBuilder()
+        peptide = ppb.build_peptides(chain)
+        return peptide[0].get_sequence()
     if all_residues_in_dict(chain, dna):
         # all residues are dna
         return build_sequence(chain, dna)
@@ -42,9 +47,7 @@ def get_sequence_for_chain(chain):
         # all residues are rna
         return build_sequence(chain,rna)
     else:
-        ppb=PPBuilder()
-        peptide = ppb.build_peptides(chain)
-        return peptide[0].get_sequence()
+        raise Exception("This program does not support heteroatoms")
 
 # function gets a list of interacting chains and returns a list of lists with homologous chains
 def find_homologous_chains(chains):
@@ -55,8 +58,6 @@ def find_homologous_chains(chains):
             if (chains[i].get_file_index() != chains[j].get_file_index()):
                 # find the best alignment for two homo_chains (first element of list of alignments)
                 alignment = pairwise2.align.globalxx(chains[i].get_sequence(), chains[j].get_sequence())[0]
-                # aln_seq_1 = alignment[0]
-                # aln_seq_2 = alignment[1]
                 #al_length = len(alignment[0])
                 #ident = sum(base1 == base2 for base1, base2 in zip(aln_seq_1, aln_seq_2))
                 if alignment[2]/alignment[4] >= 0.95:
