@@ -1,3 +1,5 @@
+
+<div style="text-align: justify">
 # sbi-project
 
 ## Index
@@ -53,7 +55,8 @@ This is the default option. The program will iterate through each chain the curr
 #### Complete
 The functions used in this type of run are the same as those in `Simple` but with some notable procedural differences. The run will loop through any chains that may be superimposed onto the current complex. For each of these it shall check where the chain may be superimposed within the current complex, it will then search for alternatives to _Chain A_ (XXXX DEFINE CHAIN A IN THIS CASE XXXX). For each of these homologous chains it will check which chain has the best RMSD and no clashes. The chain will be added to the complex and at this point, if the end criterion have not been met, the program will run recursively again. In this way the algorithm is exhausting all possible options for the model. This type of run will produce a much larger number of models but since all options have been exhaustively tested they will have greater accuracy.
 
->![Workflow for recursion](recursion_flow.png)
+
+![Workflow for simple recursion](recursion_flow_simple.png)  |  ![Workflow for complete recursion](recursion_flow_complete.png)
 
 ### Superimposition
 For each chain that is introduced into the `superimpose` function the program checks which chains are homologous to it. The program then iterates through these homologous chains and superimposes the homologous chain onto the chain that was introduced into the function. onsidering a default RMSD threshold of 0.5 the returned RMSD is evaluated to consider whether it is lower than the RMSD from previously tested homologous chains. If RMSD is lower then the program will go on to check for clashes.
@@ -88,3 +91,5 @@ Currently the program will not introduce any interactions involving small molecu
 
 ###### 6. No secondary structure modelling
 As long as the PDB files contain the full chain structure the model of the macrocomplex will be produced, in the case that the file only contains a fragment of an interaction or chain the program will not model the remaining structure. This could be implemented if the relevant FASTA files are available, using resources such as `MODELLER` the missing sections could be modeled combing the interaction from the pdb and the predicted secondary structure created from the full protein sequence.
+
+</div>
