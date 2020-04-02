@@ -97,7 +97,7 @@ class Complex(object):
 
 
         # for option in [option for option in self.get_superimpose_options(chain_list) if option in initial_chains]:
-        for option in current_complex.get_chains():
+        for option in [chain for chain in current_complex.get_chains() if chain in initial_chains]:
             # print("option from complex", option.get_biopy_chain())
             # self.__logger.info(f"Attempting to superimpose chain {option.get_biopy_chain().get_id()}")
             # print("stoich of current complex before superimposition:", self.__stoich_complex)
@@ -187,11 +187,11 @@ class Complex(object):
 
         created_complex = None
 
-        superimposition_options = [chain for chain in chain_to_superimp.get_homo_chains(chain_list)]
+        superimposition_options = [chain for chain in chain_to_superimp.get_homo_chains(chain_list) if chain in initial_chains]
 
         superimp = PDB.Superimposer()
         best_chain_position = None
-        best_rmsd = 0.5
+        best_rmsd = UserInteraction.get_rmsd_threshold()
 
         for chain in superimposition_options:
             atoms_a = []
@@ -209,7 +209,7 @@ class Complex(object):
                 if diff/len(atoms_b) >= 0.1:
                     continue
                 atoms_b = atoms_b[:-diff]
-        
+
             # setting fixed and moving atoms, calculate the superimposition matrix
             superimp.set_atoms(atoms_a, atoms_b)
             rmsd = superimp.rms
@@ -276,10 +276,7 @@ class Complex(object):
         return superimpose_positions
 
     def update_homo_chains(self, original, best_chain_position, chain_list):
-        i=0
         for list in chain_list:
             chain_names = [chain.get_biopy_chain() for chain in list]
             if original.get_biopy_chain() in chain_names:
-                break
-            i+=1
-        chain_list[i].append(best_chain_position)
+                list.append(best_chain_position)

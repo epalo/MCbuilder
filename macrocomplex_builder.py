@@ -103,6 +103,8 @@ if __name__ == "__main__":
 
     # TODO: insert case of empty fasta file
     # fasta files still needed????
+    log.warning("warning")
+    log.info("info")
     seq_record_list = []
     for seq in fasta_files:
         for seq_record in SeqIO.parse(seq, "fasta"):
@@ -184,9 +186,9 @@ if __name__ == "__main__":
 
     number_list = list(range(0,10000))
     if UserInteraction.get_runtype_option():
-        best_complex = starting_complex.create_macrocomplex_full(homo_chains,protein_limit, stoichiometry, number_list, homo_chains)
+        best_complex = starting_complex.create_macrocomplex_full(homo_chains,protein_limit, stoichiometry, number_list, chains)
     else:
-        best_complex = starting_complex.create_macrocomplex(homo_chains,protein_limit, stoichiometry, number_list, homo_chains)
+        best_complex = starting_complex.create_macrocomplex(homo_chains,protein_limit, stoichiometry, number_list, chains)
     print("ready to print")
     print("best", best_complex.get_chains())
     print("starting", starting_complex.get_chains())

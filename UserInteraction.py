@@ -15,6 +15,7 @@ from Bio.PDB import PDBIO
 # Only the mentioned file types will be accepted.
 # """
 # flags used when running in terminal
+
 parser = argparse.ArgumentParser(description="Macrocomplex builder, creates protein macrocomplex from individual PDB files and FASTA files.")
 
 parser.add_argument('-i', '--input',
@@ -55,6 +56,14 @@ parser.add_argument('-c', '--complete',
                     default=False,
                     help="Run full recursion. Explores all possibilities")
 
+parser.add_argument('-r', '--rmsd',
+                    dest="rmsd_threshold",
+                    action="store",
+                    type=float,
+                    default= 0.5,
+                    help="Set up rmsd threshold. Default is set to 0.5")
+
+
 options = parser.parse_args()
 
 
@@ -69,6 +78,9 @@ def get_output_directory():
 
 def get_runtype_option():
     return options.complete
+
+def get_rmsd_threshold():
+    return options.get_rmsd_threshold
 
 def get_stoichiometry():
     if options.stoich:
