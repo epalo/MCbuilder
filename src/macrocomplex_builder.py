@@ -15,6 +15,13 @@ import string
 ######################################################
 # HELPER FUNCTIONS
 
+# Problems:
+# check if each element of complex.get_chains() is in chains
+# - check for recursion (check end option )
+# - which complex is the best complex -> important, or create list of all complexes
+# - implement a stop criterion: if it's joining hydrophic areas.(insert in report)
+# - rmsd threshold
+# - making recursion more beautiful
 
 dna = {'DA': 'A', 'DC': 'C', 'DG': 'G', 'DT': 'T'}
 rna = {'A': 'A', 'C': 'C', 'G': 'G', 'U': 'U'}
@@ -87,6 +94,16 @@ def find_homologous_chains(chains):
                         homologous_chains.append([chains[i], chains[j]])
     return homologous_chains
 
+def get_most_interacting_interaction(interaction_list, homo_chain_list):
+    best_interaction = None
+    interaction_sum = 0
+    for interaction in interaction_list:
+        sum = len(interaction.get_chain_a().get_homo_chains(homo_chain_list)) + len(interaction.get_chain_b().get_homo_chains(homo_chain_list))
+        if sum > interaction_sum :
+            best_interaction = interaction
+            interaction_sum = sum
+    return best_interaction
+
 
 #main function that is called when running the script
 if __name__ == "__main__":
@@ -153,15 +170,9 @@ if __name__ == "__main__":
 
     ######################################################
     #SETTING THE STARTING COMPLEX
-
+        
     #the starting_model is the interaction with the most homologous chains to both chains
-    starting_model= None
-    interaction_sum = 0
-    for interaction in interactions:
-        sum = len(interaction.get_chain_a().get_homo_chains(homo_chains)) + len(interaction.get_chain_b().get_homo_chains(homo_chains))
-        if sum > interaction_sum :
-            starting_interaction = interaction
-            interaction_sum = sum
+    starting_interaction= get_most_interacting_interaction(interactions, homo_chains)
 
     starting_complex = Complex(starting_interaction.get_model(), [starting_interaction.get_chain_a(), starting_interaction.get_chain_b()], log)
     if stoichiometry:
@@ -171,22 +182,16 @@ if __name__ == "__main__":
     print("Start",starting_interaction.get_chain_a().get_biopy_chain().get_id())
     print("Start",starting_interaction.get_chain_b().get_biopy_chain().get_id())
 
-    # BUILDING THE MODEL WITH THE STARTING COMPLEX
-    # number_list = list(range(0,10000))
-    # best_complex = starting_complex.create_macrocomplex(homo_chains,protein_limit, stoichiometry, number_list, homo_chains)
-    # print("FINAL COMPLEX:",best_complex)
-    # print("NUMBER OF CHAINS:", len(best_complex.get_chains()))
-    # for chain in best_complex.get_model().get_chains():
-    #     print("CHAIN IDS", chain.get_id())
-
     ######################################################
     # BUILDING THE COMPLEX
 
     number_list = list(range(0,10000))
+    dict_of_chains = { i : 0 for i in chains }
+    print(dict_of_chains)
     if UserInteraction.get_runtype_option():
-        best_complex = starting_complex.create_macrocomplex_full(homo_chains,protein_limit, stoichiometry, number_list, homo_chains)
+        best_complex = starting_complex.create_macrocomplex_full(homo_chains,protein_limit, stoichiometry, number_list, dict_of_chains, interactions)
     else:
-        best_complex = starting_complex.create_macrocomplex(homo_chains,protein_limit, stoichiometry, number_list, homo_chains)
+        best_complex = starting_complex.create_macrocomplex(homo_chains,protein_limit, stoichiometry, number_list, dict_of_chains, interactions)
     print("ready to print")
     print("best", best_complex.get_chains())
     print("starting", starting_complex.get_chains())
