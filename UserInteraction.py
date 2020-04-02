@@ -34,7 +34,7 @@ parser.add_argument('-v', '--verbose',
                     dest="verbose",
                     action="store_true",
                     default=False,
-                    help="Print progression log to standard error")
+                    help="Print progression log to standard output")
 
 parser.add_argument('-s', '--stoichiometry',
                     dest="stoich",
@@ -53,7 +53,7 @@ parser.add_argument('-c', '--complete',
                     dest="complete",
                     action="store_true",
                     default=False,
-                    help="Run full recutsion. Explores all possibilities")
+                    help="Run full recursion. Explores all possibilities")
 
 options = parser.parse_args()
 
