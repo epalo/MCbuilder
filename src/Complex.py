@@ -3,7 +3,6 @@ import copy, random
 from InteractingChain import InteractingChain
 import UserInteraction
 import string
-import macrocomplex_builder
 
 class Complex(object):
 

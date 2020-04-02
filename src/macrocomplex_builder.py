@@ -8,7 +8,7 @@ from Bio.PDB.Structure import Structure
 import argparse, os, sys, UserInteraction
 import random , copy
 from InteractingChain import InteractingChain
-from Complex import Complex
+from Complex import *
 from Interaction import Interaction
 import string
 
