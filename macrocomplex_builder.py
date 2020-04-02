@@ -2,7 +2,7 @@
 from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
 from Bio import SeqIO, PDB, pairwise2
-from Bio.PDB.Polypeptide import PPBuilder
+from Bio.PDB.Polypeptide import PPBuilder, CaPPBuilder
 from Bio.PDB.Chain import Chain
 from Bio.PDB.Structure import Structure
 import argparse, os, sys, UserInteraction
@@ -35,17 +35,25 @@ def get_sequence_for_chain(chain):
     if all_residues_in_dict(chain, dna):
         # all residues are dna
         return build_sequence(chain, dna)
-    if all_residues_in_dict(chain, rna):
+    elif all_residues_in_dict(chain, rna):
         # all residues are rna
         return build_sequence(chain,rna)
-
-    ppb=PPBuilder()
-    peptide = ppb.build_peptides(chain)
-    if peptide:
-        return peptide[0].get_sequence()
     else:
-        log.warning("This program does not support heteroatoms")
-        return None
+        # building the peptide with PPBuilder
+        ppb=PPBuilder()
+        peptide = ppb.build_peptides(chain)
+        if peptide:
+            return peptide[0].get_sequence()
+        else:
+            # trying to build the peptide with CaPPBuilder
+            ca_ppb = CaPPBuilder()
+            peptide = ca_ppb.build_peptides(chain)
+            if peptide:
+                return peptide[0].get_sequence()
+            else:
+                # peptide couldn't be build
+                log.warning("This program does not support heteroatoms")
+                return None
 
 # function gets a list of interacting chains and returns a list of lists with homologous chains
 def find_homologous_chains(chains):
@@ -113,6 +121,9 @@ if __name__ == "__main__":
         chain_a, chain_b = model.get_chains()
         sequence_a = get_sequence_for_chain(chain_a)
         sequence_b = get_sequence_for_chain(chain_b)
+        print(pdb_files[i])
+        print("Sequence a:",sequence_a)
+        print("sequence b:",sequence_b)
 
         if sequence_a == None or sequence_b == None:
             continue
