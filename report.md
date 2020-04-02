@@ -58,10 +58,6 @@ The functions used in this type of run are the same as those in `Simple` but wit
 With each chain it will identify chains homologous to _Chain_A_ from the original PDB interactions, which have been established previously (see XXXX). Each of the chains will be superimposed onto _Chain_A_. Considering a default RMSD threshold of 0.5, it will superimpose the homologous chain and compare it to the RMSD currently stored. If the RMSD is lower then it will check for clashes.
 
 
-
-
-
-como todavia no tenemos bien diseñado el alg, no se bien que poner.
 ### Input
 
 ### Alignment
