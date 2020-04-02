@@ -102,7 +102,7 @@ class Complex(object):
         return remaining_interactions
 
     def create_macrocomplex(self, homo_chain_list, protein_limit, stoich, number_list, initial_chains, interaction_files):
-        for chain in [chain for chain in self.__chains if chain in initial_chains]:
+        for chain in self.__chains:
             option_complex, updated_numbers = self.superimpose(chain, homo_chain_list, stoich, number_list, initial_chains)
             # don't go into recursion of there is no option-complex found
             if (option_complex == None):
@@ -190,7 +190,7 @@ class Complex(object):
         # if no complex can be created with the requested chain it returns None
         created_complex = None
 
-        superimposition_options = [chain for chain in chain_to_superimp.get_homo_chains(chain_list) if chain in initial_chains]
+        superimposition_options = [chain for chain in chain_to_superimp.get_homo_chains(homo_chain_list) if chain in initial_chains]
 
         original = None
         superimp = PDB.Superimposer()

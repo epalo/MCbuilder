@@ -80,7 +80,7 @@ def get_runtype_option():
     return options.complete
 
 def get_rmsd_threshold():
-    return options.get_rmsd_threshold
+    return options.rmsd_threshold
 
 def get_stoichiometry():
     if options.stoich:
