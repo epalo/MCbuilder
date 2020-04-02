@@ -35,7 +35,7 @@ parser.add_argument('-v', '--verbose',
                     dest="verbose",
                     action="store_true",
                     default=False,
-                    help="Print progression log to standard error")
+                    help="Print progression log to standard output")
 
 parser.add_argument('-s', '--stoichiometry',
                     dest="stoich",
