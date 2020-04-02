@@ -198,7 +198,7 @@ class Complex(object):
             atoms_b = []
             atoms_a = chain_to_superimp.get_ca_atoms()
             atoms_b = chain.get_ca_atoms()
-            print(len(atoms_a), len(atoms_b))
+
             if len(atoms_a) > len(atoms_b):
                 diff = len(atoms_a) - len(atoms_b)
                 if diff/len(atoms_a) >= 0.1:
@@ -209,7 +209,7 @@ class Complex(object):
                 if diff/len(atoms_b) >= 0.1:
                     continue
                 atoms_b = atoms_b[:-diff]
-            print("after", len(atoms_a), len(atoms_b))
+        
             # setting fixed and moving atoms, calculate the superimposition matrix
             superimp.set_atoms(atoms_a, atoms_b)
             rmsd = superimp.rms
