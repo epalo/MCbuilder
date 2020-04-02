@@ -53,17 +53,38 @@ This is the default option. The program will iterate through each chain the curr
 #### Complete
 The functions used in this type of run are the same as those in `Simple` but with some notable procedural differences. The run will loop through any chains that may be superimposed onto the current complex. For each of these it shall check where the chain may be superimposed within the current complex, it will then search for alternatives to _Chain A_ (XXXX DEFINE CHAIN A IN THIS CASE XXXX). For each of these homologous chains it will check which chain has the best RMSD and no clashes. The chain will be added to the complex and at this point, if the end criterion have not been met, the program will run recursively again. In this way the algorithm is exhausting all possible options for the model. This type of run will produce a much larger number of models but since all options have been exhaustively tested they will have greater accuracy.
 
+>![Workflow for recursion](recursion_flow.png)
+
 ### Superimposition
 For each chain that is introduced into the `superimpose` function the program checks which chains are homologous to it. The program then iterates through these homologous chains and superimposes the homologous chain onto the chain that was introduced into the function. onsidering a default RMSD threshold of 0.5 the returned RMSD is evaluated to consider whether it is lower than the RMSD from previously tested homologous chains. If RMSD is lower then the program will go on to check for clashes.
 
 ### Steric Clashes
-Steric clashes are checked using the `Complex` class function `is_clashing`. The function requires the chain that is being considered as an addition to the complex (i.e. the interacting chain from the superimposed chain). A list of alpha carbons is produced for both the chain we are testing and the current model. With these it is checked whether any of the chains alpha carbons are within a 1.7 armstrong (XXXX) radius of the alpha carbons from the current complex. If there are (XXXX) 3% of atoms within this radius then the chain is returned
-to the `Superimpose` function as `True` (i.e. the chain is clashing). If there are fewer clashes than this threshold then the chain is considered not clashing.
-
-### Input
-
-### Alignment
-The first step, after obtaining the information contained in the input, was to perform a **pairwise alignment** for each chain using the module `pairwise2` from the package `Bio` of `Biopython`. The objective of this alignment is to obtain sequences with **more than 95% identity** in order to later perform a structural alignment between them.
+Steric clashes are checked using the `Complex` class function `is_clashing`. The function requires the chain that is being considered as an addition to the complex (i.e. the interacting chain from the superimposed chain). A list of alpha carbons is produced for both the chain we are testing and the current model. With these it is checked whether any of the chains alpha carbons are within a 1.7 armstrong (XXXX) radius of the alpha carbons from the current complex. If there are (XXXX) 3% of atoms within this radius then the chain is returned to the `Superimpose` function as `True` (i.e. the chain is clashing). If there are fewer clashes than this threshold then the chain is considered not clashing.
 
 
 ## Limitations
+
+###### 1. Simple run outputs only one model
+
+Since the simple run type only adds the interaction with the best RMSD this will create a single model in which the best superimpositions have been added. This poses the issue that a seperate chain, with a greater RMSD, may be better suited in that position.
+
+###### 2. Complete run outputs many models
+
+There is currently not a method for selecting the optimum model when running the `--complete` option meaning that many models are created and the user must decide which is the optimal model. Ideally, a function would be implemented to analyze the final `Complex` objects and rank them according to the likelihood that they are the actual model. We believe ranking would be optimal over returning a single model since complexes may have different conformations.
+
+###### 3. Complete run exhausts all possibilities
+
+Though this is one of the main advantages of this type of run it also presents the impediment that structures which are not biologically concordant must be constructed (such as large hydrophobic areas being present at the interface of the protein).
+
+###### 3. Computational cost
+
+Since the `--complete` option is a complete recursive algorithm the computational cost is exponential, such that currently it can only handle small complexes. Eventually a marker could be implemented so that any combination that has previously tested (with exactly the same chains and interactions surrounding it) and was deemed to clash will not be repeated, thus reducing the number of processes that need to be carried out
+
+###### 4. Cannot process small molecules
+Currently the program will not introduce any interactions involving small molecules.
+
+(XXXX Añadir algo mas? XXXX)
+
+
+###### 5. No secondary structure modelling
+As long as the PDB files contain the full chain structure the model of the macrocomplex will be produced, in the case that the file only contains a fragment of an interaction or chain the program will not model the remaining structure. This could be implemented if the relevant FASTA files are available, using resources such as `MODELLER` the missing sections could be modeled combing the interaction from the pdb and the predicted secondary structure created from the full protein sequence.
