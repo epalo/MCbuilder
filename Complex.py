@@ -94,11 +94,11 @@ class Complex(object):
                 return False
         return True
 
-    def get_remaining_interactions(self, interaction_list, complex_chain_list):
+    def get_remaining_interactions(self, interaction_list, missing_chain_list):
         remaining_interactions = []
         for interaction in interaction_list:
-            if not (interaction.get_chain_a() in complex_chain_list or \
-                interaction.get_chain_b() in complex_chain_list):
+            if (interaction.get_chain_a() in missing_chain_list or \
+                interaction.get_chain_b() in missing_chain_list):
                 remaining_interactions.append(interaction)
         return remaining_interactions
 
@@ -127,20 +127,23 @@ class Complex(object):
             # change list to all available chains
             if all(initial_chains):
                 print("COMPLEX FOUND")
-                print(homo_chain_list)
-                print(option_complex.get_chains())
                 return option_complex
             else:
                 # get remaining chains
-                remaining_interactions = self.get_remaining_interactions(interaction_files, option_complex.get_chains())
+                remaining_chains = [chain for chain,value in initial_chains.items() if value == False]
                 # make an interaction list out of remaining chains
-
+                remaining_interactions = self.get_remaining_interactions(interaction_files, remaining_chains)
                 # get next interaction with the most interactions
                 new_start_interaction = macrocomplex_builder.get_most_interacting_interaction(remaining_interactions, self.__chains)
                 # set coordinates for the next subunit
+                # missing?
                 # add new_start_interaction to optioncomplex and run again in recursive call
                 option_complex.add_chain(new_start_interaction.get_chain_a())
                 option_complex.add_chain(new_start_interaction.get_chain_b())
+                if new_start_interaction.get_chain_a in initial_chains:
+                    initial_chains[new_start_interaction.get_chain_a] = True
+                if new_start_interaction.get_chain_b in initial_chains:
+                    initial_chains[new_start_interaction.get_chain_b] = True
                 return option_complex.create_macrocomplex(homo_chain_list, protein_limit, stoich, number_list, initial_chains, interaction_files)
         else:
             # 
@@ -255,6 +258,7 @@ class Complex(object):
             # set chain to True if its in the initial chain dictionary
             if original in initial_chains:
                 initial_chains[original] = True
+            print(initial_chains)
             # if the added chain is specified in the stoichiometry change the counter of the added chain
             created_complex.add_to_stoich(best_chain_position,homo_chain_list)
 

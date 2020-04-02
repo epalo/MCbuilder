@@ -18,7 +18,6 @@ import string
 # Problems:
 # - each pdb-file at least once
 # check if each element of complex.get_chains() is in chains
-# - implement randomness for simple run
 # - check for recursion (check end option )
 # - which complex is the best complex -> important, or create list of all complexes
 # - implement a stop criterion: if it's joining hydrophic areas.(insert in report)
@@ -184,14 +183,6 @@ if __name__ == "__main__":
         starting_complex.add_to_stoich(starting_interaction.get_chain_b(), homo_chains)
     print("Start",starting_interaction.get_chain_a().get_biopy_chain().get_id())
     print("Start",starting_interaction.get_chain_b().get_biopy_chain().get_id())
-
-    # BUILDING THE MODEL WITH THE STARTING COMPLEX
-    # number_list = list(range(0,10000))
-    # best_complex = starting_complex.create_macrocomplex(homo_chains,protein_limit, stoichiometry, number_list, homo_chains)
-    # print("FINAL COMPLEX:",best_complex)
-    # print("NUMBER OF CHAINS:", len(best_complex.get_chains()))
-    # for chain in best_complex.get_model().get_chains():
-    #     print("CHAIN IDS", chain.get_id())
 
     ######################################################
     # BUILDING THE COMPLEX
