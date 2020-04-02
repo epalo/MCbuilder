@@ -6,8 +6,7 @@ Macrocomplex Builder is a standalone `python3` application developed by **Annika
 - [Requirements](#Requirements)
 - [Installation](#Installation)
 - [Package Structure](#Structure-of-the-Package)
-- [Usage](#Usage)
-- [Analysis of examples](#analysis-of-the-examples)
+- [Tutorial](#Tutorial)
 - [FAQS](#FAQS)
 
 
@@ -51,13 +50,14 @@ The package has been structured as follows:
 * `setup.py`: To install the package.
 
 
-## Usage
+## Tutorial
 
 In this section, an explanation of how to run the script from the command line and what are the required and optional arguments is provided. 
 
 The simples way to run it:
 
  ```bash
+ cd scr/
  $ macrocomplex_builder.py
  ```
 In this case, it will run using the current folder as input and it will produce as an output a file named macrocomplex.pdb in the same folder. 
