@@ -39,7 +39,26 @@ Finally, PDB files often only have a part of the protein structure and so we can
 
 ## Algorithm
 
-Once we have run quality control through the input files, assutring that the files introduced are either psb or fasta files we initiate the
+Once we have run quality control through the input, assuring that the files introduced are either PDB or FASTA file formats we can initiate the main bulk of the algorithm. Firstly, chains from each PDB are built into their coresponding sequences (be they Protein, DNA or RNA). From here we run a homology search in which each chain from any of the PDB files is aligned with another PDB chain for a different file. This is carried out to identify homologous chains. In our algorithm we consider homology to be that of 95% (or greater) identify. These homologous chains are set up into the pertinent structure.
+
+Once we have our input data processed we set the starting complex. The staring complex is chosen by identifying the PDB file with the greatest number of homologous chains. By using this we aim to initiate the run with a PDB file which will the greatest number of interactions possible.
+
+At this point the program can run two different types of algorithms depending on which the user has chosen, `simple` or `complete`.  
+
+### Simple
+This is the default option. The program will iterate through each chain the current complex, from here on this chain will be referred to as _Chain A_, initially the current complex will be the starting complex as mentioned above. It will attempt to superimpose chains that are homologous to _Chain A_ and check for clashes in those superimpositions where RMSD is lower than other chains tested for _Chain A_. Eventually, this will return a single optimal chain to add to the complex (that with the best RMSD and is not clashing with other chains currently in the complex). With the addition of this chain to new `option_complex` will be stored and the iteration will continue, this time using the option_complex and carrying out the same procedure for the next chain within the initial complex. (XXXX make sure wording makes sense regarding initial complex XXXX) This process will continue until all the chains in the initial complex have been analysed. As many chains as there in the current complex may be added at the end of this loop. At this point the program shall check whether any end crioterion have been met. If this is the case the it shall return the final complex. If these criterion have not yet been met then the program will run the algorithm again to continue adding chains to the complex.
+
+(XXXX ADD THAT SINCE WERE LOOPING THROUGH ALL CHAINS, AT ONE POINT MORE THAN ONE CHAIN WILL BE ADDED XXXX)
+
+### Complete
+The functions used in this type of run are the same as those in `Simple` but with some notable procedural differences. The run will loop through any chains that may be superimposed onto the current complex. For each of these it shall check where the chain may be superimposed within the current complex, it will then search for alternatives to _Chain A_ (XXXX DEFINE CHAIN A IN THIS CASE XXXX). For each of these chains it will check which chain has the best RMSD and no clashes. The chain will be added to the complex and at this point, if the end criterion have not been met, the program will run recursively again. In this way the algorithm is exhausting all possible options for the model.
+
+
+(XXXX MAYBE ADD SECTIONS ABOUT SUPERIMPOSITION AND CLASHING? XXXX)
+With each chain it will identify chains homologous to _Chain_A_ from the original PDB interactions, which have been established previously (see XXXX). Each of the chains will be superimposed onto _Chain_A_. Considering a default RMSD threshold of 0.5, it will superimpose the homologous chain and compare it to the RMSD currently stored. If the RMSD is lower then it will check for clashes.
+
+
+
 
 
 como todavia no tenemos bien diseñado el alg, no se bien que poner.
@@ -47,3 +66,6 @@ como todavia no tenemos bien diseñado el alg, no se bien que poner.
 
 ### Alignment
 The first step, after obtaining the information contained in the input, was to perform a **pairwise alignment** for each chain using the module `pairwise2` from the package `Bio` of `Biopython`. The objective of this alignment is to obtain sequences with **more than 95% identity** in order to later perform a structural alignment between them.
+
+
+## Limitations
