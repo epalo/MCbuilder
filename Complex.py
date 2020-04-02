@@ -116,15 +116,8 @@ class Complex(object):
         if  len(option_complex.get_chains()) == protein_limit or \
                 option_complex.stoich_is_complete(stoich) or \
                 len(option_complex.get_chains()) == len(self.__chains):
-
-            new_id_list = list(string.ascii_letters)
-            for chain in option_complex.get_model().get_chains():
-                chain.id = random.choice(new_id_list)
-                new_id_list.remove(chain.id)
-
-            UserInteraction.create_output_PDB(option_complex)
+            
             # check if all pdb-files were used at least once 
-            # change list to all available chains
             if all(initial_chains):
                 print("COMPLEX FOUND")
                 return option_complex
@@ -174,21 +167,12 @@ class Complex(object):
                 if  len(option_complex.get_chains()) == protein_limit or \
                         option_complex.stoich_is_complete(stoich):
                     print(option_complex.get_chains())
-                    # new_id_list = list(string.ascii_letters)
-                    # for chain in option_complex.get_model().get_chains():
-                    #     chain.id = random.choice(new_id_list)
-                    #     new_id_list.remove(chain.id)
-                    # print(option_complex.get_chains())
-                    # UserInteraction.create_output_PDB(option_complex)
-                    # exit(1)
+                  
                     # check if all pdb-files were used at least once , if not skip this option
                     if option_complex.each_chain_occurs_in_list(homo_chain_list):
                         return option_complex
                     else:
                         continue
-                    # if Z-Score for option complex is lower than for the current best complex replace it
-                    # if option_complex.calc_z_score < best_complex.calc_z_score:
-                    #     best_complex = option_complex
                 else:
                     # if we didn't reach the leaf yet, recursive call
                     currently = [chain for chain in option_complex.get_model().get_chains()]
@@ -196,6 +180,7 @@ class Complex(object):
                     self.__logger.warning("recursion!")
                     print("recursion!")
                     new_complex = option_complex.create_macrocomplex_full(homo_chain_list, protein_limit, stoich, updated_numbers, initial_chains)
+                    # TODO: decide which complex is the best one
                     if len(new_complex.get_chains()) > len(best_complex.get_chains()):
                         best_complex = option_complex
         len(best_complex.get_chains())
@@ -247,7 +232,6 @@ class Complex(object):
         # apply the superimposition matrix to chain_b and its interacting chain
         if not (best_chain_position == None):
             #new_id_list = list(string.ascii_letters)
-            #reached_structure = {}
             new_id = random.choice(number_list)
             best_chain_position.get_biopy_chain().id = new_id
             number_list.remove(new_id)

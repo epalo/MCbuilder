@@ -16,14 +16,12 @@ import string
 # HELPER FUNCTIONS
 
 # Problems:
-# - each pdb-file at least once
 # check if each element of complex.get_chains() is in chains
 # - check for recursion (check end option )
 # - which complex is the best complex -> important, or create list of all complexes
 # - implement a stop criterion: if it's joining hydrophic areas.(insert in report)
 # - rmsd threshold
 # - making recursion more beautiful
-# - cutting length of different chains?
 
 dna = {'DA': 'A', 'DC': 'C', 'DG': 'G', 'DT': 'T'}
 rna = {'A': 'A', 'C': 'C', 'G': 'G', 'U': 'U'}
