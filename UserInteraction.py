@@ -27,7 +27,7 @@ parser.add_argument('-i', '--input',
 parser.add_argument('-o', '--output',
                     dest="outfile",
                     action="store",
-                    default=None,
+                    default="macrocomplex.pdb",
                     help=" ")
 
 parser.add_argument('-v', '--verbose',
