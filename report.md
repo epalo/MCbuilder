@@ -76,15 +76,15 @@ There is currently not a method for selecting the optimum model when running the
 
 Though this is one of the main advantages of this type of run it also presents the impediment that structures which are not biologically concordant must be constructed (such as large hydrophobic areas being present at the interface of the protein).
 
-###### 3. Computational cost
+###### 4. Computational cost
 
 Since the `--complete` option is a complete recursive algorithm the computational cost is exponential, such that currently it can only handle small complexes. Eventually a marker could be implemented so that any combination that has previously tested (with exactly the same chains and interactions surrounding it) and was deemed to clash will not be repeated, thus reducing the number of processes that need to be carried out
 
-###### 4. Cannot process small molecules
+###### 5. Cannot process small molecules
 Currently the program will not introduce any interactions involving small molecules.
 
 (XXXX Añadir algo mas? XXXX)
 
 
-###### 5. No secondary structure modelling
+###### 6. No secondary structure modelling
 As long as the PDB files contain the full chain structure the model of the macrocomplex will be produced, in the case that the file only contains a fragment of an interaction or chain the program will not model the remaining structure. This could be implemented if the relevant FASTA files are available, using resources such as `MODELLER` the missing sections could be modeled combing the interaction from the pdb and the predicted secondary structure created from the full protein sequence.
