@@ -1,3 +1,5 @@
+
+<div style="text-align: justify">
 # sbi-project
 
 ## Index
@@ -89,3 +91,5 @@ Currently the program will not introduce any interactions involving small molecu
 
 ###### 6. No secondary structure modelling
 As long as the PDB files contain the full chain structure the model of the macrocomplex will be produced, in the case that the file only contains a fragment of an interaction or chain the program will not model the remaining structure. This could be implemented if the relevant FASTA files are available, using resources such as `MODELLER` the missing sections could be modeled combing the interaction from the pdb and the predicted secondary structure created from the full protein sequence.
+
+</div>

@@ -3,19 +3,19 @@ import argparse
 import re
 import os
 import sys
-import macrocomplex_builder
+# import macrocomplex_builder
 import logging
 from Bio.PDB import PDBIO
 
 
 # def getUserInput():
-""" Import user data.
-
-Requires input of fasta file(.fasta or .fa) containg protein to be modelled along with PDB files (.pdb) containing relevant interactions.
-Only the mentioned file types will be accepted.
-"""
+# """ Import user data.
+#
+# Requires input of fasta file(.fasta or .fa) containg protein to be modelled along with PDB files (.pdb) containing relevant interactions.
+# Only the mentioned file types will be accepted.
+# """
 # flags used when running in terminal
-parser = argparse.ArgumentParser(description=" ")
+parser = argparse.ArgumentParser(description="Macrocomplex builder, creates protein macrocomplex from individual PDB files and FASTA files.")
 
 parser.add_argument('-i', '--input',
                     dest="infile",
@@ -53,7 +53,7 @@ parser.add_argument('-c', '--complete',
                     dest="complete",
                     action="store_true",
                     default=False,
-                    help="Run full recutsion. Explores all possibilities")
+                    help="Run full recursion. Explores all possibilities")
 
 options = parser.parse_args()
 
