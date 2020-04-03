@@ -107,11 +107,13 @@ This PDB entry corresponds to the structure of the activated transcription compl
 
 <img src="images/6gmh_original.png" width="275" height="275"> <img src="images/6gmh_macro.png" width="275" height="275"> <img src="images/6gmh_super.png" width="275" height="275">
 
-This example was build using 47 interactions files. The model built fits perfectly with the original complex, except for the chains that couldn't be introduced. This model was built in the simplest way, without any stoichiometry or number of chains.
-
  ```bash
  $ scr/macrocomplex_builder.py -i example/6gmh/ -o Macro_6gmh.pdb
  ```
+ 
+This example was build using 47 interactions files. The model built fits perfectly with the original complex, except for the chains that couldn't be introduced. This model was built in the simplest way, without any stoichiometry or number of chains.
+
+
 ### Example 4 ([5fj8](https://www.rcsb.org/structure/5fj8))
 
 It is the structure of yeast RNA polymerase III elongation complex. This complex has 17 unique protein chains and 3 unique nucleic acid chains.
