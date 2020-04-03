@@ -1,5 +1,5 @@
 
-<div style="text-align: justify">
+<!--<div style="text-align: justify">-->
 # sbi-project
 
 ## Index
@@ -64,6 +64,16 @@ For each chain that is introduced into the `superimpose` function the program ch
 ### Steric Clashes
 Steric clashes are checked using the `Complex` class function `is_clashing`. The function requires the chain that is being considered as an addition to the complex (i.e. the interacting chain from the superimposed chain). A list of alpha carbons is produced for both the chain we are testing and the current model. With these it is checked whether any of the chains alpha carbons are within a 1.7 armstrong (XXXX) radius of the alpha carbons from the current complex. If there are (XXXX) 3% of atoms within this radius then the chain is returned to the `Superimpose` function as `True` (i.e. the chain is clashing). If there are fewer clashes than this threshold then the chain is considered not clashing.
 
+## Examples Analysis
+few explication of the section
+Blue: Original
+Beige: Build
+### Example 1, 4g83
+This PDB entry corresponds to the crystal structure of p73 DNA-Binding domain tetramer from Homo Sapiens, bound to a full response-element, [4g83](https://www.rcsb.org/structure/4g83). This domain is a Homo 4-mer. 
+
+<img src="4g83.png" width="275" height="275"> <img src="Macro_4g83.png" width="275" height="275"> <img src="4g83_super.png" width="275" height="275">
+
+
 
 ## Limitations
 
@@ -92,4 +102,4 @@ Currently the program will not introduce any interactions involving small molecu
 ###### 6. No secondary structure modelling
 As long as the PDB files contain the full chain structure the model of the macrocomplex will be produced, in the case that the file only contains a fragment of an interaction or chain the program will not model the remaining structure. This could be implemented if the relevant FASTA files are available, using resources such as `MODELLER` the missing sections could be modeled combing the interaction from the pdb and the predicted secondary structure created from the full protein sequence.
 
-</div>
+<!--</div>-->
