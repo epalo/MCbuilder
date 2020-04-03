@@ -106,13 +106,11 @@ if __name__ == "__main__":
     ##################################################################
     #  PARSING DATA
 
-    # TODO: insert case of empty fasta file
     seq_record_list = []
     for seq in fasta_files:
         for seq_record in SeqIO.parse(seq, "fasta"):
             seq_record_list.append(seq_record)
 
-    # TODO: insert case of empty pdb-file
     parser = PDB.PDBParser()
     interactions = []
     chains = []
@@ -174,7 +172,14 @@ if __name__ == "__main__":
         log.info("Creating Macrocomplex with full version.")
         starting_complex.create_macrocomplex_full(homo_chains,protein_limit, stoichiometry, number_list, dict_of_chains, interactions)
         macrocomplex_list = final_complexes
-        # TODO: create output pdb's
+        # create pdb-file for each final complex 
+        for i in range(len(macrocomplex_list)):
+            new_id_list = list(string.ascii_letters)
+            for chain in macrocomplex_list[i].get_model().get_chains():
+                chain.detach_parent()
+                chain.id = random.choice(new_id_list)
+                new_id_list.remove(chain.id)
+            UserInteraction.create_output_PDB(macrocomplex_list[i], i, log)
         exit(1)
     else:
         log.info("Creating Macrocomplex with simple version.")
@@ -183,5 +188,5 @@ if __name__ == "__main__":
         for chain in best_complex.get_model().get_chains():
             chain.id = random.choice(new_id_list)
             new_id_list.remove(chain.id)
-        UserInteraction.create_output_PDB(best_complex, log)
+        UserInteraction.create_output_PDB(best_complex, 0, log)
         exit(1)
