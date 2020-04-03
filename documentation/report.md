@@ -16,7 +16,7 @@
 
 ## Introduction
 
-Due to the importance of knowing the structure of protein-protein interactions (PPIs) in the cell, the goal of this project is to perform an algorithm to model a protein macro-complex from individual pairs of interactions using Bioinformatics resources.
+Due to the importance of knowing the structure of Protein-Protein Interactions (PPIs) in the cell, the goal of this project is to perform an algorithm to model a protein macro-complex from individual pairs of interactions using Bioinformatics resources.
 
 ## Background and Scientific Explanation
 
