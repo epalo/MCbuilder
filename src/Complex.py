@@ -251,7 +251,6 @@ class Complex(object):
 
         # apply the superimposition matrix to chain_b and its interacting chain
         if not (best_chain_position == None):
-            #new_id_list = list(string.ascii_letters)
             new_id = random.choice(number_list)
             best_chain_position.get_biopy_chain().id = new_id
             number_list.remove(new_id)

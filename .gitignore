@@ -1,8 +1,5 @@
 ﻿__pycache__
-mbuilder.log
-mbuilder2.log
-test.py
-test2.py
+mcbuilder.log
 readthrough.txt
 *.pdb
 *.fa
