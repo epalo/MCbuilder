@@ -96,7 +96,6 @@ def get_protein_limit():
     return options.limit
 
 
-
 verbose =  get_verbose_option()
 
 def create_logger():
@@ -112,7 +111,7 @@ def create_logger():
             soh.setLevel(level=logging.INFO)
             soh.setFormatter(formatter)
     # create file handler for logger.
-    fh = logging.FileHandler('mbuilder.log')
+    fh = logging.FileHandler('mcbuilder.log')
     fh.setLevel(level=logging.WARNING)
     fh.setFormatter(formatter)
 
@@ -128,7 +127,7 @@ def create_logger():
 def process_input():
     """ Read pdb and FASTA files. """
     log = create_logger()
-    log.info("Initialized")
+    log.info("Logger initialized")
     input_list = get_userinput()
     fasta_files = []
     pdb_files = []
@@ -136,7 +135,7 @@ def process_input():
         input_list = [os.getcwd()]
     for input in input_list:
         if os.path.isdir(input):
-            print(os.listdir(input))
+            log.info(f"Input files: {os.listdir(input)}")
             fasta_files = [os.path.join(input, f) for f in os.listdir(input) if f.endswith(".fa") or f.endswith(".fasta")]
             pdb_files = [os.path.join(input, f) for f in os.listdir(input) if f.endswith(".pdb")]
         elif os.path.isfile(input) and (input.endswith(".fa") or input.endswith(".fasta")):
@@ -154,8 +153,9 @@ def process_input():
 
     return (fasta_files, pdb_files, log)
 
-def create_output_PDB(best_complex):
+def create_output_PDB(best_complex, log):
     """ Create a PDB with the final complex """
     io = PDBIO()
     io.set_structure(best_complex.get_model())
     io.save(get_output_directory())
+    log.info(f"The final complex was saved to {get_output_directory()}")

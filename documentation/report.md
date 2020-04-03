@@ -1,28 +1,23 @@
-<!--
-<div style="text-align: justify">
--->
-# sbi-project
+# SBI + PYT PROJECT
 
 ## Index
 <!-- TOC depthFrom:1 depthTo:7 withLinks:1 updateOnSave:1 orderedList:0 -->
 - [Introduction](#Introduction)
 - [Background and Scientific Explanation](#Background-and-Scientific-explanation)
 - [Algorithm](#Algorithm)
-- [Tutorial](#Tutorial)
 - [Examples Analysis](#Examples-Analysis)
 - [Limitations](#limitations)
-- [References](#References)
 <!-- /TOC -->
 
 ## Introduction
 
-Due to the importance of knowing the structure of Protein-Protein Interactions (PPIs) in the cell, the goal of this project is to perform an algorithm to model a protein macro-complex from individual pairs of interactions using Bioinformatics resources.
-
-## Background and Scientific Explanation
+Due to the importance of knowing the structure of Protein-Protein Interactions (PPIs) in the cell, the goal of this project is to create an algorithm to model a protein macro-complex from individual pairs of interactions using Bioinformatics resources.
 
 Proteins are versatile molecules that play many critical roles in the body. Individual proteins are capable of producing a large variety of protein complexes, or even complexes with other molecules, such as DNA, that allow them to perform their function. These complexes are known as the quaternary structures of proteins; they are the spatial arrangement of chains as well as any interactions among them, be they covalent or non-covalent. Complex structures modulate the biological activity of the protein, and the separation of the subunits often leads to the loss of functionality.
 
 Experimentally determining the full structure of a protein complex or quaternary structure is very costly and time-consuming. Therefore, it is essential to develop effective computational techniques that combine experimental information and data obtained from high-throughput methods to model the protein complexes.
+
+## Background and Scientific Explanation
 
 To be able to establish these macrocomplexes, we require a starting point composed of Protein DataBank (PDB) files which feature experimentally determined structures. In our case, these structures are the combination of chains within our complex. As mentioned, experimentally determining the structure of a complex is problematic and so a suitable alternative is determining the physical structure of sections of the complex, i.e. the interaction between two chains within these complex, be they homo or heterodimers.
 
@@ -34,8 +29,10 @@ In this program, we establish superimposition to implement new proteins onto the
 
 Moreover, an accurate superimposition does not imply that a third chain is in that location. To be able to confirm whether a particular chain should be added to the macrocomplex, it is also essential to check its surrounding chains and whether there are any steric clashes. Even though two chains superimpose correctly, the chain with which it is interacting may occupy the space of a protein that is already there; this means that the interacting chains should not be placed in the complex, in that location.
 
->![Steric clashes in macrocomplex](protein_chains_sbi.png)
+<div style="text-align: center">
 
+![Steric clashes in macrocomplex](protein_chains_sbi.png)
+</div>
 To judge the presence of steric clashes VanDerWaals radius is used, any atom from a different chain that is within a certain radius of an alpha carbon is denoted as a clash. There are several non-covalent bonds found in proteins, such as hydrogen bonding; these types of interactions mean that the distance between two nuclei may be reduced, only the alpha carbon radii are measured to reduce the impact of this effect.
 
 Finally, PDB files often only have a part of the protein structure and so we can rebuild the complete quaternary structure by using the relevant amino acid sequences, from FASTA files, the build-out our model of the structure.
@@ -67,9 +64,9 @@ Steric clashes are checked using the `Complex` class function `is_clashing`. The
 
 ## Examples Analysis
 
-In this section can be found an analysis of the complexes built using Macrocomplex builder and the necessary commands to build them using the files in the `example` folder. In addition, there is a discussion of how the program performs in terms of running time and complex quality.
+In this section are analyses of the complexes built using Macrocomplex Builder and the necessary commands to construct them using the files in the `example` folder. In addition, there is a discussion of how the program performs in terms of running time and complex quality.
 
-In the images, the <span style="color:cyan;"> **Blue Complex**</span> is the original complex and the <span style="color:#FBDAB0;"> **Beige Complex** </span> is the build complex.
+In the images, the <span style="color:blue;"> **blue complex**</span> is the experimentally determined complex and the <span style="color:#FBDAB0;"> **beige complex** </span> is the built complex.
 
 ### Example 1 ([4g83](https://www.rcsb.org/structure/4g83))
 This PDB entry corresponds to the crystal structure of p73 DNA-Binding domain tetramer from *Homo Sapiens*, bound to a full response-element. This entry is formed by 1 unique protein chain and 1 unique nucleic acid chain.
@@ -78,34 +75,40 @@ The program is able to create this complex of 4 chains with 5 files very quickly
 
 <img src="4g83_original.png" width="275" height="275"> <img src="4g83_macro.png" width="275" height="275"> <img src="4g83_super.png" width="275" height="275">
 
-As can be seen, the model built fits perfectly with the original complex, there is no differences between them. So the program has no problem dealing with this type of interactions. This model was built in the simplest way, without number of chains but with the stoichiometry as example. 
+```bash
+$ scr/macrocomplex_builder.py -i example/4g83/ -o Macro_4g83.pdb -s A2E2
+```
 
+As can be seen, the modelled complex fits perfectly with the original complex, there are no differences between them. So the program has no problem dealing with these type of interactions.
 
- ```bash
- $ scr/macrocomplex_builder.py -i example/4g83/ -o Macro_4g83.pdb -s A2E2
- ```
+This model was built using the default run and specifying stoichiometry. From this example, we can see that Macrocomplex Builder is able to identify homologous chains and to follow stoichiometry and so a global stoichiometry is not required.
+
 ### Example 2 ([5nss](https://www.rcsb.org/structure/5nss))
 
-This PDB entry corresponds to a structure of RNA polymerase-sigma54 holoenzyme with promoter DNA and transcription activator PspF. There is 6 unique protein sequences and 2 unique nucleic acids, but in total it has 15 chains. 
+This PDB entry corresponds to a structure of RNA polymerase-sigma54 holoenzyme with promoter DNA and transcription activator PspF. There are 6 unique protein sequences and 2 unique nucleic acids, but in total it has 15 chains.
 
-The program takes about 5 minutes to complete the complex using 18 interaction files. 
+The program takes approximately 5 minutes to complete the complex using 18 interaction files.
 
 <img src="5nss_original.png" width="275" height="275"> <img src="5nss_macro.png" width="275" height="275"> <img src="5nss_super.png" width="275" height="275">
 
-As can be seen, the model built fits perfectly with the original complex, there is no differences between them. So the program has no problem dealing with this type of interactions. This model was built in the simplest way, without any stoichiometry or number of chains. 
+```bash
+$ scr/macrocomplex_builder.py -i example/5nss/ -o Macro_5nss.pdb
+```
 
+As can be seen, the model built fits perfectly with the original complex, there are no differences between them. So the program has no problem dealing with this type of interactions. This model was built using default options, without any stoichiometry or number of chains.
 
- ```bash
- $ scr/macrocomplex_builder.py -i example/5nss/ -o Macro_5nss.pdb
- ```
 ### Example 3 ([6gmh](https://www.rcsb.org/structure/6gmh))
 
-This PDB entry corresponds to the structure of the activated transcription complex Pol II-DSIF-PAF-SPT6. It was obtained from *Homo Sapiens* and it has 20 unique protein chains and 3 unique nucleic acid chains. Therefore, the program can run whether the complex is composed of repeated chains or unique chains. The PDB entry has 23 chains but the build complex has only 20. This is because some of the chains are composed by UNK aminoacids and this program is not able to handle that since it is necessary to build a sequence in order to obtain the homologous chains that will be superimposed. 
+This PDB entry corresponds to the structure of the activated transcription complex Pol II-DSIF-PAF-SPT6. It was obtained from Homo Sapiens, and has 20 unique protein chains and 3 unique nucleic acid chains. Therefore, the program can run whether the complex is composed of repeated chains or unique chains. The PDB entry has 23 chains, but the modelled complex has only 20. This difference is because some of the chains are composed by UNK aminoacids, and this program is not able to handle these since it is necessary to build a sequence in order to obtain the homologous chains that are superimposed.
 
 
 <img src="6gmh_original.png" width="275" height="275"> <img src="6gmh_macro.png" width="275" height="275"> <img src="6gmh_super.png" width="275" height="275">
 
-This example was build using 47 interactions files. The model built fits perfectly with the original complex, except for the chains that couldn't be introduced. This model was built in the simplest way, without any stoichiometry or number of chains.
+```bash
+$ scr/macrocomplex_builder.py -i example/6gmh/ -o Macro_6gmh.pdb
+```
+
+This example was built using 47 interactions files. The model built fits perfectly with the original complex, except for the chains that couldn not be introduced. This model was built using default options, without any stoichiometry or number of chains.
 
  ```bash
  $ scr/macrocomplex_builder.py -i example/6gmh/ -o Macro_6gmh.pdb
@@ -166,5 +169,3 @@ Currently, the program does not introduce any interactions involving small molec
 
 ###### 6. No secondary structure modelling
 As long as the PDB files contain the full chain structure the model of the macrocomplex is produced, in the case that the file only contains a fragment of the interaction or chain the program does not model the remaining structure. This feature could be implemented if the relevant FASTA files are available, using resources such as `MODELLER`, the missing sections could be modelled combing the interaction from the PDB and the predicted secondary structure created from the full protein sequence.
-
-</div>
