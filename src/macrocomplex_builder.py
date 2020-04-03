@@ -193,15 +193,19 @@ if __name__ == "__main__":
     dict_of_chains[starting_interaction.get_chain_b()] = True
     print(dict_of_chains)
     if UserInteraction.get_runtype_option():
-        best_complex = starting_complex.create_macrocomplex_full(homo_chains,protein_limit, stoichiometry, number_list, dict_of_chains, interactions)
+        starting_complex.create_macrocomplex_full(homo_chains,protein_limit, stoichiometry, number_list, dict_of_chains, interactions)
+        macrocomplex_list = final_complexes
+        print("ALL COMPLEXES:", macrocomplex_list)
+        # TODO: create output pdb's
+        exit(1)
     else:
         best_complex = starting_complex.create_macrocomplex(homo_chains,protein_limit, stoichiometry, number_list, dict_of_chains, interactions)
-    print("ready to print")
-    print("best", best_complex.get_chains())
-    print("starting", starting_complex.get_chains())
-    new_id_list = list(string.ascii_letters)
-    for chain in best_complex.get_model().get_chains():
-        chain.id = random.choice(new_id_list)
-        new_id_list.remove(chain.id)
-    UserInteraction.create_output_PDB(best_complex)
-    exit(1)
+        print("ready to print")
+        print("best", best_complex.get_chains())
+        print("starting", starting_complex.get_chains())
+        new_id_list = list(string.ascii_letters)
+        for chain in best_complex.get_model().get_chains():
+            chain.id = random.choice(new_id_list)
+            new_id_list.remove(chain.id)
+        UserInteraction.create_output_PDB(best_complex)
+        exit(1)
