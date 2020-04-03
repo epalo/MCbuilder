@@ -35,19 +35,18 @@ To use the tool, the user first has to download the package from Git and then in
  ``` 
 ## Structure of the Package
 The package has been structured as follows:
-<!--ASK ANNI, MAYBE THERE IS A BETTER WAY-->
 
 ![Tree](documentation/tree.png)
 
-* `Complex.py`:
-* `README.md`: 
-* `report.md`:
-* `get_example_files.py`:
-* `InteractingChain.py`:
-* `Interaction.py`
-* `UserInteraction.py`:
-* `macrocomplex_builder.py`:
-* `setup.py`: To install the package.
+* **`Complex.py`**: A module used by `macrocomplex_builder.py` that contains the `Complex object` that stores a `Bio.PDB.Model.Model`, a list of `InteractingChains`, a `logging.getLogger(__name__) Object`, and (optionally) a dictionary for stoichiometry
+* **`README.md`**: A MarkDown File containing tutorial and important information about the package. 
+* **`report.md`**: A MarkDown File containing background and scientific explanation, analysis of the results and package limitations. 
+* **`get_example_files.py`**: Complementary script for building the examples. 
+* **`InteractingChain.py`**:A module used by `Complex.py` and `macrocomplex_builder.py` that contains the `InteractingChain Object` that stores a `Bio.PDB.Chain.Chain Object`, a file_index(int) that refers to the associated interaction-file, a string of residues as sequence and (optionally) the `InteractingChain` that its interacting with.
+* **`Interaction.py`**: A module used by `macrocomplex_builder.py` that contains the `Interaction Object` stores a `Bio.PDB.Model.Model`, a first `InteractingChain` and a second `Interacting Chain`.
+* **`UserInteraction.py`**: A module used by `Complex.py` and `macrocomplex_builder.py` that performs the import of user data and output of files.
+* **`macrocomplex_builder.py`**: The main script to run the program. 
+* **`setup.py`**: To install the package.
 
 
 ## Tutorial
@@ -78,6 +77,11 @@ The user can also indicate the stoichiometry of the complex in a specific format
 
  ```bash
  $ macrocomplex_builder.py -i /path/pdb/fasta/folder -s A3B5C8
+ ```
+It is also possible to change the default RSMD value before checking clashes. The default value is 0.5.
+
+ ```bash
+ $ macrocomplex_builder.py -i /path/pdb/fasta/folder -r 0.2
  ```
 
 There are two run types: simple and complete. By default, it runs simply because it is less computationally expensive and gives quite good results. If the user would like to explore all the different possibilities the `-c` argument can be used (see report for more information about simple and complete algorithms). 

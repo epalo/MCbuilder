@@ -12,7 +12,7 @@ from Complex import *
 from Interaction import Interaction
 import string
 
-"""  Macrocomplex builder based on structural superimposition  """
+###  Macrocomplex builder based on structural superimposition  ###
 
 ######################################################
 # HELPER FUNCTIONS

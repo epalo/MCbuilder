@@ -40,12 +40,10 @@ class Complex(object):
           stoich_complex[id] = 0
         self.__stoich_complex = stoich_complex
 
-    def calc_z_score(self):
-        # how to calculate z_score?
-        return
-
-    # each entry in the stoichiometry is one representation for all homo-chains, so if a homologous chain occurs also the counter has to be set up
     def add_to_stoich(self, chain, chain_list):
+        """ increments the counter for a chain in the stoichiometric dictionary of a complex,
+        the counter is also incremented while adding a homologous chain
+        """
         if not self.__stoich_complex == None:
             # get all the homo-chains for the chain to add
             homo_chain_ids = []
@@ -59,9 +57,9 @@ class Complex(object):
                     self.__stoich_complex[id] += 1
 
     def stoich_is_complete(self, stoich):
+        """ check if stoichiometry has reached its limit for all chains (the two dictionaries are equal) """
         is_complete = False
         if stoich:
-            # check if stoichiometry has reached its limit for all chains (the two dictionaries are equal)
             for id in stoich:
                 if not self.__stoich_complex[id] == stoich[id]:
                     is_complete = False
@@ -70,6 +68,7 @@ class Complex(object):
         return is_complete
 
     def stoich_is_overfull(self, stoich):
+        """ check if stoichiometry is overfull in one of the fields """
         is_overfull = False
         if stoich:
             for id in stoich:
@@ -79,8 +78,8 @@ class Complex(object):
                 is_overfull = False
         return is_overfull
 
-    # returns a list with all possible chains that can be added to a current complex
     def get_superimpose_options(self, chain_list):
+        """ returns a list with all possible chains that can be added to a current complex due to homology """
         superimpose_options = []
         for chain in self.__chains:
             similar_chains = chain.get_homo_chains(chain_list)
@@ -89,12 +88,14 @@ class Complex(object):
         return superimpose_options
 
     def each_chain_occurs_in_list(self, chain_list):
+        """ checks if each chain of a complex is present in a list of chains """
         for chain in self.__chains:
             if not chain in chain_list:
                 return False
         return True
 
     def get_most_interacting_chain(self, list_of_chains, homo_chain_list):
+        """ returns the chain with the most homologous chains in a chain list """
         best_chain = list_of_chains[0]
         most_homo_chains = len(best_chain.get_homo_chains(homo_chain_list))
         for chain in list_of_chains:
@@ -106,6 +107,7 @@ class Complex(object):
 
 
     def create_new_subunit(self,homo_chain_list, protein_limit, stoich, number_list, initial_chains, interaction_files, version):
+        """ adds the chain that has the highest number of homologous chains to a complex and calls create_macrocomplex to start a new subunit """
         # get remaining interactions
         remaining_chains = [chain for chain,value in initial_chains.items() if value == 0]
         print("Remaining chain:",remaining_chains)
@@ -134,9 +136,10 @@ class Complex(object):
         else:
             return self.create_macrocomplex(homo_chain_list, protein_limit, stoich, number_list, initial_chains, interaction_files)
 
-    # simple version of algorithm:
     def create_macrocomplex(self, homo_chain_list, protein_limit, stoich, number_list, initial_chains, interaction_files):
-        # adds each time the function is called all possibly addable chains AT ONCE
+        """ simple version of the recursive algorithm:
+        adds in each recursion all possibly addable chains AT ONCE
+        """
         for chain in self.__chains:
             option_complex, updated_numbers = self.superimpose(chain, homo_chain_list, stoich, number_list, initial_chains)
             if (option_complex == None):
@@ -150,12 +153,9 @@ class Complex(object):
                 len(option_complex.get_chains()) == len(self.__chains):
             # check if all pdb-files were used at least once
             if all(initial_chains.values()) or protein_limit or option_complex.stoich_is_complete(stoich):
-                print("FINAL COMPLEX FOUND")
-                print("Initial Values are",initial_chains.values())
-                print("optionComplex is:",option_complex)
                 return option_complex
             else: # if not all pdb-files were used at least once but further adding leads to clashes --> creation of new subunit
-    
+
                 return option_complex.create_new_subunit(homo_chain_list, protein_limit, stoich, number_list, initial_chains, interaction_files, "simple")
         else:
             # recursively add chains that can still be added to the current complex
@@ -165,9 +165,11 @@ class Complex(object):
             print("recursion!")
             return option_complex.create_macrocomplex(homo_chain_list, protein_limit, stoich, updated_numbers, initial_chains, interaction_files)
 
-    # full version of algorithm:
-    # in each recursive step one possible chain is added and from there the whole recursive tree is searched through for possible complexes
+
     def create_macrocomplex_full(self, homo_chain_list, protein_limit, stoich, number_list, initial_chains, interaction_files):
+        """ full version of algorithm:
+        in each recursive step one possible chain is added and from there the whole recursive tree is searched through for possible complexes
+        """
         for option in self.get_superimpose_options(homo_chain_list):
             # superimpose the option-chain to the current complex
             self.__logger.info(f"Attempting to superimpose chain {option.get_biopy_chain().get_id()}")
@@ -183,10 +185,7 @@ class Complex(object):
                         option_complex.stoich_is_complete(stoich) or \
                         len(option_complex.get_chains()) == len(self.__chains):
                     # check if all pdb-files were used at least once
-                    if all(initial_chains.values())  or protein_limit or option_complex.stoich_is_complete(stoich):
-                        print(initial_chains.values())
-                        print(option_complex)
-                        print("COMPLEX FOUND")
+                    if all(initial_chains.values()) or protein_limit or option_complex.stoich_is_complete(stoich):
                         # add option_complex to list of final complexes
                         return option_complex
                     else: # if not all pdb-files were used at least once but further adding leads to clashes --> creation of new subunit
@@ -202,7 +201,10 @@ class Complex(object):
 
 
     def superimpose(self, chain_to_superimp, homo_chain_list, stoich, number_list, initial_chains):
-        # if no complex can be created with the requested chain it returns None
+        """ Superimposes the chain to superimpose on the chain with the best rmsd and returns the final complex.
+        If all superimpositions lead to clashes the function returns None as the complex.
+        Besides that the function returns the updated list of numbers that are given to chains as IDs """
+
         created_complex = None
 
         superimposition_options = [chain for chain in chain_to_superimp.get_homo_chains(homo_chain_list) if chain in initial_chains]
@@ -270,6 +272,7 @@ class Complex(object):
         return created_complex, number_list
 
     def is_clashing(self, chain):
+        """ checks if a complex is clashing with a chain by using PDB.NeighborSearch """
         backbone = {"CA", "C1\'"}
         model_atoms = [atom for atom in self.__model.get_atoms() if atom.id in backbone]
         chain_atoms = chain.get_ca_atoms()
@@ -286,14 +289,6 @@ class Complex(object):
         else:  # Otherwise return no
             return False
 
-    # return all the chains of a current complex where a chain_b can possibly be superimposed
-    def get_superimpose_positions(self, chain_b):
-        superimpose_positions = []
-        homos_chain_b = chain_b.get_homo_chains()
-        for chain in self.__chains():
-            if chain in homos_chain_b:
-                superimpose_positions.append(chain)
-        return superimpose_positions
 
     def update_homo_chains(self, original, best_chain_position, chain_list):
         for list in chain_list:
