@@ -6,13 +6,13 @@ import sys
 import logging
 from Bio.PDB import PDBIO
 
-""" Import of user data and output of files.
+#Import of user data and output of files.
 
-Requires input of fasta file(.fasta or .fa) containing protein to be modelled along with PDB files (.pdb) containing relevant interactions.
-Only the mentioned file types will be accepted.
+#Requires input of fasta file(.fasta or .fa) containing protein to be modelled along with PDB files (.pdb) containing relevant interactions.
+#Only the mentioned file types will be accepted.
 
-Outputs PDB file in the working directory (default) or in the specified directory 
-"""
+#Outputs PDB file in the working directory (default) or in the specified directory 
+
 
 
 parser = argparse.ArgumentParser(description="Macrocomplex builder, creates protein macrocomplex from individual PDB files and FASTA files.")
