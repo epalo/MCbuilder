@@ -103,14 +103,26 @@ class Complex(object):
                 best_chain = chain
                 most_homo_chains = num_homo_chains
         return best_chain
-    
+
 
     def create_new_subunit(self,homo_chain_list, protein_limit, stoich, number_list, initial_chains, interaction_files, version):
         # get remaining interactions
         remaining_chains = [chain for chain,value in initial_chains.items() if value == 0]
         print("Remaining chain:",remaining_chains)
         # get next interaction with the most interactions
-        new_start_chain = self.get_most_interacting_chain(remaining_chains, homo_chain_list)
+        # new_start_chain = self.get_most_interacting_chain(remaining_chains, homo_chain_list)
+        for i in range(len(remaining_chains)):
+            new_start_chain = self.get_most_interacting_chain(remaining_chains, homo_chain_list)
+            print(new_start_chain)
+            print(self.is_clashing(new_start_chain))
+            if not self.is_clashing(new_start_chain):
+                print("no clash")
+                break
+            else:
+                print("clash")
+                initial_chains[new_start_chain] = True
+                remaining_chains.remove(new_start_chain)
+        print("adding subunit")
         # TODO: set coordinates for the next subunit
         # add new_start_chain to optioncomplex and run again in recursive call (creation of new subunit)
         if new_start_chain in initial_chains:
@@ -143,6 +155,7 @@ class Complex(object):
                 print("optionComplex is:",option_complex)
                 return option_complex
             else: # if not all pdb-files were used at least once but further adding leads to clashes --> creation of new subunit
+    
                 return option_complex.create_new_subunit(homo_chain_list, protein_limit, stoich, number_list, initial_chains, interaction_files, "simple")
         else:
             # recursively add chains that can still be added to the current complex
@@ -170,7 +183,7 @@ class Complex(object):
                         option_complex.stoich_is_complete(stoich) or \
                         len(option_complex.get_chains()) == len(self.__chains):
                     # check if all pdb-files were used at least once
-                    if all(initial_chains.values()):
+                    if all(initial_chains.values())  or protein_limit or option_complex.stoich_is_complete(stoich):
                         print(initial_chains.values())
                         print(option_complex)
                         print("COMPLEX FOUND")
