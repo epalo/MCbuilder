@@ -1,4 +1,3 @@
-# imports
 from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
 from Bio import SeqIO, PDB, pairwise2
@@ -31,14 +30,13 @@ for i in range(len(chains)):
             clashes += bool(ns.search(atom.coord, 3.5))  # If this atom shows clashes, add 1 to the clashes counter
         if clashes >= 1:
             all_interact.append((chains[i].get_id(), chains[m].get_id()))
-        else:  # Otherwise return no
+        else: 
             continue
 
 flat_list = [item for sublist in all_interact for item in sublist]
 
 for chain in chains:
     if chain.get_id() not in flat_list:
-        log.info(f"{chain.get_id()} not in list")
 io = PDBIO()
 io.set_structure(structure)
 cwd = os.getcwd()

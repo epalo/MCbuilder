@@ -5,6 +5,7 @@ import UserInteraction
 import string
 
 final_complexes = []
+
 class Complex(object):
 
     """ A Complex object stores a Bio.PDB.Model.Model, a list of InteractingChains,
@@ -46,7 +47,7 @@ class Complex(object):
         the counter is also incremented while adding a homologous chain
         """
         if not self.__stoich_complex == None:
-            # get all the homo-chains for the chain to add
+            # get all the homologous chains for the chain to add
             homo_chain_ids = []
             for elem in chain.get_homo_chains(chain_list):
                 homo_chain_ids.append(elem.get_biopy_chain().get_id())
@@ -127,7 +128,6 @@ class Complex(object):
                 # if chain doesn't lead to clashes use it for adding the next subunit
                 break
 
-
         # TODO: set coordinates for the next subunit
         # add new_start_chain to optioncomplex and run again in recursive call (creation of new subunit)
         if new_start_chain:
@@ -150,8 +150,8 @@ class Complex(object):
                 self.__logger.warning("The current option could not be added!")
             else:
                 self.__logger.info("Option complex was be found!")
-        # if end-options are reached, don't go into recursion
-        # endoptions: - all chains are clashing, -protein-limit reached, -complete stoichiometry
+        # if end-conditions are reached, don't go into recursion
+        # end-conditions: - all chains are clashing, -protein-limit reached, -complete stoichiometry
         if  len(option_complex.get_chains()) == protein_limit or \
                 option_complex.stoich_is_complete(stoich) or \
                 len(option_complex.get_chains()) == len(self.__chains):
@@ -182,8 +182,8 @@ class Complex(object):
                 self.__logger.warning("The current option could not be added!")
             else:
                 self.__logger.info("Option complex was be found!")
-                # if end-options are reached, don't go into recursion
-                # endoptions: - all chains are clashing, -protein-limit reached, -complete stoichiometry
+                # if end-conditions are reached, don't go into recursion
+                # end-conditions: - all chains are clashing, -protein-limit reached, -complete stoichiometry
                 if  len(option_complex.get_chains()) == protein_limit or \
                         option_complex.stoich_is_complete(stoich) or \
                         len(option_complex.get_chains()) == len(self.__chains):

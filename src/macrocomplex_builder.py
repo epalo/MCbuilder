@@ -1,4 +1,3 @@
-# imports
 from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
 from Bio import SeqIO, PDB, pairwise2
@@ -108,8 +107,6 @@ if __name__ == "__main__":
     #  PARSING DATA
 
     # TODO: insert case of empty fasta file
-    log.warning("warning")
-    log.info("info")
     seq_record_list = []
     for seq in fasta_files:
         for seq_record in SeqIO.parse(seq, "fasta"):

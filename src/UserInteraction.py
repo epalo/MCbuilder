@@ -1,4 +1,3 @@
-# imports
 import argparse
 import re
 import os
@@ -12,7 +11,6 @@ from Bio.PDB import PDBIO
 #Only the mentioned file types will be accepted.
 
 #Outputs PDB file in the working directory (default) or in the specified directory 
-
 
 
 parser = argparse.ArgumentParser(description="Macrocomplex builder, creates protein macrocomplex from individual PDB files and FASTA files.")
