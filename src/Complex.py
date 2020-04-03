@@ -7,7 +7,8 @@ from macrocomplex_builder import get_most_interacting_interaction
 
 class Complex(object):
 
-    """ DESCRIPTION """
+    """ A Complex object stores a Bio.PDB.Model.Model, a list of InteractingChains,
+    a logging.getLogger(__name__) object, and (optionally) a dictionary for stoichiometry """
 
     def __init__(self, model, chains, logger, stoich_complex=None):
         self.__model = model

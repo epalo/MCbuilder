@@ -1,7 +1,9 @@
 import random
 
 class InteractingChain():
-    """ DESCRIPTION """
+    """ An InteractingChain stores a Bio.PDB.Chain.Chain Object, a file_index(int) that refers to the 
+    associated interaction-file, a string of residues as sequence 
+    and (optionally) the InteractingChain that its interacting with """
 
     def __init__(self, biopy_chain, file_index, sequence, interacting_chain=None):
         self.__biopy_chain = biopy_chain
