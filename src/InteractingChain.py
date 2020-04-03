@@ -48,4 +48,4 @@ class InteractingChain():
         new_id = random.choice(number_list)
         self.__biopy_chain.id = new_id
         number_list.remove(new_id)
-        return self.__biopy_chain, number_list
+        return number_list

@@ -123,24 +123,30 @@ class Complex(object):
                 return option_complex
             else:
                 # get remaining chains
-                remaining_chains = [chain for chain,value in initial_chains.items() if value == False]
+                remaining_chains = [chain for chain,value in initial_chains.items() if value == 0]
                 # make an interaction list out of remaining chains
-                print(remaining_chains)
-                print(option_complex.get_chains())
+                # print(remaining_chains)
+                # print(option_complex.get_chains())
                 remaining_interactions = self.get_remaining_interactions(interaction_files, remaining_chains)
                 # get next interaction with the most interactions
                 new_start_interaction = get_most_interacting_interaction(remaining_interactions, homo_chain_list)
                 # set coordinates for the next subunit
                 # missing?
                 # add new_start_interaget_mosction to optioncomplex and run again in recursive call
-                chain_a, number_list = new_start_interaction.get_chain_a().set_numeric_id(number_list)
-                chain_b, number_list = new_start_interaction.get_chain_b().set_numeric_id(number_list)
-
+                print("A before ", new_start_interaction.get_chain_a().get_biopy_chain().get_id())
+                print("B before ", new_start_interaction.get_chain_b().get_biopy_chain().get_id())
+                print(len(number_list))
+                number_list = new_start_interaction.get_chain_a().set_numeric_id(number_list)
+                print(len(number_list))
+                number_list = new_start_interaction.get_chain_b().set_numeric_id(number_list)
+                print(len(number_list))
+                print("A after ", new_start_interaction.get_chain_a().get_biopy_chain().get_id())
+                print("B after ", new_start_interaction.get_chain_b().get_biopy_chain().get_id())
                 option_complex.add_chain(new_start_interaction.get_chain_a())
                 option_complex.add_chain(new_start_interaction.get_chain_b())
-                if new_start_interaction.get_chain_a in initial_chains:
+                if new_start_interaction.get_chain_a() in initial_chains:
                     initial_chains[new_start_interaction.get_chain_a] = True
-                if new_start_interaction.get_chain_b in initial_chains:
+                if new_start_interaction.get_chain_b() in initial_chains:
                     initial_chains[new_start_interaction.get_chain_b] = True
                 return option_complex.create_macrocomplex(homo_chain_list, protein_limit, stoich, number_list, initial_chains, interaction_files)
         else:

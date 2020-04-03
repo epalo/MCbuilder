@@ -189,6 +189,8 @@ if __name__ == "__main__":
 
     number_list = list(range(0,10000))
     dict_of_chains = { i : 0 for i in chains }
+    dict_of_chains[starting_interaction.get_chain_a()] = True
+    dict_of_chains[starting_interaction.get_chain_b()] = True
     print(dict_of_chains)
     if UserInteraction.get_runtype_option():
         best_complex = starting_complex.create_macrocomplex_full(homo_chains,protein_limit, stoichiometry, number_list, dict_of_chains, interactions)
