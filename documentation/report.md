@@ -5,10 +5,8 @@
 - [Introduction](#Introduction)
 - [Background and Scientific Explanation](#Background-and-Scientific-explanation)
 - [Algorithm](#Algorithm)
-- [Tutorial](#Tutorial)
 - [Examples Analysis](#Examples-Analysis)
 - [Limitations](#limitations)
-- [References](#References)
 <!-- /TOC -->
 
 ## Introduction
