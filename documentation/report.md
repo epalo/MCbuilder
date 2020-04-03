@@ -65,13 +65,23 @@ For each chain that is introduced into the `superimpose` function the program ch
 Steric clashes are checked using the `Complex` class function `is_clashing`. The function requires the chain that is being considered as an addition to the complex (i.e. the interacting chain from the superimposed chain). A list of alpha carbons is produced for both the chain we are testing and the current model. With these it is checked whether any of the chains alpha carbons are within a 1.7 armstrong (XXXX) radius of the alpha carbons from the current complex. If there are (XXXX) 3% of atoms within this radius then the chain is returned to the `Superimpose` function as `True` (i.e. the chain is clashing). If there are fewer clashes than this threshold then the chain is considered not clashing.
 
 ## Examples Analysis
+
 few explication of the section
 Blue: Original
 Beige: Build
 ### Example 1, 4g83
-This PDB entry corresponds to the crystal structure of p73 DNA-Binding domain tetramer from Homo Sapiens, bound to a full response-element, [4g83](https://www.rcsb.org/structure/4g83). This domain is a Homo 4-mer. 
+This PDB entry corresponds to the crystal structure of p73 DNA-Binding domain tetramer from Homo Sapiens, bound to a full response-element, [4g83](https://www.rcsb.org/structure/4g83). This entry is formed by 1 unique protein chain and 1 unique nucleic acid chain. 
+
+XXXXXXXXXXXXXX i dont understand pdb data base, it put that but also put that stech is A4, and that there is A,B proteins chain --> we have to discuss who we want to do the examples. XXXXXXXXXXXXXX
 
 <img src="4g83.png" width="275" height="275"> <img src="Macro_4g83.png" width="275" height="275"> <img src="4g83_super.png" width="275" height="275">
+
+As can be seen, the model built fits perfectly with the original complex, there is no differences between them. So the program has no problem dealing with this type of interactions. This model was built in the simplest way, without any stoichiometry or number of chains. 
+
+
+ ```bash
+ $ scr/macrocomplex_builder.py -i example/4g83/ -o Macro_4g83.pdb
+ ```
 
 
 
