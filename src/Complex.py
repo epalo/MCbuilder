@@ -3,6 +3,7 @@ import copy, random
 from InteractingChain import InteractingChain
 import UserInteraction
 import string
+from macrocomplex_builder import get_most_interacting_interaction
 
 class Complex(object):
 
@@ -117,19 +118,20 @@ class Complex(object):
                 len(option_complex.get_chains()) == len(self.__chains):
 
             # check if all pdb-files were used at least once
-            if all(initial_chains):
+            if all(initial_chains.values()):
                 print("COMPLEX FOUND")
                 return option_complex
             else:
                 # get remaining chains
                 remaining_chains = [chain for chain,value in initial_chains.items() if value == False]
                 # make an interaction list out of remaining chains
+                print(remaining_chains)
                 remaining_interactions = self.get_remaining_interactions(interaction_files, remaining_chains)
                 # get next interaction with the most interactions
                 new_start_interaction = macrocomplex_builder.get_most_interacting_interaction(remaining_interactions, self.__chains)
                 # set coordinates for the next subunit
                 # missing?
-                # add new_start_interaction to optioncomplex and run again in recursive call
+                # add new_start_interaget_mosction to optioncomplex and run again in recursive call
                 option_complex.add_chain(new_start_interaction.get_chain_a())
                 option_complex.add_chain(new_start_interaction.get_chain_b())
                 if new_start_interaction.get_chain_a in initial_chains:
