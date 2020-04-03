@@ -130,7 +130,7 @@ This example was build using 47 interactions files. The model built fits perfect
 
 It is the structure of yeast RNA polymerase III elongation complex. This complex has 17 unique protein chains and 3 unique nucleic acid chains.
 
-Both this example and the previous one take longer, because as there are many unique chains, the step of checking all chains are within the complex and, if not, starting another round to add them, is more demanding.  
+Both this example and the next one take longer, because as there are many unique chains, the step of checking all chains are within the complex and, if not, starting another round to add them, is more demanding.  
 
 <img src="images/5fj8_original.png" width="275" height="275"> <img src="images/5fj8_macro.png" width="275" height="275"> <img src="images/5fj8_super.png" width="275" height="275">
 
