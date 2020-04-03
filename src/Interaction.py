@@ -1,6 +1,5 @@
-# an interaction is a model out of two chains
 class Interaction():
-    
+
     """ An Interaction Object stores a Bio.PDB.Model.Model, a first InteractingChain
     and a second Interacting Chain  """
 

@@ -14,16 +14,7 @@ import string
 
 ###  Macrocomplex builder based on structural superimposition  ###
 
-######################################################
-# HELPER FUNCTIONS
-
-# Problems:
-# check if each element of complex.get_chains() is in chains
-# - check for recursion (check end option )
-# - which complex is the best complex -> important, or create list of all complexes
-# - implement a stop criterion: if it's joining hydrophic areas.(insert in report)
-# - rmsd threshold
-# - making recursion more beautiful
+##################################################################
 
 dna = {'DA': 'A', 'DC': 'C', 'DG': 'G', 'DT': 'T'}
 rna = {'A': 'A', 'C': 'C', 'G': 'G', 'U': 'U'}
@@ -73,8 +64,6 @@ def find_homologous_chains(chains):
             if (chains[i].get_file_index() != chains[j].get_file_index()):
                 # find the best alignment for two homo_chains (first element of list of alignments)
                 alignment = pairwise2.align.globalxx(chains[i].get_sequence(), chains[j].get_sequence())[0]
-                #al_length = len(alignment[0])
-                #ident = sum(base1 == base2 for base1, base2 in zip(aln_seq_1, aln_seq_2))
                 if alignment[2]/alignment[4] >= 0.95:
                     inserted = True
                     log.info(f"{chains[i].get_biopy_chain().get_id()} and {chains[j].get_biopy_chain().get_id()} have 95% or more sequence identity")
@@ -109,17 +98,16 @@ def get_most_interacting_interaction(interaction_list, homo_chain_list):
 if __name__ == "__main__":
     """ main function that is called when running the application """
 
-    ######################################################
+   ##################################################################
     #  USER INPUT
     # obtaining fasta and pdb files
     fasta_files, pdb_files, log = UserInteraction.process_input()
     protein_limit = UserInteraction.get_protein_limit()
 
-    ######################################################
+    ##################################################################
     #  PARSING DATA
 
     # TODO: insert case of empty fasta file
-    # fasta files still needed????
     log.warning("warning")
     log.info("info")
     seq_record_list = []
@@ -140,9 +128,6 @@ if __name__ == "__main__":
         chain_a, chain_b = model.get_chains()
         sequence_a = get_sequence_for_chain(chain_a)
         sequence_b = get_sequence_for_chain(chain_b)
-        print(pdb_files[i])
-        print("Sequence a:",sequence_a)
-        print("sequence b:",sequence_b)
 
         if sequence_a == None or sequence_b == None:
             continue
@@ -158,19 +143,18 @@ if __name__ == "__main__":
         chains.append(interacting_b)
         log.info("PDB interactions processed")
 
-    ######################################################
+    ##################################################################
     # SEQUENCE ALIGNMENTS
     homo_chains = find_homologous_chains(chains)
 
     log.info(f"{len(homo_chains)} homologous chains found")
 
-    ######################################################
+    ##################################################################
     # SETTING THE STOICHIOMETRY
     stoichiometry = UserInteraction.get_stoichiometry()
-    print(stoichiometry)
     log.info(f"Stoichiometry has been set.{stoichiometry}")
 
-    ######################################################
+    ##################################################################
     #SETTING THE STARTING COMPLEX
 
     #the starting_model is the interaction with the most homologous chains to both chains
@@ -181,31 +165,26 @@ if __name__ == "__main__":
         starting_complex.set_stoich_complex(stoichiometry)
         starting_complex.add_to_stoich(starting_interaction.get_chain_a(), homo_chains)
         starting_complex.add_to_stoich(starting_interaction.get_chain_b(), homo_chains)
-    print("Start",starting_interaction.get_chain_a().get_biopy_chain().get_id())
-    print("Start",starting_interaction.get_chain_b().get_biopy_chain().get_id())
 
-    ######################################################
+    ##################################################################
     # BUILDING THE COMPLEX
 
     number_list = list(range(0,10000))
     dict_of_chains = { i : 0 for i in chains }
     dict_of_chains[starting_interaction.get_chain_a()] = True
     dict_of_chains[starting_interaction.get_chain_b()] = True
-    print(dict_of_chains)
     if UserInteraction.get_runtype_option():
+        log.info("Creating Macrocomplex with full version.")
         starting_complex.create_macrocomplex_full(homo_chains,protein_limit, stoichiometry, number_list, dict_of_chains, interactions)
         macrocomplex_list = final_complexes
-        print("ALL COMPLEXES:", macrocomplex_list)
         # TODO: create output pdb's
         exit(1)
     else:
+        log.info("Creating Macrocomplex with simple version.")
         best_complex = starting_complex.create_macrocomplex(homo_chains,protein_limit, stoichiometry, number_list, dict_of_chains, interactions)
-        print("ready to print")
-        print("best", best_complex.get_chains())
-        print("starting", starting_complex.get_chains())
         new_id_list = list(string.ascii_letters)
         for chain in best_complex.get_model().get_chains():
             chain.id = random.choice(new_id_list)
             new_id_list.remove(chain.id)
-        UserInteraction.create_output_PDB(best_complex)
+        UserInteraction.create_output_PDB(best_complex, log)
         exit(1)

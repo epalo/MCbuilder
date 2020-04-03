@@ -1,7 +1,7 @@
 import random
 
 class InteractingChain():
-    
+
     """ An InteractingChain Object stores a Bio.PDB.Chain.Chain Object, a file_index(int) that refers to the 
     associated interaction-file, a string of residues as sequence 
     and (optionally) the InteractingChain that its interacting with """
@@ -38,8 +38,8 @@ class InteractingChain():
         model_atoms = [atom for atom in self.get_biopy_chain().get_atoms() if atom.id in backbone]
         return model_atoms
 
-    # returns a list of chains out of a list of chains that are similar to the input chain
     def get_homo_chains(self, list_of_chains):
+        """ returns a list of chains out of a list of chains that are homologous to the input chain """
         to_return = []
         for lst in list_of_chains:
             if self in lst:
