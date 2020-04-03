@@ -42,12 +42,12 @@ The package has been structured as follows:
 * **`README.md`**: A MarkDown File containing tutorial and important information about the package. 
 * **`report.md`**: A MarkDown File containing background and scientific explanation, analysis of the results and package limitations. 
 * **`get_example_files.py`**: Complementary script for building the examples. 
-* **`InteractingChain.py`**:A module used by `Complex.py` and `macrocomplex_builder.py` that contains the `InteractingChain Object` that stores a `Bio.PDB.Chain.Chain Object`, a file_index(int) that refers to the associated interaction-file, a string of residues as sequence and (optionally) the `InteractingChain` that its interacting with.
+* **`InteractingChain.py`**:A module used by `Complex.py` and `macrocomplex_builder.py` that contains the `InteractingChain Object` that stores a `Bio.PDB.Chain.Chain Object`, a file_index (int) that refers to the associated interaction-file, a string of residues as sequence and (optionally) the `InteractingChain` that its interacting with.
 * **`Interaction.py`**: A module used by `macrocomplex_builder.py` that contains the `Interaction Object` stores a `Bio.PDB.Model.Model`, a first `InteractingChain` and a second `Interacting Chain`.
 * **`UserInteraction.py`**: A module used by `Complex.py` and `macrocomplex_builder.py` that performs the import of user data and output of files.
 * **`macrocomplex_builder.py`**: The main script to run the program. 
 * **`setup.py`**: To install the package.
-* **`__init__`**: It is a necessary file for the installation.
+* **`__init__.py`**: It is a necessary file for the installation.
 
 
 ## Tutorial
