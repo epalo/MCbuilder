@@ -73,7 +73,8 @@ Another option is to indicate the maximum number of strings that the user wants 
  ```bash
  $ macrocomplex_builder.py -i /path/pdb/fasta/folder -l 30
  ```
-The user can also indicate the stoichiometry of the complex in a specific format:
+The user can also indicate the stoichiometry of the complex in a specific format.
+Homologous chains have to be specified with one representative chain:
 
  ```bash
  $ macrocomplex_builder.py -i /path/pdb/fasta/folder -s A3B5C8
