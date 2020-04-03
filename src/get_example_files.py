@@ -8,6 +8,9 @@ from Bio.PDB.Structure import Structure
 from Bio.PDB import PDBIO
 from Bio.PDB.PDBIO import Select
 import os
+
+""" produces interaction files to create examples to test the program """
+
 chains = []
 pdb_file = "6om3.pdb"
 parser = PDB.PDBParser()
