@@ -33,9 +33,7 @@ In this program, we establish superimposition to implement new proteins onto the
 
 Moreover, an accurate superimposition does not imply that a third chain is in that location. To be able to confirm whether a particular chain should be added to the macrocomplex, it is also essential to check its surrounding chains and whether there are any steric clashes. These could lead to unnatural structures in the model, produced by non-bonding atoms being places together or two atoms being at too close a distance. Even though two chains superimpose correctly, the chain with which it is interacting may occupy the space of a protein that is already there; this means that the interacting chains should not be placed in the complex, in that location.
 
-<div style="text-align: center">
 ![Steric clashes in macrocomplex](images/protein_chains_sbi.png)
-</div>
 
 To judge the presence of steric clashes VanDerWaals radius is used, any atom from a different chain that is within a 1.7 angstrong radius of an alpha carbon is denoted as a clash; this distance is chosen since it corresponds to carbons' VdW radius. There are several non-covalent bonds found in proteins, such as hydrogen bonding; these types of interactions mean that the distance between two nuclei may be reduced, only the alpha carbon radii are measured to reduce the impact of this effect.
 
