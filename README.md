@@ -29,14 +29,14 @@ It was used several python modules for the tool development. These modules can b
 To use the tool, the user first has to download the package from Git and then install it via `setup.py` in the python site-packages.
 
  ```bash
- $ git clone https://github.com/anmeert/sbi-project.git
- $ cd sbi-project
+ $ git clone https://github.com/anmeert/MCbuilder.git
+ $ cd MCbuilder
  $ sudo python3 setup.py install
  ``` 
 ## Structure of the Package
 The package has been structured as follows:
 
-![Tree](documentation/tree.png)
+![Tree](documentation/images/tree.png)
 
 * **`Complex.py`**: A module used by `macrocomplex_builder.py` that contains the `Complex object` that stores a `Bio.PDB.Model.Model`, a list of `InteractingChains`, a `logging.getLogger(__name__) Object`, and (optionally) a dictionary for stoichiometry
 * **`README.md`**: A MarkDown File containing tutorial and important information about the package. 
@@ -47,6 +47,7 @@ The package has been structured as follows:
 * **`UserInteraction.py`**: A module used by `Complex.py` and `macrocomplex_builder.py` that performs the import of user data and output of files.
 * **`macrocomplex_builder.py`**: The main script to run the program. 
 * **`setup.py`**: To install the package.
+* **`__init__`**: It is a necessary file for the installation.
 
 
 ## Tutorial
@@ -56,7 +57,6 @@ In this section, an explanation of how to run the script from the command line a
 The simples way to run it:
 
  ```bash
- $ cd scr/
  $ macrocomplex_builder.py
  ```
 In this case, it will run using the current folder as input and it will produce as an output a file named macrocomplex.pdb in the same folder. 
