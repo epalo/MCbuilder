@@ -1,4 +1,3 @@
-# imports
 from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
 from Bio import SeqIO, PDB, pairwise2
@@ -17,14 +16,11 @@ parser = PDB.PDBParser()
 structure = parser.get_structure("6om3",pdb_file)
 for chain in structure.get_chains():
     chains.append(chain)
-# chains.append(structure.get_chains())
-print(chains)
 backbone = {"CA", "C1\'"}
 all_interact = []
 for i in range(len(chains)):
     fixed_chain = []
     fixed_chain = [atom for atom in chains[i].get_atoms()]  # Gets only the backbone atoms
-    # print(fixed_chain)
     ns = PDB.NeighborSearch(fixed_chain)  # Generates a neigbour search tree to speed up distance calculations
     for m in range(i):
         compare_chain = []
@@ -32,18 +28,15 @@ for i in range(len(chains)):
         clashes = 0
         for atom in compare_chain:
             clashes += bool(ns.search(atom.coord, 3.5))  # If this atom shows clashes, add 1 to the clashes counter
-        #print(clashes)
         if clashes >= 1:
-            #print(clashes)
             all_interact.append((chains[i].get_id(), chains[m].get_id()))
-        else:  # Otherwise return no
-            continue# print("Doesn't")
+        else: 
+            continue
 
 flat_list = [item for sublist in all_interact for item in sublist]
 
 for chain in chains:
     if chain.get_id() not in flat_list:
-        print(f"{chain.get_id()} not in list")
 io = PDBIO()
 io.set_structure(structure)
 cwd = os.getcwd()
