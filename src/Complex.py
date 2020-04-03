@@ -3,7 +3,6 @@ import copy, random
 from InteractingChain import InteractingChain
 import UserInteraction
 import string
-from macrocomplex_builder import get_most_interacting_interaction
 
 class Complex(object):
 
@@ -95,31 +94,29 @@ class Complex(object):
                 return False
         return True
 
-    def get_remaining_interactions(self, interaction_list, missing_chain_list):
-        remaining_interactions = []
-        for interaction in interaction_list:
-            if (interaction.get_chain_a() in missing_chain_list or \
-                interaction.get_chain_b() in missing_chain_list):
-                remaining_interactions.append(interaction)
-        return remaining_interactions
+    def get_most_interacting_chain(self, list_of_chains, homo_chain_list):
+        best_chain = list_of_chains[0]
+        most_homo_chains = len(best_chain.get_homo_chains(homo_chain_list))
+        for chain in list_of_chains:
+            num_homo_chains = len(chain.get_homo_chains(homo_chain_list))
+            if (num_homo_chains > most_homo_chains):
+                best_chain = chain
+                most_homo_chains = num_homo_chains
+        return best_chain
     
 
     def create_new_subunit(self,homo_chain_list, protein_limit, stoich, number_list, initial_chains, interaction_files, version):
         # get remaining interactions
         remaining_chains = [chain for chain,value in initial_chains.items() if value == 0]
-        remaining_interactions = self.get_remaining_interactions(interaction_files, remaining_chains)
+        print("Remaining chain:",remaining_chains)
         # get next interaction with the most interactions
-        new_start_interaction = get_most_interacting_interaction(remaining_interactions, homo_chain_list)
+        new_start_chain = self.get_most_interacting_chain(remaining_chains, homo_chain_list)
         # TODO: set coordinates for the next subunit
-        # add new_start_interaction to optioncomplex and run again in recursive call (creation of new subunit)
-        if new_start_interaction.get_chain_a() in initial_chains:
-            initial_chains[new_start_interaction.get_chain_a()] = True
-        if new_start_interaction.get_chain_b() in initial_chains:
-            initial_chains[new_start_interaction.get_chain_b()] = True
-        number_list = new_start_interaction.get_chain_a().set_numeric_id(number_list)
-        number_list = new_start_interaction.get_chain_b().set_numeric_id(number_list)
-        self.add_chain(new_start_interaction.get_chain_a())
-        self.add_chain(new_start_interaction.get_chain_b())
+        # add new_start_chain to optioncomplex and run again in recursive call (creation of new subunit)
+        if new_start_chain in initial_chains:
+            initial_chains[new_start_chain] = True
+        number_list = new_start_chain.set_numeric_id(number_list)
+        self.add_chain(new_start_chain)
         if(version == "full"):
             return self.create_macrocomplex_full(homo_chain_list, protein_limit, stoich, number_list, initial_chains, interaction_files)
         else:
