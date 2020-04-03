@@ -111,26 +111,31 @@ class Complex(object):
         # get remaining interactions
         remaining_chains = [chain for chain,value in initial_chains.items() if value == 0]
         print("Remaining chain:",remaining_chains)
-        # get next interaction with the most interactions
-        # new_start_chain = self.get_most_interacting_chain(remaining_chains, homo_chain_list)
+
+        # find the next chain to add that is not clashing
         for i in range(len(remaining_chains)):
             new_start_chain = self.get_most_interacting_chain(remaining_chains, homo_chain_list)
-            print(new_start_chain)
-            print(self.is_clashing(new_start_chain))
-            if not self.is_clashing(new_start_chain):
-                print("no clash")
-                break
-            else:
+            # if the new start chain leads to clashes get the next chain and update remaining chains 
+            if self.is_clashing(new_start_chain):
                 print("clash")
                 initial_chains[new_start_chain] = True
                 remaining_chains.remove(new_start_chain)
+                if (i == len(remaining_chains)):
+                    new_start_chain = None 
+                    break 
+            else:
+                # if chain doesn't lead to clashes use it for adding the next subunit
+                print("no clash")
+                break
+
         print("adding subunit")
         # TODO: set coordinates for the next subunit
         # add new_start_chain to optioncomplex and run again in recursive call (creation of new subunit)
-        if new_start_chain in initial_chains:
-            initial_chains[new_start_chain] = True
-        number_list = new_start_chain.set_numeric_id(number_list)
-        self.add_chain(new_start_chain)
+        if new_start_chain:
+            if new_start_chain in initial_chains:
+                initial_chains[new_start_chain] = True
+            number_list = new_start_chain.set_numeric_id(number_list)
+            self.add_chain(new_start_chain)
         if(version == "full"):
             return self.create_macrocomplex_full(homo_chain_list, protein_limit, stoich, number_list, initial_chains, interaction_files)
         else:
