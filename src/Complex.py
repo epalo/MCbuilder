@@ -133,6 +133,10 @@ class Complex(object):
                 # set coordinates for the next subunit
                 # missing?
                 # add new_start_interaget_mosction to optioncomplex and run again in recursive call
+                if new_start_interaction.get_chain_a() in initial_chains:
+                    initial_chains[new_start_interaction.get_chain_a()] = True
+                if new_start_interaction.get_chain_b() in initial_chains:
+                    initial_chains[new_start_interaction.get_chain_b()] = True
                 print("A before ", new_start_interaction.get_chain_a().get_biopy_chain().get_id())
                 print("B before ", new_start_interaction.get_chain_b().get_biopy_chain().get_id())
                 print(len(number_list))
@@ -144,10 +148,6 @@ class Complex(object):
                 print("B after ", new_start_interaction.get_chain_b().get_biopy_chain().get_id())
                 option_complex.add_chain(new_start_interaction.get_chain_a())
                 option_complex.add_chain(new_start_interaction.get_chain_b())
-                if new_start_interaction.get_chain_a() in initial_chains:
-                    initial_chains[new_start_interaction.get_chain_a] = True
-                if new_start_interaction.get_chain_b() in initial_chains:
-                    initial_chains[new_start_interaction.get_chain_b] = True
                 return option_complex.create_macrocomplex(homo_chain_list, protein_limit, stoich, number_list, initial_chains, interaction_files)
         else:
             #
