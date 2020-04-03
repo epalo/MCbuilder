@@ -37,7 +37,7 @@ To use the tool, the user first has to download the package from Git and then in
 The package has been structured as follows:
 <!--ASK ANNI, MAYBE THERE IS A BETTER WAY-->
 
-![Tree](tree.png)
+![Tree](documentation/tree.png)
 
 * `Complex.py`:
 * `README.md`: 
@@ -95,7 +95,31 @@ Use `-h` to get information about all the arguments:
 
 ```bash
  $ macrocomplex_builder.py -h 
-# WHEN THE HELP IS DONE, COPY HERE  
+ 
+
+usage: macrocomplex_builder.py [-h] [-i [INFILE [INFILE ...]]] [-o OUTFILE]
+                               [-v] [-s STOICH] [-l LIMIT] [-c]
+                               [-r RMSD_THRESHOLD]
+
+Macrocomplex builder, creates protein macrocomplex from individual PDB files
+and FASTA files.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i [INFILE [INFILE ...]], --input [INFILE [INFILE ...]]
+                        Input fasta and PDB files, or directory containing
+                        these
+  -o OUTFILE, --output OUTFILE
+                        PDB output file fo complete model
+  -v, --verbose         Print progression log to standard output
+  -s STOICH, --stoichiometry STOICH
+                        Set stoichiometry for the macrocomplex. Input in
+                        standard form (e.g. A1B4C6)
+  -l LIMIT, --limit LIMIT
+                        Limit number of chains in the protein
+  -c, --complete        Run full recursion. Explores all possibilities
+  -r RMSD_THRESHOLD, --rmsd RMSD_THRESHOLD
+                        Set up rmsd threshold. Default is set to 0.5
 ```
 
 ## FAQS
