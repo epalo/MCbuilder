@@ -4,6 +4,7 @@ from InteractingChain import InteractingChain
 import UserInteraction
 import string
 
+final_complexes = []
 class Complex(object):
 
     """ A Complex object stores a Bio.PDB.Model.Model, a list of InteractingChains,
@@ -171,15 +172,15 @@ class Complex(object):
             print("recursion!")
             return option_complex.create_macrocomplex(homo_chain_list, protein_limit, stoich, updated_numbers, initial_chains, interaction_files)
 
-
     def create_macrocomplex_full(self, homo_chain_list, protein_limit, stoich, number_list, initial_chains, interaction_files):
         """ full version of algorithm:
         in each recursive step one possible chain is added and from there the whole recursive tree is searched through for possible complexes
         """
-        for option in self.get_superimpose_options(homo_chain_list):
+        original_initial_values = copy.deepcopy(initial_chains)
+        for chain in self.__chains:
             # superimpose the option-chain to the current complex
-            self.__logger.info(f"Attempting to superimpose chain {option.get_biopy_chain().get_id()}")
-            option_complex, updated_numbers = self.superimpose(option, homo_chain_list, stoich, number_list, initial_chains)
+            self.__logger.info(f"Attempting to superimpose chain {chain.get_biopy_chain().get_id()}")
+            option_complex, updated_numbers = self.superimpose(chain, homo_chain_list, stoich, number_list, initial_chains)
 
             if (option_complex == None): # if no option complex was found don't go into the recursive call
                 self.__logger.warning("The current option could not be added!")
@@ -193,7 +194,12 @@ class Complex(object):
                     # check if all pdb-files were used at least once
                     if all(initial_chains.values()) or protein_limit or option_complex.stoich_is_complete(stoich):
                         # add option_complex to list of final complexes
-                        return option_complex
+                        global final_complexes
+                        final_complexes.append(option_complex)
+                        print("FINAL COMPLEXES:",final_complexes)
+                        # reset initial chains
+                        initial_chains = original_initial_values
+                        print("original inital values:", initial_chains)
                     else: # if not all pdb-files were used at least once but further adding leads to clashes --> creation of new subunit
                         return option_complex.create_new_subunit(homo_chain_list, protein_limit, stoich, number_list, initial_chains, interaction_files, "full")
                 else:
