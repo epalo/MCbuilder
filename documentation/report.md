@@ -66,9 +66,10 @@ Steric clashes are checked using the `Complex` class function `is_clashing`. The
 
 ## Examples Analysis
 
-few explication of the section
-Blue: Original
-Beige: Build
+In this section can be found an analysis of the complexes built using Macrocomplex builder and the necessary commands to build them using the files in the `example` folder. In addition, there is a discussion of how the program performs in terms of running time and complex quality.
+
+In the images, the <span style="color:cyan;"> **Blue Complex**</span> is the original complex and the <span style="color:#FBDAB0;"> **Beige Complex** </span> is the build complex. 
+
 ### Example 1, 4g83
 This PDB entry corresponds to the crystal structure of p73 DNA-Binding domain tetramer from Homo Sapiens, bound to a full response-element, [4g83](https://www.rcsb.org/structure/4g83). This entry is formed by 1 unique protein chain and 1 unique nucleic acid chain. 
 
