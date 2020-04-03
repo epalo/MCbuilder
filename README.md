@@ -78,6 +78,11 @@ The user can also indicate the stoichiometry of the complex in a specific format
  ```bash
  $ macrocomplex_builder.py -i /path/pdb/fasta/folder -s A3B5C8
  ```
+It is also possible to change the default RSMD value before checking clashes. The default value is 0.5.
+
+ ```bash
+ $ macrocomplex_builder.py -i /path/pdb/fasta/folder -r 0.2
+ ```
 
 There are two run types: simple and complete. By default, it runs simply because it is less computationally expensive and gives quite good results. If the user would like to explore all the different possibilities the `-c` argument can be used (see report for more information about simple and complete algorithms). 
 
