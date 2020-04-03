@@ -140,7 +140,7 @@ class Complex(object):
                 option_complex.stoich_is_complete(stoich) or \
                 len(option_complex.get_chains()) == len(self.__chains):
             # check if all pdb-files were used at least once
-            if all(initial_chains.values()):
+            if all(initial_chains.values()) or protein_limit or option_complex.stoich_is_complete(stoich):
                 print("FINAL COMPLEX FOUND")
                 print("Initial Values are",initial_chains.values())
                 print("optionComplex is:",option_complex)
@@ -162,10 +162,10 @@ class Complex(object):
             # superimpose the option-chain to the current complex
             self.__logger.info(f"Attempting to superimpose chain {option.get_biopy_chain().get_id()}")
             option_complex, updated_numbers = self.superimpose(option, homo_chain_list, stoich, number_list, initial_chains)
-            
+
             if (option_complex == None): # if no option complex was found don't go into the recursive call
                 self.__logger.warning("The current option could not be added!")
-            else: 
+            else:
                 self.__logger.info("Option complex was be found!")
                 # if end-options are reached, don't go into recursion
                 # endoptions: - all chains are clashing, -protein-limit reached, -complete stoichiometry
@@ -189,7 +189,7 @@ class Complex(object):
                     print("full recursion!")
                     return option_complex.create_macrocomplex_full(homo_chain_list, protein_limit, stoich, updated_numbers, initial_chains, interaction_files)
 
- 
+
 
     def superimpose(self, chain_to_superimp, homo_chain_list, stoich, number_list, initial_chains):
         # if no complex can be created with the requested chain it returns None
@@ -269,7 +269,7 @@ class Complex(object):
         n_search = PDB.NeighborSearch(model_atoms) # Generates a neigbour search tree
         clashes = 0
         for atom in chain_atoms:
-            clashes += bool(n_search.search(atom.coord, 1.7))  # If this atom shows clashes, add 1 to the clashes counter
+            clashes += bool(n_search.search(atom.coord, 1.9))  # If this atom shows clashes, add 1 to the clashes counter
         if clashes/len(chain_atoms) >= 0.03:  # If more than 3% of atoms show clashes return yes
             self.__logger.info(f"Leads to clashes! {chain_list}")
             return True
