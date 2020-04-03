@@ -1,7 +1,7 @@
-from setuptools import setup
+import setuptools
 
 setup(
-    name='mcbuilder',
+    name='MCbuilder',
     version='0.1.0',
     description='A macrocomplex builder from pdb interaction files',
     url='https://github.com/anmeert/sbi-project',
