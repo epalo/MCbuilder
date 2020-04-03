@@ -1,10 +1,10 @@
-
+<!--
 <div style="text-align: justify">
-
+-->
 # sbi-project
 
 ## Index
-<!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
+<!-- TOC depthFrom:1 depthTo:7 withLinks:1 updateOnSave:1 orderedList:0 -->
 - [Introduction](#Introduction)
 - [Background and Scientific Explanation](#Background-and-Scientific-explanation)
 - [Algorithm](#Algorithm)
@@ -74,19 +74,33 @@ In the images, the <span style="color:cyan;"> **Blue Complex**</span> is the ori
 ### Example 1, 4g83
 This PDB entry corresponds to the crystal structure of p73 DNA-Binding domain tetramer from Homo Sapiens, bound to a full response-element, [4g83](https://www.rcsb.org/structure/4g83). This entry is formed by 1 unique protein chain and 1 unique nucleic acid chain.
 
-XXXXXXXXXXXXXX i dont understand pdb data base, it put that but also put that stech is A4, and that there is A,B proteins chain --> we have to discuss who we want to do the examples. XXXXXXXXXXXXXX
+The program is able to create this complex of 4 strings with 5 files very quickly, therefore, it is able to handle redundant interactions. 
 
 <img src="4g83.png" width="275" height="275"> <img src="Macro_4g83.png" width="275" height="275"> <img src="4g83_super.png" width="275" height="275">
+
+As can be seen, the model built fits perfectly with the original complex, there is no differences between them. So the program has no problem dealing with this type of interactions. This model was built in the simplest way, without number of chains but with the stoichiometry as example. 
+
+
+ ```bash
+ $ scr/macrocomplex_builder.py -i example/4g83/ -o Macro_4g83.pdb -s A2E2
+ ```
+### Example 2, 5nss
+
+[5nss](https://www.rcsb.org/structure/5nss) PDB entry corresponds to a structure of RNA polymerase-sigma54 holoenzyme with promoter DNA and transcription activator PspF. There is 6 unique protein sequences and 2 unique nucleic acids, but in total it has 15 chains. 
+
+The program takes about 5 minutes to complete the complex using 18 interaction files. 
+
+<img src="original_5nss.png" width="275" height="275"> <img src="macro_5nss.png" width="275" height="275"> <img src="super_5nss.png" width="275" height="275">
 
 As can be seen, the model built fits perfectly with the original complex, there is no differences between them. So the program has no problem dealing with this type of interactions. This model was built in the simplest way, without any stoichiometry or number of chains.
 
 
  ```bash
- $ scr/macrocomplex_builder.py -i example/4g83/ -o Macro_4g83.pdb
+ $ scr/macrocomplex_builder.py -i example/5nss/ -o Macro_5nss.pdb
  ```
+### Example 3, 6gmh
 
-
-
+ 
 ## Limitations
 
 ###### 1. Simple run outputs only one model

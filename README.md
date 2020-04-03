@@ -56,7 +56,7 @@ In this section, an explanation of how to run the script from the command line a
 The simples way to run it:
 
  ```bash
- cd scr/
+ $ cd scr/
  $ macrocomplex_builder.py
  ```
 In this case, it will run using the current folder as input and it will produce as an output a file named macrocomplex.pdb in the same folder. 
