@@ -108,30 +108,32 @@ class Complex(object):
 
     def create_new_subunit(self,homo_chain_list, protein_limit, stoich, number_list, initial_chains, interaction_files, version):
         """ adds the chain that has the highest number of homologous chains to a complex and calls create_macrocomplex to start a new subunit """
+        print(initial_chains)
         # get remaining interactions
         remaining_chains = [chain for chain,value in initial_chains.items() if value == 0]
         print("Remaining chain:",remaining_chains)
 
         # find the next chain to add that is not clashing
-        for i in range(len(remaining_chains)):
+        while remaining_chains:
+
             new_start_chain = self.get_most_interacting_chain(remaining_chains, homo_chain_list)
-            # if the new start chain leads to clashes get the next chain and update remaining chains 
+            
+            # if the new start chain leads to clashes get the next chain and update remaining chains
             if self.is_clashing(new_start_chain):
-                print("clash")
                 initial_chains[new_start_chain] = True
                 remaining_chains.remove(new_start_chain)
-                if (i == len(remaining_chains)):
-                    new_start_chain = None 
-                    break 
+                if (len(remaining_chains) == 0):
+                    new_start_chain = None
+                    print(new_start_chain)
             else:
                 # if chain doesn't lead to clashes use it for adding the next subunit
-                print("no clash")
                 break
 
-        print("adding subunit")
+
         # TODO: set coordinates for the next subunit
         # add new_start_chain to optioncomplex and run again in recursive call (creation of new subunit)
         if new_start_chain:
+            print("in")
             if new_start_chain in initial_chains:
                 initial_chains[new_start_chain] = True
             number_list = new_start_chain.set_numeric_id(number_list)
@@ -160,7 +162,6 @@ class Complex(object):
             if all(initial_chains.values()) or protein_limit or option_complex.stoich_is_complete(stoich):
                 return option_complex
             else: # if not all pdb-files were used at least once but further adding leads to clashes --> creation of new subunit
-
                 return option_complex.create_new_subunit(homo_chain_list, protein_limit, stoich, number_list, initial_chains, interaction_files, "simple")
         else:
             # recursively add chains that can still be added to the current complex
