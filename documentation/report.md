@@ -8,7 +8,7 @@
 - [Background and Scientific Explanation](#Background-and-Scientific-explanation)
 - [Algorithm](#Algorithm)
 - [Examples Analysis](#Examples-Analysis)
-- [Further Steps](#Further Steps)
+- [Further Steps](#Further-Steps)
 <!-- /TOC -->
 
 ## Introduction
