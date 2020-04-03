@@ -71,10 +71,10 @@ In this section can be found an analysis of the complexes built using Macrocompl
 
 In the images, the <span style="color:cyan;"> **Blue Complex**</span> is the original complex and the <span style="color:#FBDAB0;"> **Beige Complex** </span> is the build complex.
 
-### Example 1, [4g83](https://www.rcsb.org/structure/4g83)
-This PDB entry corresponds to the crystal structure of p73 DNA-Binding domain tetramer from Homo Sapiens, bound to a full response-element. This entry is formed by 1 unique protein chain and 1 unique nucleic acid chain.
+### Example 1 ([4g83](https://www.rcsb.org/structure/4g83))
+This PDB entry corresponds to the crystal structure of p73 DNA-Binding domain tetramer from *Homo Sapiens*, bound to a full response-element. This entry is formed by 1 unique protein chain and 1 unique nucleic acid chain.
 
-The program is able to create this complex of 4 strings with 5 files very quickly, therefore, it is able to handle redundant interactions. 
+The program is able to create this complex of 4 chains with 5 files very quickly, therefore, it is able to handle redundant interactions. 
 
 <img src="4g83_original.png" width="275" height="275"> <img src="4g83_macro.png" width="275" height="275"> <img src="4g83_super.png" width="275" height="275">
 
@@ -84,7 +84,7 @@ As can be seen, the model built fits perfectly with the original complex, there 
  ```bash
  $ scr/macrocomplex_builder.py -i example/4g83/ -o Macro_4g83.pdb -s A2E2
  ```
-### Example 2, [5nss] (https://www.rcsb.org/structure/5nss)
+### Example 2 ([5nss](https://www.rcsb.org/structure/5nss))
 
 This PDB entry corresponds to a structure of RNA polymerase-sigma54 holoenzyme with promoter DNA and transcription activator PspF. There is 6 unique protein sequences and 2 unique nucleic acids, but in total it has 15 chains. 
 
@@ -92,15 +92,15 @@ The program takes about 5 minutes to complete the complex using 18 interaction f
 
 <img src="5nss_original.png" width="275" height="275"> <img src="5nss_macro.png" width="275" height="275"> <img src="5nss_super.png" width="275" height="275">
 
-As can be seen, the model built fits perfectly with the original complex, there is no differences between them. So the program has no problem dealing with this type of interactions. This model was built in the simplest way, without any stoichiometry or number of chains.
+As can be seen, the model built fits perfectly with the original complex, there is no differences between them. So the program has no problem dealing with this type of interactions. This model was built in the simplest way, without any stoichiometry or number of chains. 
 
 
  ```bash
  $ scr/macrocomplex_builder.py -i example/5nss/ -o Macro_5nss.pdb
  ```
-### Example 3, [6gmh] (https://www.rcsb.org/structure/6gmh)
+### Example 3 ([6gmh](https://www.rcsb.org/structure/6gmh))
 
-This PDB entry corresponds to the structure of the activated transcription complex Pol II-DSIF-PAF-SPT6. It was obtained from Homo Sapiens and it has 20 unique protein chains and 3 unique nucleic acid chains. Therefore, the program can run whether the complex is composed of repeated chains or unique chains. The PDB entry has 23 chains but the build complex has only 20. This is because some of the chains are composed by UNK aminoacids and this program is not able to handle that since it is necessary to build a sequence in order to obtain the homologous chains that will be superimposed. 
+This PDB entry corresponds to the structure of the activated transcription complex Pol II-DSIF-PAF-SPT6. It was obtained from *Homo Sapiens* and it has 20 unique protein chains and 3 unique nucleic acid chains. Therefore, the program can run whether the complex is composed of repeated chains or unique chains. The PDB entry has 23 chains but the build complex has only 20. This is because some of the chains are composed by UNK aminoacids and this program is not able to handle that since it is necessary to build a sequence in order to obtain the homologous chains that will be superimposed. 
 
 
 <img src="6gmh_original.png" width="275" height="275"> <img src="6gmh_macro.png" width="275" height="275"> <img src="6gmh_super.png" width="275" height="275">
@@ -110,9 +110,34 @@ This example was build using 47 interactions files. The model built fits perfect
  ```bash
  $ scr/macrocomplex_builder.py -i example/6gmh/ -o Macro_6gmh.pdb
  ```
-### Example 4, [5fj8] (https://www.rcsb.org/structure/5fj8)
+### Example 4 ([5fj8](https://www.rcsb.org/structure/5fj8))
+
+It is the structure of yeast RNA polymerase III elongation complex. This complex has 17 unique protein chains and 3 unique nucleic acid chains.
+
+Both this example and the previous one take longer, because as there are many unique chains, the step of checking that all the chains are within the complex and if not, start another round to add them, is more demanding.  
 
 <img src="5fj8_original.png" width="275" height="275"> <img src="5fj8_macro.png" width="275" height="275"> <img src="5fj8_super.png" width="275" height="275">
+
+ ```bash
+ $ scr/macrocomplex_builder.py -i example/5fj8/ -o Macro_5fj8.pdb
+ ```
+
+This example was build using 43 interactions files. The model built fits perfectly with the original complex. This model was built in the simplest way, without any stoichiometry or number of chains.
+
+  
+
+### Example 5 ([6om3](https://www.rcsb.org/structure/6om3))
+
+This is the structure of the Orc1 BAH domain in complex with a nucleosome core particle. The complex was obtained from *Saccharomyces cerevisiae* and it has 5 unique protein chains and 2 unique nucleic acid chains. The complex has in total 24 chains and the Macrocomplex Builder is able to build all of them using 78 files (and handle with redundant interaction files). In this case, the program is a little slower due to the high number of input files.
+
+<img src="6om3_original.png" width="275" height="275"> <img src="6om3_macro.png" width="275" height="275"> <img src="6om3_super.png" width="275" height="275">
+
+ ```bash
+ $ scr/macrocomplex_builder.py -i example/5fj8/ -o Macro_5fj8.pdb
+ ```
+
+The model built fits perfectly with the original complex. It was built using the default values. 
+  
 
 ## Limitations
 
