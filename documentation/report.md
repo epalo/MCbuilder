@@ -82,7 +82,7 @@ As can be seen, the model built fits perfectly with the original complex, there 
 
 
  ```bash
- $ macrocomplex_builder.py -i example/4g83/ -o Macro_4g83.pdb -s A2E2
+ $ macrocomplex_builder.py -i example/example_input/4g83/ -o Macro_4g83.pdb -s A2E2
  ```
 ### Example 2 ([5nss](https://www.rcsb.org/structure/5nss))
 
@@ -94,7 +94,7 @@ The program takes about 5 minutes to complete the complex using 18 interaction f
 
 
  ```bash
- $ macrocomplex_builder.py -i example/5nss/ -o Macro_5nss.pdb
+ $ macrocomplex_builder.py -i example/example_input/5nss/ -o Macro_5nss.pdb
  ```
 
 As can be seen, the model built fits perfectly with the original complex, there is no differences between them. So the program has no problem dealing with this type of interactions. This model was built in the simplest way, without any stoichiometry or number of chains. 
@@ -108,7 +108,7 @@ This PDB entry corresponds to the structure of the activated transcription compl
 <img src="images/6gmh_original.png" width="275" height="275"> <img src="images/6gmh_macro.png" width="275" height="275"> <img src="images/6gmh_super.png" width="275" height="275">
 
  ```bash
- $ macrocomplex_builder.py -i example/6gmh/ -o Macro_6gmh.pdb
+ $ macrocomplex_builder.py -i example/example_input/6gmh/ -o Macro_6gmh.pdb
  ```
  
 This example was build using 47 interactions files. The model built fits perfectly with the original complex, except for the chains that couldn't be introduced. This model was built in the simplest way, without any stoichiometry or number of chains.
@@ -123,7 +123,7 @@ Both this example and the previous one take longer, because as there are many un
 <img src="images/5fj8_original.png" width="275" height="275"> <img src="images/5fj8_macro.png" width="275" height="275"> <img src="images/5fj8_super.png" width="275" height="275">
 
  ```bash
- $ macrocomplex_builder.py -i example/5fj8/ -o Macro_5fj8.pdb
+ $ macrocomplex_builder.py -i example/example_input/5fj8/ -o Macro_5fj8.pdb
  ```
 
 This example was build using 43 interactions files. The model built fits perfectly with the original complex. This model was built in the simplest way, without any stoichiometry or number of chains.
@@ -137,7 +137,7 @@ This is the structure of the Orc1 BAH domain in complex with a nucleosome core p
 <img src="images/6om3_original.png" width="275" height="275"> <img src="images/6om3_macro.png" width="275" height="275"> <img src="images/6om3_super.png" width="275" height="275">
 
  ```bash
- $ macrocomplex_builder.py -i example/5fj8/ -o Macro_5fj8.pdb
+ $ macrocomplex_builder.py -i example/example_input/5fj8/ -o Macro_5fj8.pdb
  ```
 
 The model built fits perfectly with the original complex. It was built using the default values. 
