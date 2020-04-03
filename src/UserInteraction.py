@@ -6,10 +6,12 @@ import sys
 import logging
 from Bio.PDB import PDBIO
 
-""" Import user data.
+""" Import of user data and output of files.
 
-Requires input of fasta file(.fasta or .fa) containg protein to be modelled along with PDB files (.pdb) containing relevant interactions.
+Requires input of fasta file(.fasta or .fa) containing protein to be modelled along with PDB files (.pdb) containing relevant interactions.
 Only the mentioned file types will be accepted.
+
+Outputs PDB file in the working directory (default) or in the specified directory 
 """
 
 
@@ -97,7 +99,6 @@ def get_protein_limit():
 
 verbose =  get_verbose_option()
 
-# create logger
 def create_logger():
     log = logging.getLogger(__name__)
     log.setLevel(level=logging.INFO)

@@ -12,6 +12,8 @@ from Complex import *
 from Interaction import Interaction
 import string
 
+"""  Macrocomplex builder based on structural superimposition  """
+
 ######################################################
 # HELPER FUNCTIONS
 
@@ -104,10 +106,8 @@ def get_most_interacting_interaction(interaction_list, homo_chain_list):
             interaction_sum = sum
     return best_interaction
 
-
-#main function that is called when running the script
 if __name__ == "__main__":
-    """ Macrocomplex builder based on structure superimposition."""
+    """ main function that is called when running the application """
 
     ######################################################
     #  USER INPUT
