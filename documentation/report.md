@@ -1,17 +1,14 @@
-<!--
-<div style="text-align: justify">
--->
-# sbi-project
+
+# SBI + PYT project
+*by Annika Meert, Elena Pareja Lorente and Paula Torren Peraire*
 
 ## Index
 <!-- TOC depthFrom:1 depthTo:7 withLinks:1 updateOnSave:1 orderedList:0 -->
 - [Introduction](#Introduction)
 - [Background and Scientific Explanation](#Background-and-Scientific-explanation)
 - [Algorithm](#Algorithm)
-- [Tutorial](#Tutorial)
 - [Examples Analysis](#Examples-Analysis)
-- [Limitations](#limitations)
-- [References](#References)
+- [Further Steps](#Further Steps)
 <!-- /TOC -->
 
 ## Introduction
@@ -37,7 +34,7 @@ In this program, we establish superimposition to implement new proteins onto the
 Moreover, an accurate superimposition does not imply that a third chain is in that location. To be able to confirm whether a particular chain should be added to the macrocomplex, it is also essential to check its surrounding chains and whether there are any steric clashes. These could lead to unnatural structures in the model, produced by non-bonding atoms being places together or two atoms being at too close a distance. Even though two chains superimpose correctly, the chain with which it is interacting may occupy the space of a protein that is already there; this means that the interacting chains should not be placed in the complex, in that location.
 
 <div style="text-align: center">
-![Steric clashes in macrocomplex](protein_chains_sbi.png)
+![Steric clashes in macrocomplex](images/protein_chains_sbi.png)
 </div>
 
 To judge the presence of steric clashes VanDerWaals radius is used, any atom from a different chain that is within a 1.7 angstrong radius of an alpha carbon is denoted as a clash; this distance is chosen since it corresponds to carbons' VdW radius. There are several non-covalent bonds found in proteins, such as hydrogen bonding; these types of interactions mean that the distance between two nuclei may be reduced, only the alpha carbon radii are measured to reduce the impact of this effect.
@@ -60,7 +57,7 @@ At this point, the program can run two different types of algorithms depending o
 #### Complete
 Functions used in this type of run are the same as those in `Simple` but with some notable procedural differences. The run loops through any chains that may be superimposed onto the current complex. For each of these, it checks where the chain may be superimposed within the current complex, it then searches for alternatives to this chain (i.e. homologous chains). For each of these homologous chains, it examines which chain has the best RMSD and no clashes. The chain is added to the complex and, if end criteria have not been met, the program runs recursively. Therefore the algorithm is exhausting all possible options for the model and not only depending on the RMSD value. This type of run produces a much larger number of models, but since all options have been exhaustively tested, there is greater accuracy.
 
-| ![Workflow for simple recursion](recursion_flow_simple.png)  |  ![Workflow for complete recursion](recursion_flow_complete.png) |
+| ![Workflow for simple recursion](images/recursion_flow_simple.png)  |  ![Workflow for complete recursion](images/recursion_flow_complete.png) |
 |--- |---|
 
 ### Superimposition
