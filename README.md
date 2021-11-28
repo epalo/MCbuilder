@@ -1,5 +1,6 @@
 # Macrocomplex Builder
 Macrocomplex Builder is a standalone `python3` application developed by **Annika Meert**, **Elena Pareja Lorente** and **Paula Torren Peraire**. The purpose is to model the macro-complex (quaternary) structure of biomolecules, formed by proteins and nucleotids or only proteins given a folder with the structures of protein-protein and protein-DNA/RNA interactions in PDB format. 
+
 ##Index
 
 
